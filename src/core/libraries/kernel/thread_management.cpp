@@ -559,6 +559,9 @@ int PS4_SYSV_ABI scePthreadMutexattrSetprotocol(ScePthreadMutexattr* attr, int p
 }
 
 int PS4_SYSV_ABI scePthreadMutexLock(ScePthreadMutex* mutex) {
+    if (*mutex == (ScePthreadMutex)1) {
+        *mutex = nullptr;
+    }
     mutex = createMutex(mutex);
     if (mutex == nullptr) {
         return SCE_KERNEL_ERROR_EINVAL;
