@@ -2155,6 +2155,7 @@ int PS4_SYSV_ABI sceGnmSubmitCommandBuffersForWorkload() {
 
 int PS4_SYSV_ABI sceGnmSubmitDone() {
     LOG_DEBUG(Lib_GnmDriver, "called");
+    WaitGpuIdle();
     if (!liverpool->IsGpuIdle()) {
         submission_lock = true;
     }
@@ -2664,6 +2665,10 @@ void RegisterlibSceGnmDriver(Core::Loader::SymbolsResolver* sym) {
     const int result = sceKernelGetCompiledSdkVersion(&sdk_version);
     if (result != ORBIS_OK) {
         sdk_version = 0;
+    }
+
+    if (Config::copyGPUCmdBuffers()) {
+        liverpool->reserveCopyBufferSpace();
     }
 
     Platform::IrqC::Instance()->Register(Platform::InterruptId::GpuIdle, ResetSubmissionLock,
