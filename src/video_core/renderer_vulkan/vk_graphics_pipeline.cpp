@@ -434,7 +434,7 @@ void GraphicsPipeline::BindResources(const Liverpool::Regs& regs,
                            // "Texel buffer stride must match format stride");
                 const u32 offset_aligned = Common::AlignDown(offset, alignment);
                 const u32 adjust = offset - offset_aligned;
-                ASSERT(adjust % fmt_stride == 0);
+                // ASSERT(adjust % fmt_stride == 0);
                 push_data.AddOffset(binding.buffer, adjust / fmt_stride);
                 buffer_view = vk_buffer->View(offset_aligned, size + adjust, desc.is_written,
                                               vsharp.GetDataFmt(), vsharp.GetNumberFmt());
