@@ -260,7 +260,7 @@ void Emulator::Run(const std::filesystem::path& file) {
 }
 
 void Emulator::LoadSystemModules(const std::filesystem::path& file) {
-    constexpr std::array<SysModules, 13> ModulesToLoad{
+    constexpr std::array<SysModules, 12> ModulesToLoad{
         {{"libSceNgs2.sprx", &Libraries::Ngs2::RegisterlibSceNgs2},
          {"libSceFiber.sprx", &Libraries::Fiber::RegisterlibSceFiber},
          {"libSceUlt.sprx", nullptr},
@@ -272,8 +272,7 @@ void Emulator::LoadSystemModules(const std::filesystem::path& file) {
          {"libSceJpegEnc.sprx", nullptr},
          {"libSceFont.sprx", nullptr},
          {"libSceRazorCpu.sprx", nullptr},
-         {"libSceCesCs.sprx", nullptr},
-         {"libSceRudp.sprx", nullptr}}};
+         {"libSceCesCs.sprx", nullptr}}};
 
     std::vector<std::filesystem::path> found_modules;
     const auto& sys_module_path = Common::FS::GetUserPath(Common::FS::PathType::SysModuleDir);
