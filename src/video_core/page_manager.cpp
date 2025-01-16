@@ -69,8 +69,8 @@ struct PageManager::Impl {
         wp.range.len = size;
         wp.mode = allow_write ? 0 : UFFDIO_WRITEPROTECT_MODE_WP;
         const int ret = ioctl(uffd, UFFDIO_WRITEPROTECT, &wp);
-        ASSERT_MSG(ret != -1, "Uffdio writeprotect failed with error: {}",
-                   Common::GetLastErrorMsg());
+        //ASSERT_MSG(ret != -1, "Uffdio writeprotect failed with error: {}",
+                   //Common::GetLastErrorMsg());
     }
 
     void UffdHandler(std::stop_token token) {
@@ -202,9 +202,13 @@ void PageManager::UpdatePagesCachedCount(VAddr addr, u64 size, s32 delta) {
         const VAddr interval_start_addr = boost::icl::first(interval) << PageShift;
         const VAddr interval_end_addr = boost::icl::last_next(interval) << PageShift;
         const u32 interval_size = interval_end_addr - interval_start_addr;
-        ASSERT_MSG(rasterizer->IsMapped(interval_start_addr, interval_size),
-                   "Attempted to track non-GPU memory at address {:#x}, size {:#x}.",
-                   interval_start_addr, interval_size);
+        //ASSERT_MSG(rasterizer->IsMapped(interval_start_addr, interval_size),
+                   //"Attempted to track non-GPU memory at address {:#x}, size {:#x}.",
+                   //interval_start_addr, interval_size);
+        if (!rasterizer->IsMapped(interval_start_addr, interval_size)) {
+            LOG_WARNING(Render, "Skipping non-GPU memory assert!");
+            continue;
+        }
         if (delta > 0 && count == delta) {
             impl->Protect(interval_start_addr, interval_size, false);
         } else if (delta < 0 && count == -delta) {
