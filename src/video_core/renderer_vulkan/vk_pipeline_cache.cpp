@@ -218,6 +218,43 @@ PipelineCache::PipelineCache(const Instance& instance_, Scheduler& scheduler_,
 
 PipelineCache::~PipelineCache() = default;
 
+bool ShouldSkipShader(u64 shader_hash, const char* shader_type) {
+    static std::vector<u64> skip_hashes = {
+        //Cyberpunk v1.00 hashes (so far)
+        0x7fb39b5d, //Sharp source
+        //0xae4c510d, //memory (also does UI rendering)
+        0x9a8b08fd, //Sharp source
+        0xdba19abc, //memory
+        0x504ebbb8, //memory
+        0x7abb3895, //Sharp source
+        0x1efe12b7, //Sharp source
+        0x7f3d5000, //Sharp source
+        0xbf3ad9fb, //Sharp source
+        0x4c42f0ad, //Sharp source
+        0x3685fdc1, //Sharp source
+        0x9fa65a77, //Sharp source
+        0xdc997d23, //Sharp source
+        0x6200ba38, //Sharp source
+        0xc106de81, //Sharp source
+        0xec6e137d, //Sharp source
+        0x8991f3f3, //Sharp source
+        0x958dc499, //Sharp source
+        0x10d44244, //Sharp source
+        //0xb074d37c, //Sharp tracking (can't skip, makes everything black)
+
+        //Cyberpunk v1.61 hashes (so far)
+        0xe5d9b9b2, //memory
+        0x17d25065, //memory
+        0x8f6826c7, //memory
+        0x68aaf3b0, //Sharp source
+    };
+    if (std::ranges::contains(skip_hashes, shader_hash)) {
+        LOG_WARNING(Render_Vulkan, "Skipped {} shader hash {:#x}.", shader_type, shader_hash);
+        return true;
+    }
+    return false;
+}
+
 const GraphicsPipeline* PipelineCache::GetGraphicsPipeline() {
     if (!RefreshGraphicsKey()) {
         return nullptr;
@@ -364,6 +401,10 @@ bool PipelineCache::RefreshGraphicsKey() {
             return false;
         }
 
+        if (ShouldSkipShader(bininfo.shader_hash, "graphics")) {
+            return false;
+        }
+
         auto params = Liverpool::GetParams(*pgm);
         std::optional<Shader::Gcn::FetchShaderData> fetch_shader_;
         std::tie(infos[stage_out_idx], modules[stage_out_idx], fetch_shader_,
@@ -470,6 +511,11 @@ bool PipelineCache::RefreshComputeKey() {
     Shader::Backend::Bindings binding{};
     const auto& cs_pgm = liverpool->GetCsRegs();
     const auto cs_params = Liverpool::GetParams(cs_pgm);
+
+    if (ShouldSkipShader(cs_params.hash, "compute")) {
+        return false;
+    }
+
     std::tie(infos[0], modules[0], fetch_shader, compute_key.value) =
         GetProgram(Shader::Stage::Compute, LogicalStage::Compute, cs_params, binding);
     return true;
