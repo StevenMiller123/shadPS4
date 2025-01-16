@@ -927,7 +927,7 @@ int PS4_SYSV_ABI sceNetSendmsg() {
 
 int PS4_SYSV_ABI sceNetSendto() {
     LOG_ERROR(Lib_Net, "(STUBBED) called");
-    return ORBIS_OK;
+    return 1;
 }
 
 int PS4_SYSV_ABI sceNetSetDns6Info() {
