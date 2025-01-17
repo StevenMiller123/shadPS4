@@ -247,6 +247,10 @@ bool ShouldSkipShader(u64 shader_hash, const char* shader_type) {
         0x17d25065, //memory
         0x8f6826c7, //memory
         0x68aaf3b0, //Sharp source
+        0xec4eacaa, //memory
+        0xe85d959d, //Device lost
+        0xaca4cd21, //memory
+        0x3612c7c, //Sharp source
     };
     if (std::ranges::contains(skip_hashes, shader_hash)) {
         LOG_WARNING(Render_Vulkan, "Skipped {} shader hash {:#x}.", shader_type, shader_hash);
