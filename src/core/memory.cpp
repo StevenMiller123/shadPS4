@@ -288,9 +288,13 @@ int MemoryManager::MapMemory(void** out_addr, VAddr virtual_addr, size_t size, M
     // Fixed mapping means the virtual address must exactly match the provided one.
     if (True(flags & MemoryMapFlags::Fixed)) {
         // This should return SCE_KERNEL_ERROR_ENOMEM but shouldn't normally happen.
-        const auto& vma = FindVMA(mapped_addr)->second;
+        auto& vma = FindVMA(mapped_addr)->second;
+        if (vma.IsMapped()) {
+            UnmapMemoryImpl(vma.base, vma.size);
+        }
+        vma = FindVMA(mapped_addr)->second;
         const size_t remaining_size = vma.base + vma.size - mapped_addr;
-        ASSERT_MSG(!vma.IsMapped() && remaining_size >= size);
+        ASSERT_MSG(remaining_size >= size);
     }
 
     // Find the first free area starting with provided virtual address.

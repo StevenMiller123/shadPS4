@@ -7,6 +7,7 @@
 #include "common/assert.h"
 #include "common/error.h"
 #include "common/signal_context.h"
+#include "core/libraries/kernel/memory.h"
 #include "core/memory.h"
 #include "core/signals.h"
 #include "video_core/page_manager.h"
@@ -205,9 +206,15 @@ void PageManager::UpdatePagesCachedCount(VAddr addr, u64 size, s32 delta) {
         // ASSERT_MSG(rasterizer->IsMapped(interval_start_addr, interval_size),
         // "Attempted to track non-GPU memory at address {:#x}, size {:#x}.",
         // interval_start_addr, interval_size);
+        auto in_addr = (void*)interval_start_addr;
+        size_t in_size = std::ceil(interval_size / (double)0x10000) * 0x10000;
         if (!rasterizer->IsMapped(interval_start_addr, interval_size)) {
-            LOG_WARNING(Render, "Skipping non-GPU memory assert!");
-            break;
+            LOG_WARNING(Render, "Skipping non-GPU memory assert! address {:#x}, size {:#x}", interval_start_addr, interval_size);
+            int result = Libraries::Kernel::sceKernelMapDirectMemory(
+                                &in_addr, in_size,
+                               Libraries::Kernel::MemoryProtection::SCE_KERNEL_PROT_GPU_RW,
+                               Libraries::Kernel::MemoryFlags::SCE_KERNEL_MAP_FIXED, 0, 0);
+            ASSERT(result == 0);
         }
         if (delta > 0 && count == delta) {
             impl->Protect(interval_start_addr, interval_size, false);
