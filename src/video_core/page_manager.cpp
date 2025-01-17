@@ -207,7 +207,7 @@ void PageManager::UpdatePagesCachedCount(VAddr addr, u64 size, s32 delta) {
                    //interval_start_addr, interval_size);
         if (!rasterizer->IsMapped(interval_start_addr, interval_size)) {
             LOG_WARNING(Render, "Skipping non-GPU memory assert!");
-            continue;
+            break;
         }
         if (delta > 0 && count == delta) {
             impl->Protect(interval_start_addr, interval_size, false);
