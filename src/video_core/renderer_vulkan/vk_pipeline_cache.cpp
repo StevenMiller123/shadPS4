@@ -220,40 +220,54 @@ PipelineCache::~PipelineCache() = default;
 
 bool ShouldSkipShader(u64 shader_hash, const char* shader_type) {
     static std::vector<u64> skip_hashes = {
-        //Cyberpunk v1.00 hashes (so far)
-        0x7fb39b5d, //Sharp source
-        //0xae4c510d, //memory (also does UI rendering)
-        0x9a8b08fd, //Sharp source
-        0xdba19abc, //memory
-        0x504ebbb8, //memory
-        0x7abb3895, //Sharp source
-        0x1efe12b7, //Sharp source
-        0x7f3d5000, //Sharp source
-        0xbf3ad9fb, //Sharp source
-        0x4c42f0ad, //Sharp source
-        0x3685fdc1, //Sharp source
-        0x9fa65a77, //Sharp source
-        0xdc997d23, //Sharp source
-        0x6200ba38, //Sharp source
-        0xc106de81, //Sharp source
-        0xec6e137d, //Sharp source
-        0x8991f3f3, //Sharp source
-        0x958dc499, //Sharp source
-        0x10d44244, //Sharp source
-        //0xb074d37c, //Sharp tracking (can't skip, makes everything black)
+        // Cyberpunk v1.00 hashes (so far)
+        0x7fb39b5d, // Sharp source
+        0xae4c510d, // memory (also does UI rendering)
+        0x9a8b08fd, // Sharp source
+        0xdba19abc, // memory
+        0x504ebbb8, // memory
+        0x7abb3895, // Sharp source
+        0x1efe12b7, // Sharp source
+        0x7f3d5000, // Sharp source
+        0xbf3ad9fb, // Sharp source
+        0x4c42f0ad, // Sharp source
+        0x3685fdc1, // Sharp source
+        0x9fa65a77, // Sharp source
+        0xdc997d23, // Sharp source
+        0x6200ba38, // Sharp source
+        0xc106de81, // Sharp source
+        0xec6e137d, // Sharp source
+        0x8991f3f3, // Sharp source
+        0x958dc499, // Sharp source
+        0x10d44244, // Sharp source
+        0xda4569a9, // memory
+        0xb4d4dcb,  // memory
+        0x846ecc71, // memory
+        0xec14a730, // memory
+        0x70a216f0, // memory
+        0x9bcb2d01, // memory
+        0xd51d127,  // memory
+        0x4522d9a3, // memory
+        0x9e199d08, // memory
+        0x2ace7ba7, // memory
+        0x2ae78037, // vertex explosions (might be related to V_CVT_PKNORM_I16_F32?)
+        0x9908c274, // memory
+        0x7443fe40, // memory
+        0x75b3a5cd, // memory
+        // 0xb074d37c, // Sharp tracking (can't skip, makes everything black)
 
         //Cyberpunk v1.61 hashes (so far)
-        0xe5d9b9b2, //memory
-        0x17d25065, //memory
-        0x8f6826c7, //memory
-        0x68aaf3b0, //Sharp source
-        0xec4eacaa, //memory
-        0xe85d959d, //Device lost
-        0xaca4cd21, //memory
-        0x3612c7c, //Sharp source
+        0xe5d9b9b2, // memory
+        0x17d25065, // memory
+        0x8f6826c7, // memory
+        0x68aaf3b0, // Sharp source
+        0xec4eacaa, // memory
+        0xe85d959d, // Device lost
+        0xaca4cd21, // memory
+        0x3612c7c,  // Sharp source
     };
     if (std::ranges::contains(skip_hashes, shader_hash)) {
-        LOG_WARNING(Render_Vulkan, "Skipped {} shader hash {:#x}.", shader_type, shader_hash);
+        // LOG_WARNING(Render_Vulkan, "Skipped {} shader hash {:#x}.", shader_type, shader_hash);
         return true;
     }
     return false;
