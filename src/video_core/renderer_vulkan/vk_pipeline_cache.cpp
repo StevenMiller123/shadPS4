@@ -222,10 +222,7 @@ bool ShouldSkipShader(u64 shader_hash, const char* shader_type) {
     static std::vector<u64> skip_hashes = {
         // Cyberpunk v1.00 hashes (so far)
         0x7fb39b5d, // Sharp source
-        0xae4c510d, // Memory (also does UI rendering)
         0x9a8b08fd, // Sharp source
-        0xdba19abc, // Memory
-        0x504ebbb8, // Memory
         0x7abb3895, // Sharp source
         0x1efe12b7, // Sharp source
         0x7f3d5000, // Sharp source
@@ -240,40 +237,15 @@ bool ShouldSkipShader(u64 shader_hash, const char* shader_type) {
         0x8991f3f3, // Sharp source
         0x958dc499, // Sharp source
         0x10d44244, // Sharp source
-        0xda4569a9, // Memory
-        0xb4d4dcb,  // Memory
-        0x846ecc71, // Memory
-        0xec14a730, // Memory
-        0x70a216f0, // Memory
-        0x9bcb2d01, // Memory
-        0xd51d127,  // Memory
-        0x4522d9a3, // Memory
-        0x9e199d08, // Memory
-        0x2ace7ba7, // Memory
-        0x2ae78037, // Vertex explosions (might be related to V_CVT_PKNORM_I16_F32?)
-        0x9908c274, // Memory
-        0x7443fe40, // Memory
-        0x75b3a5cd, // Memory
-        0xb787a5a5, // Memory
-        0x96e4fa6a, // Memory
-        0xc1b7303f, // Memory
-        0x271091a1, // Device lost
-        0x1fc17d01, // Device lost
-        0x5e05044d, // Memory
-        0xf55857f9, // Memory
-        0x4bd6a5aa, // Memory
-        0xd6f3d513, // Memory
-        0x7a5d8681, // Memory
-        // 0xb074d37c, // Sharp tracking (can't skip, makes everything black)
-
-        //Cyberpunk v1.61 hashes (so far)
-        0xe5d9b9b2, // Memory
-        0x17d25065, // Memory
-        0x8f6826c7, // Memory
+        0xb74815,   // Overlap resolve failed?
+        0x2ae78037, // Vertex explosions
+        0x504ebbb8, // Memory
+        0xae4c510d, // Memory (Important for UI rendering)
+        0xdba19abc, // Memory
+        
+        // Cyberpunk v1.61 hashes (so far)
         0x68aaf3b0, // Sharp source
-        0xec4eacaa, // Memory
         0xe85d959d, // Device lost
-        0xaca4cd21, // Memory
         0x3612c7c,  // Sharp source
     };
     if (std::ranges::contains(skip_hashes, shader_hash)) {
