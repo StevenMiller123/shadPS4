@@ -1474,7 +1474,7 @@ public:
         GpuQueue& gfx_queue = mapped_queues[GfxQueueId];
         std::scoped_lock<std::mutex> lk(gfx_queue.m_access);
 
-        constexpr size_t GfxReservedSize = 2_MB >> 2;
+        constexpr size_t GfxReservedSize = 64_MB >> 2;
         gfx_queue.ccb_buffer.reserve(GfxReservedSize);
         gfx_queue.dcb_buffer.reserve(GfxReservedSize);
     }
