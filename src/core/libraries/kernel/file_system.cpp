@@ -595,7 +595,9 @@ int PS4_SYSV_ABI sceKernelFStat(int fd, OrbisKernelStat* sb) {
 int PS4_SYSV_ABI posix_fstat(int fd, OrbisKernelStat* sb) {
     int result = sceKernelFStat(fd, sb);
     if (result < 0) {
-        return 0;
+        LOG_ERROR(Kernel_Pthread, "posix_fstat: error = {}", result);
+        ErrSceToPosix(result);
+        return -1;
     }
     return result;
 }
