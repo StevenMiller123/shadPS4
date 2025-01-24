@@ -242,6 +242,8 @@ bool ShouldSkipShader(u64 shader_hash, const char* shader_type) {
         0x504ebbb8, // Memory
         0xae4c510d, // Memory (Important for UI rendering)
         0xdba19abc, // Memory
+        0x271091a1, // Device lost
+        0x1fc17d01, // Device lost
         
         // Cyberpunk v1.61 hashes (so far)
         0x68aaf3b0, // Sharp source
