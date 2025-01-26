@@ -165,13 +165,6 @@ int PS4_SYSV_ABI sceKernelMapNamedDirectMemory(void** addr, u64 len, int prot, i
     const VAddr in_addr = reinterpret_cast<VAddr>(*addr);
     const auto mem_prot = static_cast<Core::MemoryProt>(prot);
     const auto map_flags = static_cast<Core::MemoryMapFlags>(flags);
-    SCOPE_EXIT {
-        LOG_INFO(Kernel_Vmm,
-                 "in_addr = {:#x}, out_addr = {}, len = {:#x}, prot = {:#x}, flags = {:#x}, "
-                 "directMemoryStart = {:#x}, "
-                 "alignment = {:#x}",
-                 in_addr, fmt::ptr(*addr), len, prot, flags, directMemoryStart, alignment);
-    };
 
     auto* memory = Core::Memory::Instance();
     return memory->MapMemory(addr, in_addr, len, mem_prot, map_flags, Core::VMAType::Direct, "",
@@ -206,11 +199,6 @@ s32 PS4_SYSV_ABI sceKernelMapNamedFlexibleMemory(void** addr_in_out, std::size_t
     const VAddr in_addr = reinterpret_cast<VAddr>(*addr_in_out);
     const auto mem_prot = static_cast<Core::MemoryProt>(prot);
     const auto map_flags = static_cast<Core::MemoryMapFlags>(flags);
-    SCOPE_EXIT {
-        LOG_INFO(Kernel_Vmm,
-                 "in_addr = {:#x}, out_addr = {}, len = {:#x}, prot = {:#x}, flags = {:#x}",
-                 in_addr, fmt::ptr(*addr_in_out), len, prot, flags);
-    };
     auto* memory = Core::Memory::Instance();
     return memory->MapMemory(addr_in_out, in_addr, len, mem_prot, map_flags,
                              Core::VMAType::Flexible, name);
@@ -287,39 +275,24 @@ s32 PS4_SYSV_ABI sceKernelBatchMap2(OrbisKernelBatchMapEntry* entries, int numEn
             result = sceKernelMapNamedDirectMemory(&entries[i].start, entries[i].length,
                                                    entries[i].protection, flags,
                                                    static_cast<s64>(entries[i].offset), 0, "");
-            LOG_INFO(Kernel_Vmm,
-                     "entry = {}, operation = {}, len = {:#x}, offset = {:#x}, type = {}, "
-                     "result = {}",
-                     i, entries[i].operation, entries[i].length, entries[i].offset,
-                     (u8)entries[i].type, result);
             break;
         }
         case MemoryOpTypes::ORBIS_KERNEL_MAP_OP_UNMAP: {
             result = sceKernelMunmap(entries[i].start, entries[i].length);
-            LOG_INFO(Kernel_Vmm, "entry = {}, operation = {}, len = {:#x}, result = {}", i,
-                     entries[i].operation, entries[i].length, result);
             break;
         }
         case MemoryOpTypes::ORBIS_KERNEL_MAP_OP_PROTECT: {
             result = sceKernelMProtect(entries[i].start, entries[i].length, entries[i].protection);
-            LOG_INFO(Kernel_Vmm, "entry = {}, operation = {}, len = {:#x}, result = {}", i,
-                     entries[i].operation, entries[i].length, result);
             break;
         }
         case MemoryOpTypes::ORBIS_KERNEL_MAP_OP_MAP_FLEXIBLE: {
             result = sceKernelMapNamedFlexibleMemory(&entries[i].start, entries[i].length,
                                                      entries[i].protection, flags, "");
-            LOG_INFO(Kernel_Vmm,
-                     "entry = {}, operation = {}, len = {:#x}, type = {}, "
-                     "result = {}",
-                     i, entries[i].operation, entries[i].length, (u8)entries[i].type, result);
             break;
         }
         case MemoryOpTypes::ORBIS_KERNEL_MAP_OP_TYPE_PROTECT: {
             result = sceKernelMTypeProtect(entries[i].start, entries[i].length, entries[i].type,
                                            entries[i].protection);
-            LOG_INFO(Kernel_Vmm, "entry = {}, operation = {}, len = {:#x}, result = {}", i,
-                     entries[i].operation, entries[i].length, result);
             break;
         }
         default: {
@@ -487,7 +460,6 @@ s32 PS4_SYSV_ABI sceKernelConfiguredFlexibleMemorySize(u64* sizeOut) {
 }
 
 int PS4_SYSV_ABI sceKernelMunmap(void* addr, size_t len) {
-    LOG_INFO(Kernel_Vmm, "addr = {}, len = {:#x}", fmt::ptr(addr), len);
     if (len == 0) {
         return ORBIS_OK;
     }

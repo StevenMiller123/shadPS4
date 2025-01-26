@@ -236,7 +236,6 @@ int PS4_SYSV_ABI sceSslReuseConnection() {
 }
 
 int PS4_SYSV_ABI sceSslSend() {
-    LOG_ERROR(Lib_Ssl2, "(STUBBED) called");
     return ORBIS_OK;
 }
 

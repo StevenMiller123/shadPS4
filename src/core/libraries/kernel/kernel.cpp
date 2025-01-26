@@ -196,12 +196,8 @@ const char* PS4_SYSV_ABI sceKernelGetFsSandboxRandomWord() {
     return path;
 }
 
-int PS4_SYSV_ABI posix_socket() {
-    return 1000;
-}
-
 int PS4_SYSV_ABI posix_connect() {
-    return 0;
+    return -1;
 }
 
 int PS4_SYSV_ABI _sigprocmask() {
@@ -228,10 +224,7 @@ void RegisterKernel(Core::Loader::SymbolsResolver* sym) {
     LIB_OBJ("f7uOxY9mM1U", "libkernel", 1, "libkernel", 1, 1, &g_stack_chk_guard);
     LIB_FUNCTION("PfccT7qURYE", "libkernel", 1, "libkernel", 1, 1, kernel_ioctl);
     LIB_FUNCTION("JGfTMBOdUJo", "libkernel", 1, "libkernel", 1, 1, sceKernelGetFsSandboxRandomWord);
-    LIB_FUNCTION("TU-d9PfIHPM", "libkernel", 1, "libkernel", 1, 1, posix_socket);
-    LIB_FUNCTION("TU-d9PfIHPM", "libScePosix", 1, "libkernel", 1, 1, posix_socket);
     LIB_FUNCTION("XVL8So3QJUk", "libkernel", 1, "libkernel", 1, 1, posix_connect);
-    LIB_FUNCTION("XVL8So3QJUk", "libScePosix", 1, "libkernel", 1, 1, posix_connect);
     LIB_FUNCTION("6xVpy0Fdq+I", "libkernel", 1, "libkernel", 1, 1, _sigprocmask);
     LIB_FUNCTION("Xjoosiw+XPI", "libkernel", 1, "libkernel", 1, 1, sceKernelUuidCreate);
     LIB_FUNCTION("Ou3iL1abvng", "libkernel", 1, "libkernel", 1, 1, stack_chk_fail);

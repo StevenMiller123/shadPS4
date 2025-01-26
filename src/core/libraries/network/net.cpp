@@ -686,7 +686,6 @@ int PS4_SYSV_ABI sceNetGetsockname(OrbisNetId s, OrbisNetSockaddr* addr, u32* pa
 }
 
 int PS4_SYSV_ABI sceNetGetsockopt(OrbisNetId s, int level, int optname, void* optval, u32* optlen) {
-    LOG_ERROR(Lib_Net, "(STUBBED) called");
     return ORBIS_OK;
 }
 
@@ -951,7 +950,6 @@ int PS4_SYSV_ABI sceNetSetDnsInfoToKernel() {
 }
 
 int PS4_SYSV_ABI sceNetSetsockopt() {
-    LOG_ERROR(Lib_Net, "(STUBBED) called");
     return ORBIS_OK;
 }
 
