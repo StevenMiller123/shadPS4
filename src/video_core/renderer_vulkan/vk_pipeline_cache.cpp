@@ -237,7 +237,6 @@ bool ShouldSkipShader(u64 shader_hash, const char* shader_type) {
         0x8991f3f3, // Sharp source
         0x958dc499, // Sharp source
         0x10d44244, // Sharp source
-        0xb74815,   // Overlap resolve failed?
         0x504ebbb8, // Memory
         0xae4c510d, // Memory (Important for UI rendering)
         0xdba19abc, // Memory
