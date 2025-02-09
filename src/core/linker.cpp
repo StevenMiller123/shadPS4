@@ -376,18 +376,14 @@ void* Linker::AllocateTlsForThread(bool is_primary) {
     static constexpr size_t TlsAllocAlign = 0x20;
     const size_t total_tls_size = Common::AlignUp(static_tls_size, TlsAllocAlign) + TcbSize;
 
-    // If sceKernelMapNamedFlexibleMemory is being called from libkernel and addr = 0
-    // it automatically places mappings in system reserved area instead of managed.
-    static constexpr VAddr KernelAllocBase = 0x880000000ULL;
-
     // The kernel module has a few different paths for TLS allocation.
     // For SDK < 1.7 it allocates both main and secondary thread blocks using libc mspace/malloc.
     // In games compiled with newer SDK, the main thread gets mapped from flexible memory,
     // with addr = 0, so system managed area. Here we will only implement the latter.
-    void* addr_out{reinterpret_cast<void*>(KernelAllocBase)};
+    void* addr_out = 0;
     if (is_primary) {
         const size_t tls_aligned = Common::AlignUp(total_tls_size, 16_KB);
-        const int ret = Libraries::Kernel::sceKernelMapNamedFlexibleMemory(
+        const int ret = Libraries::Kernel::sceKernelMapNamedSystemFlexibleMemory(
             &addr_out, tls_aligned, 3, 0, "SceKernelPrimaryTcbTls");
         ASSERT_MSG(ret == 0, "Unable to allocate TLS+TCB for the primary thread");
     } else {
