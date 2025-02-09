@@ -61,6 +61,14 @@ void Linker::InitMalloc() {
 
     // Find libSceLibcInternal
     u32 module_index = Core::Linker::FindByName("libSceLibcInternal");
+    if (module_index == -1) {
+        void* addr = 0;
+        // libSceLibcInternal is not loaded, simulate the SceKernelInternalMemory mapping instead.
+        const int ret = Libraries::Kernel::sceKernelMapNamedSystemFlexibleMemory(
+                    &addr, 0x1000000, 3, 0, "SceKernelInternalMemory");
+        ASSERT_MSG(ret == 0, "SceKernelInternalMemory mapping failed");
+        return;
+    }
 
     // Search through libSceLibcInternal's exports to find _malloc_init
     auto libc_internal_symbols = Core::Linker::GetModule(module_index)->export_sym.GetSymbols();
@@ -74,6 +82,7 @@ void Linker::InitMalloc() {
     // Run _malloc_init
     Core::ExecuteGuest(reinterpret_cast<_malloc_init>(func.virtual_address));
 }
+
 
 void Linker::Execute(const std::vector<std::string> args) {
     if (Config::debugDump()) {

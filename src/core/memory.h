@@ -183,6 +183,9 @@ public:
 
     int PoolCommit(VAddr virtual_addr, size_t size, MemoryProt prot);
 
+    int MapSystemMemory(void** out_addr, VAddr virtual_addr, size_t size, MemoryProt prot,
+                        MemoryMapFlags flags, VMAType type, std::string_view name = "");
+
     int MapMemory(void** out_addr, VAddr virtual_addr, size_t size, MemoryProt prot,
                   MemoryMapFlags flags, VMAType type, std::string_view name = "",
                   bool is_exec = false, PAddr phys_addr = -1, u64 alignment = 0);
@@ -242,7 +245,7 @@ private:
         return iter;
     }
 
-    VAddr SearchFree(VAddr virtual_addr, size_t size, u32 alignment = 0);
+    VAddr SearchFree(VAddr virtual_addr, size_t size, u32 alignment);
 
     VMAHandle CarveVMA(VAddr virtual_addr, size_t size);
 
