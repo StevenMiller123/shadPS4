@@ -56,8 +56,7 @@ using _malloc_init = int PS4_SYSV_ABI (*)(void);
 
 void Linker::InitMalloc() {
     // During eboot relocation, libkernel runs libSceLibcInternal's _malloc_init.
-    // This reserves a significant amount of flexible memory,
-    // and enables behaviors some LLE libraries rely on.
+    // Properly emulating this is required for some LLE libraries to function properly.
 
     // Find libSceLibcInternal
     u32 module_index = Core::Linker::FindByName("libSceLibcInternal");
@@ -71,18 +70,19 @@ void Linker::InitMalloc() {
     }
 
     // Search through libSceLibcInternal's exports to find _malloc_init
-    auto libc_internal_symbols = Core::Linker::GetModule(module_index)->export_sym.GetSymbols();
+    auto symbols = Core::Linker::GetModule(module_index)->export_sym.GetSymbols();
     Core::Loader::SymbolRecord func;
-    for (u32 i = 0; i < libc_internal_symbols.size(); i++) {
-        if (libc_internal_symbols[i].nid_name == "_malloc_init") {
-            func = libc_internal_symbols[i];
+    for (u32 i = 0; i < symbols.size(); i++) {
+        if (symbols[i].nid_name == "_malloc_init") {
+            func = symbols[i];
         }
     }
+    ASSERT_MSG(func.nid_name == "_malloc_init", "_malloc_init not found!");
 
     // Run _malloc_init
-    Core::ExecuteGuest(reinterpret_cast<_malloc_init>(func.virtual_address));
+    int ret = Core::ExecuteGuest(reinterpret_cast<_malloc_init>(func.virtual_address));
+    ASSERT_MSG(ret == 0, "libSceLibcInternal _malloc_init failed!");
 }
-
 
 void Linker::Execute(const std::vector<std::string> args) {
     if (Config::debugDump()) {
@@ -136,6 +136,7 @@ void Linker::Execute(const std::vector<std::string> args) {
     main_thread.Run([this, module, args](std::stop_token) {
         Common::SetCurrentThreadName("GAME_MainThread");
         LoadSharedLibraries();
+        InitMalloc();
 
         // Start main module.
         EntryParams params{};
@@ -148,9 +149,6 @@ void Linker::Execute(const std::vector<std::string> args) {
             }
         }
         params.entry_addr = module->GetEntryAddress();
-
-        InitMalloc();
-
         RunMainEntry(&params);
     });
 }
