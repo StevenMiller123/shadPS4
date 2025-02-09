@@ -64,7 +64,7 @@ void Linker::InitMalloc() {
         void* addr = 0;
         // libSceLibcInternal is not loaded, simulate the SceKernelInternalMemory mapping instead.
         const int ret = Libraries::Kernel::sceKernelMapNamedSystemFlexibleMemory(
-                    &addr, 0x1000000, 3, 0, "SceKernelInternalMemory");
+            &addr, 0x1000000, 3, 0, "SceKernelInternalMemory");
         ASSERT_MSG(ret == 0, "SceKernelInternalMemory mapping failed");
         return;
     }
