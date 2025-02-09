@@ -114,11 +114,6 @@ public:
         return null_descriptor;
     }
 
-    /// Returns true when VK_KHR_maintenance5 is supported.
-    bool IsMaintenance5Supported() const {
-        return maintenance5;
-    }
-
     /// Returns true when VK_KHR_fragment_shader_barycentric is supported.
     bool IsFragmentShaderBarycentricSupported() const {
         return fragment_shader_barycentric;
@@ -152,6 +147,16 @@ public:
     /// Returns true when tessellation is supported by the device
     bool IsTessellationSupported() const {
         return features.tessellationShader;
+    }
+
+    /// Returns true when tessellation isolines are supported by the device
+    bool IsTessellationIsolinesSupported() const {
+        return !portability_subset || portability_features.tessellationIsolines;
+    }
+
+    /// Returns true when tessellation point mode is supported by the device
+    bool IsTessellationPointModeSupported() const {
+        return !portability_subset || portability_features.tessellationPointMode;
     }
 
     /// Returns the vendor ID of the physical device
@@ -204,14 +209,14 @@ public:
         return properties.limits.minUniformBufferOffsetAlignment;
     }
 
+    ///  Returns the maximum size of uniform buffers.
+    vk::DeviceSize UniformMaxSize() const {
+        return properties.limits.maxUniformBufferRange;
+    }
+
     /// Returns the minimum required alignment for storage buffers
     vk::DeviceSize StorageMinAlignment() const {
         return properties.limits.minStorageBufferOffsetAlignment;
-    }
-
-    /// Returns the minimum required alignment for texel buffers
-    vk::DeviceSize TexelBufferMinAlignment() const {
-        return properties.limits.minTexelBufferOffsetAlignment;
     }
 
     /// Returns the minimum alignemt required for accessing host-mapped device memory
@@ -227,11 +232,6 @@ public:
     /// Returns the maximum size of compute shared memory.
     u32 MaxComputeSharedMemorySize() const {
         return properties.limits.maxComputeSharedMemorySize;
-    }
-
-    /// Returns the maximum supported elements in a texel buffer
-    u32 MaxTexelBufferElements() const {
-        return properties.limits.maxTexelBufferElements;
     }
 
     /// Returns the maximum sampler LOD bias.
@@ -259,10 +259,12 @@ public:
         return features.shaderClipDistance;
     }
 
+    /// Returns the maximim viewport width.
     u32 GetMaxViewportWidth() const {
         return properties.limits.maxViewportDimensions[0];
     }
 
+    ///  Returns the maximum viewport height.
     u32 GetMaxViewportHeight() const {
         return properties.limits.maxViewportDimensions[1];
     }
@@ -300,6 +302,7 @@ private:
     vk::PhysicalDeviceVulkan12Properties vk12_props;
     vk::PhysicalDevicePushDescriptorPropertiesKHR push_descriptor_props;
     vk::PhysicalDeviceFeatures features;
+    vk::PhysicalDevicePortabilitySubsetFeaturesKHR portability_features;
     vk::DriverIdKHR driver_id;
     vk::UniqueDebugUtilsMessengerEXT debug_callback{};
     std::string vendor_name;
@@ -317,13 +320,13 @@ private:
     bool dynamic_color_write_mask{};
     bool vertex_input_dynamic_state{};
     bool null_descriptor{};
-    bool maintenance5{};
     bool list_restart{};
     bool legacy_vertex_attributes{};
     bool shader_stencil_export{};
     bool image_load_store_lod{};
     bool amd_gcn_shader{};
     bool tooling_info{};
+    bool portability_subset{};
 };
 
 } // namespace Vulkan
