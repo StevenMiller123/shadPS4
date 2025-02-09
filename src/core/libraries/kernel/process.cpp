@@ -45,7 +45,7 @@ s32 PS4_SYSV_ABI sceKernelLoadStartModule(const char* moduleFileName, size_t arg
 
     // Load PRX module and relocate any modules that import it.
     auto* linker = Common::Singleton<Core::Linker>::Instance();
-    u32 handle = linker->FindByName(path);
+    u32 handle = linker->FindByPath(path);
     if (handle != -1) {
         return handle;
     }
