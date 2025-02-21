@@ -30,9 +30,9 @@ jobs:
     - name: Install
       run: |
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-        sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main'
+        sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main'
         sudo apt update
-        sudo apt install clang-format-18
+        sudo apt install clang-format-19
     - name: Build
       env:
         COMMIT_RANGE: ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}
@@ -111,10 +111,10 @@ jobs:
     - name: Setup Qt
       uses: jurplel/install-qt-action@v4
       with:
-        version: 6.7.3
+        version: 6.8.2
         host: windows
         target: desktop
-        arch: win64_msvc2019_64
+        arch: win64_msvc2022_64
         archives: qtbase qttools
         modules: qtmultimedia
 
@@ -228,7 +228,7 @@ jobs:
     - name: Setup Qt
       uses: jurplel/install-qt-action@v4
       with:
-        version: 6.7.3
+        version: 6.8.2
         host: mac
         target: desktop
         arch: clang_64

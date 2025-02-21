@@ -143,6 +143,9 @@ Logo is done by [**Xphalnos**](https://github.com/Xphalnos)
 If you want to contribute, please look the [**CONTRIBUTING.md**](https://github.com/shadps4-emu/shadPS4/blob/main/CONTRIBUTING.md) file.\
 Open a PR and we'll check it :)
 
+# Translations
+
+If you want to translate shadPS4 to your language we use [**crowdin**](https://crowdin.com/project/shadps4-emulator).
 # Contributors
 
 <a href="https://github.com/shadps4-emu/shadPS4/graphs/contributors">
@@ -160,7 +163,7 @@ A few noteworthy teams/projects who've helped us along the way are:
 
 - **yuzu**: Our shader compiler has been designed with yuzu's Hades compiler as a blueprint. This allowed us to focus on the challenges of emulating a modern AMD GPU while having a high-quality optimizing shader compiler implementation as a base.
 
-- [**hydra**](https://github.com/hydra-emu/hydra): A multisystem, multiplatform emulator (chip-8, GB, NES, N64) from Paris.
+- [**felix86**](https://github.com/OFFTKP/felix86): A new x86-64 → RISC-V Linux userspace emulator
 
 # License
 

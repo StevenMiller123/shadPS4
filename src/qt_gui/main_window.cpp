@@ -57,7 +57,7 @@ bool MainWindow::Init() {
     SetLastIconSizeBullet();
     GetPhysicalDevices();
     // show ui
-    setMinimumSize(350, minimumSizeHint().height());
+    setMinimumSize(720, 405);
     std::string window_title = "";
     if (Common::isRelease) {
         window_title = fmt::format("shadPS4 v{}", Common::VERSION);
@@ -142,6 +142,7 @@ void MainWindow::AddUiWidgets() {
     ui->toolBar->addWidget(ui->refreshButton);
     ui->toolBar->addWidget(ui->settingsButton);
     ui->toolBar->addWidget(ui->controllerButton);
+    ui->toolBar->addWidget(ui->keyboardButton);
     QFrame* line = new QFrame(this);
     line->setFrameShape(QFrame::StyledPanel);
     line->setFrameShadow(QFrame::Sunken);
@@ -325,6 +326,11 @@ void MainWindow::CreateConnects() {
     connect(ui->controllerButton, &QPushButton::clicked, this, [this]() {
         auto configWindow = new ControlSettings(m_game_info, this);
         configWindow->exec();
+    });
+
+    connect(ui->keyboardButton, &QPushButton::clicked, this, [this]() {
+        auto kbmWindow = new EditorDialog(this);
+        kbmWindow->exec();
     });
 
 #ifdef ENABLE_UPDATER
@@ -959,6 +965,9 @@ void MainWindow::InstallDragDropPkg(std::filesystem::path file, int pkgNum, int 
                 dialog.setAutoClose(true);
                 dialog.setRange(0, nfiles);
 
+                dialog.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
+                                                       dialog.size(), this->geometry()));
+
                 QFutureWatcher<void> futureWatcher;
                 connect(&futureWatcher, &QFutureWatcher<void>::finished, this, [=, this]() {
                     if (pkgNum == nPkg) {
@@ -1106,6 +1115,7 @@ void MainWindow::SetUiIcons(bool isWhite) {
     ui->refreshButton->setIcon(RecolorIcon(ui->refreshButton->icon(), isWhite));
     ui->settingsButton->setIcon(RecolorIcon(ui->settingsButton->icon(), isWhite));
     ui->controllerButton->setIcon(RecolorIcon(ui->controllerButton->icon(), isWhite));
+    ui->keyboardButton->setIcon(RecolorIcon(ui->keyboardButton->icon(), isWhite));
     ui->refreshGameListAct->setIcon(RecolorIcon(ui->refreshGameListAct->icon(), isWhite));
     ui->menuGame_List_Mode->setIcon(RecolorIcon(ui->menuGame_List_Mode->icon(), isWhite));
     ui->pkgViewerAct->setIcon(RecolorIcon(ui->pkgViewerAct->icon(), isWhite));
