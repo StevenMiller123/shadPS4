@@ -113,6 +113,8 @@ static vk::FormatFeatureFlags2 FormatFeatureFlags(const vk::ImageUsageFlags usag
     return feature_flags;
 }
 
+UniqueImage::UniqueImage() {}
+
 UniqueImage::UniqueImage(vk::Device device_, VmaAllocator allocator_)
     : device{device_}, allocator{allocator_} {}
 
@@ -123,6 +125,9 @@ UniqueImage::~UniqueImage() {
 }
 
 void UniqueImage::Create(const vk::ImageCreateInfo& image_ci) {
+    if (image) {
+        vmaDestroyImage(allocator, image, allocation);
+    }
     const VmaAllocationCreateInfo alloc_info = {
         .flags = VMA_ALLOCATION_CREATE_WITHIN_BUDGET_BIT,
         .usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
@@ -394,7 +399,7 @@ void Image::CopyImage(const Image& image) {
             vk::AccessFlagBits2::eShaderRead | vk::AccessFlagBits2::eTransferRead, {});
 }
 
-void Image::CopyMip(const Image& image, u32 mip) {
+void Image::CopyMip(const Image& image, u32 mip, u32 slice) {
     scheduler->EndRendering();
     Transit(vk::ImageLayout::eTransferDstOptimal, vk::AccessFlagBits2::eTransferWrite, {});
 
@@ -407,18 +412,19 @@ void Image::CopyMip(const Image& image, u32 mip) {
     ASSERT(mip_w == image.info.size.width);
     ASSERT(mip_h == image.info.size.height);
 
+    const u32 num_layers = std::min(image.info.resources.layers, info.resources.layers);
     const vk::ImageCopy image_copy{
         .srcSubresource{
             .aspectMask = image.aspect_mask,
             .mipLevel = 0,
             .baseArrayLayer = 0,
-            .layerCount = image.info.resources.layers,
+            .layerCount = num_layers,
         },
         .dstSubresource{
             .aspectMask = image.aspect_mask,
             .mipLevel = mip,
-            .baseArrayLayer = 0,
-            .layerCount = info.resources.layers,
+            .baseArrayLayer = slice,
+            .layerCount = num_layers,
         },
         .extent = {mip_w, mip_h, mip_d},
     };

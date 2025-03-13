@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if(APPLE)
-    enable_language(OBJC)
+    list(APPEND ADDITIONAL_LANGUAGES OBJC)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 14)
 endif()
 
@@ -16,7 +16,7 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-project(shadPS4 CXX C ASM)
+project(shadPS4 CXX C ASM ${ADDITIONAL_LANGUAGES})
 
 # Forcing PIE makes sure that the base address is high enough so that it doesn't clash with the PS4 memory.
 if(UNIX AND NOT APPLE)
@@ -195,6 +195,7 @@ endif()
 
 add_subdirectory(externals)
 include_directories(src)
+include_directories(Resources)
 
 if(ENABLE_QT_GUI)
     find_package(Qt6 REQUIRED COMPONENTS Widgets Concurrent LinguistTools Network Multimedia)
@@ -297,6 +298,7 @@ set(KERNEL_LIB src/core/libraries/kernel/sync/mutex.cpp
 
 set(NETWORK_LIBS src/core/libraries/network/http.cpp
                  src/core/libraries/network/http.h
+                 src/core/libraries/network/http_error.h
                  src/core/libraries/network/http2.cpp
                  src/core/libraries/network/http2.h
                  src/core/libraries/network/net.cpp
@@ -397,20 +399,17 @@ set(VIDEOOUT_LIB src/core/libraries/videoout/buffer.h
                  src/core/libraries/videoout/videoout_error.h
 )
 
-set(LIBC_SOURCES src/core/libraries/libc_internal/libc_internal.cpp
+set(HLE_LIBC_INTERNAL_LIB src/core/libraries/libc_internal/libc_internal.cpp
                  src/core/libraries/libc_internal/libc_internal.h
-                 src/core/libraries/libc_internal/libc_internal_mspace.cpp
-                 src/core/libraries/libc_internal/libc_internal_mspace.h
                  src/core/libraries/libc_internal/libc_internal_io.cpp
                  src/core/libraries/libc_internal/libc_internal_io.h
                  src/core/libraries/libc_internal/libc_internal_memory.cpp
                  src/core/libraries/libc_internal/libc_internal_memory.h
                  src/core/libraries/libc_internal/libc_internal_str.cpp
                  src/core/libraries/libc_internal/libc_internal_str.h
-                 src/core/libraries/libc_internal/libc_internal_stream.cpp
-                 src/core/libraries/libc_internal/libc_internal_stream.h
                  src/core/libraries/libc_internal/libc_internal_math.cpp
                  src/core/libraries/libc_internal/libc_internal_math.h
+                 src/core/libraries/libc_internal/printf.h
 )
 
 set(IME_LIB src/core/libraries/ime/error_dialog.cpp
@@ -585,6 +584,7 @@ set(COMMON src/common/logging/backend.cpp
            src/common/spin_lock.h
            src/common/stb.cpp
            src/common/stb.h
+           src/common/string_literal.h
            src/common/string_util.cpp
            src/common/string_util.h
            src/common/thread.cpp
@@ -665,7 +665,7 @@ set(CORE src/core/aerolib/stubs.cpp
          ${KERNEL_LIB}
          ${NETWORK_LIBS}
          ${SYSTEM_LIBS}
-         ${LIBC_SOURCES}
+         ${HLE_LIBC_INTERNAL_LIB}
          ${PAD_LIB}
          ${VIDEOOUT_LIB}
          ${NP_LIBS}
@@ -846,6 +846,10 @@ set(VIDEO_CORE src/video_core/amdgpu/liverpool.cpp
                src/video_core/renderer_vulkan/vk_shader_util.h
                src/video_core/renderer_vulkan/vk_swapchain.cpp
                src/video_core/renderer_vulkan/vk_swapchain.h
+               src/video_core/renderer_vulkan/host_passes/fsr_pass.cpp
+               src/video_core/renderer_vulkan/host_passes/fsr_pass.h
+               src/video_core/renderer_vulkan/host_passes/pp_pass.cpp
+               src/video_core/renderer_vulkan/host_passes/pp_pass.h
                src/video_core/texture_cache/image.cpp
                src/video_core/texture_cache/image.h
                src/video_core/texture_cache/image_info.cpp
@@ -918,6 +922,9 @@ set(QT_GUI src/qt_gui/about_dialog.cpp
 	   src/qt_gui/control_settings.cpp	   
            src/qt_gui/control_settings.h
            src/qt_gui/control_settings.ui
+           src/qt_gui/kbm_gui.cpp	   
+           src/qt_gui/kbm_gui.h
+           src/qt_gui/kbm_gui.ui
            src/qt_gui/main_window_ui.h
            src/qt_gui/main_window.cpp
            src/qt_gui/main_window.h
@@ -1104,6 +1111,19 @@ set(HOST_SHADERS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/src/video_core/host_shaders
 add_subdirectory(${HOST_SHADERS_INCLUDE})
 add_dependencies(shadps4 host_shaders)
 target_include_directories(shadps4 PRIVATE ${HOST_SHADERS_INCLUDE})
+
+# embed resources
+
+include(CMakeRC)
+cmrc_add_resource_library(embedded-resources
+        ALIAS res::embedded
+        NAMESPACE res
+        src/images/bronze.png
+        src/images/gold.png
+        src/images/platinum.png
+        src/images/silver.png)
+
+target_link_libraries(shadps4 PRIVATE res::embedded)
 
 # ImGui resources
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/imgui/renderer)

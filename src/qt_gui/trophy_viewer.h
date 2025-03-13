@@ -4,12 +4,15 @@
 #pragma once
 
 #include <QApplication>
+#include <QCheckBox>
 #include <QDir>
+#include <QDockWidget>
 #include <QFileInfoList>
 #include <QGraphicsBlurEffect>
 #include <QHeaderView>
 #include <QLabel>
 #include <QMainWindow>
+#include <QPushButton>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QVBoxLayout>
@@ -23,6 +26,12 @@ class TrophyViewer : public QMainWindow {
 public:
     explicit TrophyViewer(QString trophyPath, QString gameTrpPath);
 
+    void updateTrophyInfo();
+
+    void updateTableFilters();
+    void onDockClosed();
+    void reopenLeftDock();
+
 private:
     void PopulateTrophyWidget(QString title);
     void SetTableItem(QTableWidget* parent, int row, int column, QString str);
@@ -31,17 +40,24 @@ private:
     QStringList headers;
     QString gameTrpPath_;
     TRP trp;
+    QLabel* trophyInfoLabel;
+    QCheckBox* showEarnedCheck;
+    QCheckBox* showNotEarnedCheck;
+    QCheckBox* showHiddenCheck;
+    QPushButton* expandButton;
+    QDockWidget* trophyInfoDock;
+    QPushButton* reopenButton;
 
-    QString GetTrpType(const QChar trp_) {
+    std::string GetTrpType(const QChar trp_) {
         switch (trp_.toLatin1()) {
         case 'B':
-            return "Bronze";
+            return "bronze.png";
         case 'S':
-            return "Silver";
+            return "silver.png";
         case 'G':
-            return "Gold";
+            return "gold.png";
         case 'P':
-            return "Platinum";
+            return "platinum.png";
         }
         return "Unknown";
     }

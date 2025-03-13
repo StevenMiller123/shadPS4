@@ -31,10 +31,7 @@ std::filesystem::path find_fs_path_or(const basic_value<TC>& v, const K& ky,
 
 namespace Config {
 
-static bool isHDRAllowed = false;
 static bool isNeo = false;
-static bool isFullscreen = false;
-static std::string fullscreenMode = "borderless";
 static bool playBGM = false;
 static bool isTrophyPopupDisabled = false;
 static int BGMvolume = 50;
@@ -56,6 +53,7 @@ static bool isShaderDebug = false;
 static bool isShowSplash = false;
 static bool isAutoUpdate = false;
 static bool isAlwaysShowChangelog = false;
+static std::string isSideTrophy = "right";
 static bool isNullGpu = false;
 static bool shouldCopyGPUBuffers = false;
 static bool shouldDumpShaders = false;
@@ -69,8 +67,10 @@ static bool vkHostMarkers = false;
 static bool vkGuestMarkers = false;
 static bool rdocEnable = false;
 static bool isFpsColor = true;
+static bool isSeparateLogFilesEnabled = false;
 static s16 cursorState = HideCursorState::Idle;
 static int cursorHideTimeout = 5; // 5 seconds (default)
+static double trophyNotificationDuration = 6.0;
 static bool useUnifiedInputConfig = true;
 static bool overrideControllerColor = false;
 static int controllerCustomColorRGB[3] = {0, 0, 255};
@@ -102,6 +102,9 @@ std::vector<std::string> m_recent_files;
 std::string emulator_language = "en_US";
 static int backgroundImageOpacity = 50;
 static bool showBackgroundImage = true;
+static bool isFullscreen = false;
+static std::string fullscreenMode = "Windowed";
+static bool isHDRAllowed = false;
 
 // Language
 u32 m_language = 1; // english
@@ -195,6 +198,10 @@ int getCursorHideTimeout() {
     return cursorHideTimeout;
 }
 
+double getTrophyNotificationDuration() {
+    return trophyNotificationDuration;
+}
+
 u32 getScreenWidth() {
     return screenWidth;
 }
@@ -261,6 +268,10 @@ bool autoUpdate() {
 
 bool alwaysShowChangelog() {
     return isAlwaysShowChangelog;
+}
+
+std::string sideTrophy() {
+    return isSideTrophy;
 }
 
 bool nullGpu() {
@@ -371,6 +382,10 @@ void setAlwaysShowChangelog(bool enable) {
     isAlwaysShowChangelog = enable;
 }
 
+void setSideTrophy(std::string side) {
+    isSideTrophy = side;
+}
+
 void setNullGpu(bool enable) {
     isNullGpu = enable;
 }
@@ -434,6 +449,9 @@ void setCursorState(s16 newCursorState) {
 void setCursorHideTimeout(int newcursorHideTimeout) {
     cursorHideTimeout = newcursorHideTimeout;
 }
+void setTrophyNotificationDuration(double newTrophyNotificationDuration) {
+    trophyNotificationDuration = newTrophyNotificationDuration;
+}
 
 void setLanguage(u32 language) {
     m_language = language;
@@ -449,6 +467,10 @@ void setLogType(const std::string& type) {
 
 void setLogFilter(const std::string& type) {
     logFilter = type;
+}
+
+void setSeparateLogFilesEnabled(bool enabled) {
+    isSeparateLogFilesEnabled = enabled;
 }
 
 void setUserName(const std::string& type) {
@@ -656,6 +678,10 @@ u32 GetLanguage() {
     return m_language;
 }
 
+bool getSeparateLogFilesEnabled() {
+    return isSeparateLogFilesEnabled;
+}
+
 int getBackgroundImageOpacity() {
     return backgroundImageOpacity;
 }
@@ -694,12 +720,11 @@ void load(const std::filesystem::path& path) {
     if (data.contains("General")) {
         const toml::value& general = data.at("General");
 
-        isHDRAllowed = toml::find_or<bool>(general, "allowHDR", false);
         isNeo = toml::find_or<bool>(general, "isPS4Pro", false);
-        isFullscreen = toml::find_or<bool>(general, "Fullscreen", false);
-        fullscreenMode = toml::find_or<std::string>(general, "FullscreenMode", "borderless");
         playBGM = toml::find_or<bool>(general, "playBGM", false);
         isTrophyPopupDisabled = toml::find_or<bool>(general, "isTrophyPopupDisabled", false);
+        trophyNotificationDuration =
+            toml::find_or<double>(general, "trophyNotificationDuration", 5.0);
         BGMvolume = toml::find_or<int>(general, "BGMvolume", 50);
         enableDiscordRPC = toml::find_or<bool>(general, "enableDiscordRPC", true);
         logFilter = toml::find_or<std::string>(general, "logFilter", "");
@@ -713,6 +738,7 @@ void load(const std::filesystem::path& path) {
         isShowSplash = toml::find_or<bool>(general, "showSplash", true);
         isAutoUpdate = toml::find_or<bool>(general, "autoUpdate", false);
         isAlwaysShowChangelog = toml::find_or<bool>(general, "alwaysShowChangelog", false);
+        isSideTrophy = toml::find_or<std::string>(general, "sideTrophy", "right");
         separateupdatefolder = toml::find_or<bool>(general, "separateUpdateEnabled", false);
         compatibilityData = toml::find_or<bool>(general, "compatibilityEnabled", false);
         checkCompatibilityOnStartup =
@@ -742,6 +768,9 @@ void load(const std::filesystem::path& path) {
         shouldDumpShaders = toml::find_or<bool>(gpu, "dumpShaders", false);
         shouldPatchShaders = toml::find_or<bool>(gpu, "patchShaders", true);
         vblankDivider = toml::find_or<int>(gpu, "vblankDivider", 1);
+        isFullscreen = toml::find_or<bool>(gpu, "Fullscreen", false);
+        fullscreenMode = toml::find_or<std::string>(gpu, "FullscreenMode", "Windowed");
+        isHDRAllowed = toml::find_or<bool>(gpu, "allowHDR", false);
     }
 
     if (data.contains("Vulkan")) {
@@ -761,6 +790,7 @@ void load(const std::filesystem::path& path) {
         const toml::value& debug = data.at("Debug");
 
         isDebugDump = toml::find_or<bool>(debug, "DebugDump", false);
+        isSeparateLogFilesEnabled = toml::find_or<bool>(debug, "isSeparateLogFilesEnabled", false);
         isShaderDebug = toml::find_or<bool>(debug, "CollectShader", false);
         isFpsColor = toml::find_or<bool>(debug, "FPSColor", true);
     }
@@ -824,7 +854,7 @@ void load(const std::filesystem::path& path) {
 }
 
 void save(const std::filesystem::path& path) {
-    toml::value data;
+    toml::ordered_value data;
 
     std::error_code error;
     if (std::filesystem::exists(path, error)) {
@@ -832,7 +862,8 @@ void save(const std::filesystem::path& path) {
             std::ifstream ifs;
             ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             ifs.open(path, std::ios_base::binary);
-            data = toml::parse(ifs, std::string{fmt::UTF(path.filename().u8string()).data});
+            data = toml::parse<toml::ordered_type_config>(
+                ifs, std::string{fmt::UTF(path.filename().u8string()).data});
         } catch (const std::exception& ex) {
             fmt::print("Exception trying to parse config file. Exception: {}\n", ex.what());
             return;
@@ -844,11 +875,9 @@ void save(const std::filesystem::path& path) {
         fmt::print("Saving new configuration file {}\n", fmt::UTF(path.u8string()));
     }
 
-    data["General"]["allowHDR"] = isHDRAllowed;
     data["General"]["isPS4Pro"] = isNeo;
-    data["General"]["Fullscreen"] = isFullscreen;
-    data["General"]["FullscreenMode"] = fullscreenMode;
     data["General"]["isTrophyPopupDisabled"] = isTrophyPopupDisabled;
+    data["General"]["trophyNotificationDuration"] = trophyNotificationDuration;
     data["General"]["playBGM"] = playBGM;
     data["General"]["BGMvolume"] = BGMvolume;
     data["General"]["enableDiscordRPC"] = enableDiscordRPC;
@@ -860,6 +889,7 @@ void save(const std::filesystem::path& path) {
     data["General"]["showSplash"] = isShowSplash;
     data["General"]["autoUpdate"] = isAutoUpdate;
     data["General"]["alwaysShowChangelog"] = isAlwaysShowChangelog;
+    data["General"]["sideTrophy"] = isSideTrophy;
     data["General"]["separateUpdateEnabled"] = separateupdatefolder;
     data["General"]["compatibilityEnabled"] = compatibilityData;
     data["General"]["checkCompatibilityOnStartup"] = checkCompatibilityOnStartup;
@@ -877,6 +907,9 @@ void save(const std::filesystem::path& path) {
     data["GPU"]["dumpShaders"] = shouldDumpShaders;
     data["GPU"]["patchShaders"] = shouldPatchShaders;
     data["GPU"]["vblankDivider"] = vblankDivider;
+    data["GPU"]["Fullscreen"] = isFullscreen;
+    data["GPU"]["FullscreenMode"] = fullscreenMode;
+    data["GPU"]["allowHDR"] = isHDRAllowed;
     data["Vulkan"]["gpuId"] = gpuId;
     data["Vulkan"]["validation"] = vkValidation;
     data["Vulkan"]["validation_sync"] = vkValidationSync;
@@ -887,6 +920,7 @@ void save(const std::filesystem::path& path) {
     data["Vulkan"]["rdocEnable"] = rdocEnable;
     data["Debug"]["DebugDump"] = isDebugDump;
     data["Debug"]["CollectShader"] = isShaderDebug;
+    data["Debug"]["isSeparateLogFilesEnabled"] = isSeparateLogFilesEnabled;
     data["Debug"]["FPSColor"] = isFpsColor;
 
     data["Keys"]["TrophyKey"] = trophyKey;
@@ -913,7 +947,7 @@ void save(const std::filesystem::path& path) {
 }
 
 void saveMainWindow(const std::filesystem::path& path) {
-    toml::value data;
+    toml::ordered_value data;
 
     std::error_code error;
     if (std::filesystem::exists(path, error)) {
@@ -921,7 +955,8 @@ void saveMainWindow(const std::filesystem::path& path) {
             std::ifstream ifs;
             ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             ifs.open(path, std::ios_base::binary);
-            data = toml::parse(ifs, std::string{fmt::UTF(path.filename().u8string()).data});
+            data = toml::parse<toml::ordered_type_config>(
+                ifs, std::string{fmt::UTF(path.filename().u8string()).data});
         } catch (const std::exception& ex) {
             fmt::print("Exception trying to parse config file. Exception: {}\n", ex.what());
             return;
@@ -975,6 +1010,7 @@ void setDefaultValues() {
     chooseHomeTab = "General";
     cursorState = HideCursorState::Idle;
     cursorHideTimeout = 5;
+    trophyNotificationDuration = 6.0;
     backButtonBehavior = "left";
     useSpecialPad = false;
     specialPadClass = 1;
@@ -983,6 +1019,7 @@ void setDefaultValues() {
     isShowSplash = false;
     isAutoUpdate = false;
     isAlwaysShowChangelog = false;
+    isSideTrophy = "right";
     isNullGpu = false;
     shouldDumpShaders = false;
     vblankDivider = 1;

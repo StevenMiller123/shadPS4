@@ -26,8 +26,10 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QXmlStreamReader>
-#include <common/logging/log.h>
+
 #include "cheats_patches.h"
+#include "common/config.h"
+#include "common/logging/log.h"
 #include "common/memory_patcher.h"
 #include "common/path_util.h"
 #include "core/module.h"
@@ -92,7 +94,7 @@ void CheatsPatches::setupUI() {
     gameVersionLabel->setAlignment(Qt::AlignLeft);
     gameInfoLayout->addWidget(gameVersionLabel);
 
-    if (m_gameSize.left(4) != "0.00") {
+    if (Config::GetLoadGameSizeEnabled()) {
         QLabel* gameSizeLabel = new QLabel(tr("Size: ") + m_gameSize);
         gameSizeLabel->setAlignment(Qt::AlignLeft);
         gameInfoLayout->addWidget(gameSizeLabel);
@@ -1080,7 +1082,11 @@ void CheatsPatches::addCheatsToLayout(const QJsonArray& modsArray, const QJsonAr
     QLabel* creditsLabel = new QLabel();
     QString creditsText = tr("Author: ");
     if (!creditsArray.isEmpty()) {
-        creditsText += creditsArray[0].toString();
+        QStringList authors;
+        for (const QJsonValue& credit : creditsArray) {
+            authors << credit.toString();
+        }
+        creditsText += authors.join(", ");
     }
     creditsLabel->setText(creditsText);
     creditsLabel->setAlignment(Qt::AlignLeft);
