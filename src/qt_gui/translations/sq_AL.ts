@@ -559,11 +559,11 @@
     </message>
     <message>
       <source>Restore Defaults</source>
-      <translation type="unfinished">Restore Defaults</translation>
+      <translation>Rikthe Paracaktimet</translation>
     </message>
     <message>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Anulo</translation>
     </message>
   </context>
   <context>
@@ -1193,19 +1193,19 @@
     </message>
     <message>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Ruaj</translation>
     </message>
     <message>
       <source>Apply</source>
-      <translation type="unfinished">Apply</translation>
+      <translation>Zbato</translation>
     </message>
     <message>
       <source>Restore Defaults</source>
-      <translation type="unfinished">Restore Defaults</translation>
+      <translation>Rikthe Paracaktimet</translation>
     </message>
     <message>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Anulo</translation>
     </message>
   </context>
   <context>
@@ -1305,6 +1305,14 @@
     <message>
       <source>Dump Game List</source>
       <translation>Zbraz Listën e Lojërave</translation>
+    </message>
+    <message>
+      <source>Trophy Viewer</source>
+      <translation>Shikuesi i Trofeve</translation>
+    </message>
+    <message>
+      <source>No games found. Please add your games to your library first.</source>
+      <translation>Nuk u gjetën lojëra. Shto lojërat në librarinë tënde fillimisht.</translation>
     </message>
     <message>
       <source>PKG Viewer</source>
@@ -1606,7 +1614,7 @@
     </message>
     <message>
       <source>Default tab when opening settings</source>
-      <translation>Skeda e parazgjedhur kur hapen cilësimet</translation>
+      <translation>Skeda e paracaktuar kur hapen cilësimet</translation>
     </message>
     <message>
       <source>Show Game Size In List</source>
@@ -1850,7 +1858,7 @@
     </message>
     <message>
       <source>Restore Defaults</source>
-      <translation>Rikthe paracaktimet</translation>
+      <translation>Rikthe Paracaktimet</translation>
     </message>
     <message>
       <source>Close</source>
@@ -2190,6 +2198,10 @@
     <message>
       <source>Trophy Viewer</source>
       <translation>Shikuesi i Trofeve</translation>
+    </message>
+    <message>
+      <source>Select Game:</source>
+      <translation>Zgjidh Lojën:</translation>
     </message>
     <message>
       <source>Progress</source>

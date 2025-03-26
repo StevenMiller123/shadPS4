@@ -730,7 +730,7 @@
     </message>
     <message>
       <source>Game displays an image but does not go past the menu</source>
-      <translation>Jogo exibe imagem mas não passa do menu</translation>
+      <translation>O jogo exibe imagem mas não passa do menu</translation>
     </message>
     <message>
       <source>Game has game-breaking glitches or unplayable performance</source>
@@ -1284,11 +1284,11 @@
     </message>
     <message>
       <source>List View</source>
-      <translation>Visualizar em Lista</translation>
+      <translation>Visualização em Lista</translation>
     </message>
     <message>
       <source>Grid View</source>
-      <translation>Visualizar em Grade</translation>
+      <translation>Visualização em Grade</translation>
     </message>
     <message>
       <source>Elf Viewer</source>
@@ -1305,6 +1305,14 @@
     <message>
       <source>Dump Game List</source>
       <translation>Exportar Lista de Jogos</translation>
+    </message>
+    <message>
+      <source>Trophy Viewer</source>
+      <translation>Visualizador de Troféus</translation>
+    </message>
+    <message>
+      <source>No games found. Please add your games to your library first.</source>
+      <translation>Nenhum jogo encontrado. Adicione seus jogos à sua biblioteca primeiro.</translation>
     </message>
     <message>
       <source>PKG Viewer</source>
@@ -2030,11 +2038,11 @@
     </message>
     <message>
       <source>Host Debug Markers:\nInserts emulator-side information like markers for specific AMDGPU commands around Vulkan commands, as well as giving resources debug names.\nIf you have this enabled, you should enable Crash Diagnostics.\nUseful for programs like RenderDoc.</source>
-      <translation>Marcadores de Depuração de Host:\nInsere informações vindo do emulador como marcadores para comandos AMDGPU específicos em torno de comandos Vulkan, além de fornecer nomes de depuração aos recursos.\nSe isso estiver habilitado, ative os Diagnósticos de Falha.\nÚtil para programas como o RenderDoc.</translation>
+      <translation>Marcadores de Depuração do Host:\nInsere informações vindo do emulador como marcadores para comandos AMDGPU específicos em torno de comandos Vulkan, além de fornecer nomes de depuração aos recursos.\nSe isso estiver habilitado, ative os Diagnósticos de Falhas.\nÚtil para programas como o RenderDoc.</translation>
     </message>
     <message>
       <source>Guest Debug Markers:\nInserts any debug markers the game itself has added to the command buffer.\nIf you have this enabled, you should enable Crash Diagnostics.\nUseful for programs like RenderDoc.</source>
-      <translation>Marcadores de Depuração de Convidado:\nInsere quaisquer marcadores de depuração que o próprio jogo adicionou ao buffer de comando.\nSe isso estiver habilitado, ative os Diagnósticos de Falha.\nÚtil para programas como o RenderDoc.</translation>
+      <translation>Marcadores de Depuração do Convidado:\nInsere quaisquer marcadores de depuração que o próprio jogo adicionou ao buffer de comando.\nSe isso estiver habilitado, ative os Diagnósticos de Falhas.\nÚtil para programas como o RenderDoc.</translation>
     </message>
     <message>
       <source>Save Data Path:\nThe folder where game save data will be saved.</source>
@@ -2190,6 +2198,10 @@
     <message>
       <source>Trophy Viewer</source>
       <translation>Visualizador de Troféus</translation>
+    </message>
+    <message>
+      <source>Select Game:</source>
+      <translation>Selecionar Jogo:</translation>
     </message>
     <message>
       <source>Progress</source>

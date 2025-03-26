@@ -116,7 +116,9 @@ public:
 
         compatibilityMenu->addAction(updateCompatibility);
         compatibilityMenu->addAction(viewCompatibilityReport);
-        compatibilityMenu->addAction(submitCompatibilityReport);
+        if (Common::isRelease) {
+            compatibilityMenu->addAction(submitCompatibilityReport);
+        }
 
         menu.addMenu(compatibilityMenu);
 
@@ -140,8 +142,12 @@ public:
             Common::FS::PathToQString(open_update_path, m_games[itemID].path);
             open_update_path += "-UPDATE";
             if (!std::filesystem::exists(Common::FS::PathFromQString(open_update_path))) {
-                QMessageBox::critical(nullptr, tr("Error"),
-                                      QString(tr("This game has no update folder to open!")));
+                Common::FS::PathToQString(open_update_path, m_games[itemID].path);
+                open_update_path += "-patch";
+                if (!std::filesystem::exists(Common::FS::PathFromQString(open_update_path))) {
+                    QMessageBox::critical(nullptr, tr("Error"),
+                                          QString(tr("This game has no update folder to open!")));
+                }
             } else {
                 QDesktopServices::openUrl(QUrl::fromLocalFile(open_update_path));
             }
@@ -216,6 +222,12 @@ public:
             game_update_path += "-UPDATE";
             if (std::filesystem::exists(game_update_path)) {
                 game_folder_path = game_update_path;
+            } else {
+                game_update_path = game_folder_path;
+                game_update_path += "-patch";
+                if (std::filesystem::exists(game_update_path)) {
+                    game_folder_path = game_update_path;
+                }
             }
             if (psf.Open(game_folder_path / "sce_sys" / "param.sfo")) {
                 int rows = psf.GetEntries().size();
@@ -312,8 +324,40 @@ public:
             game_update_path += "-UPDATE";
             if (std::filesystem::exists(game_update_path)) {
                 Common::FS::PathToQString(gameTrpPath, game_update_path);
+            } else {
+                game_update_path = Common::FS::PathFromQString(gameTrpPath);
+                game_update_path += "-patch";
+                if (std::filesystem::exists(game_update_path)) {
+                    Common::FS::PathToQString(gameTrpPath, game_update_path);
+                }
             }
-            TrophyViewer* trophyViewer = new TrophyViewer(trophyPath, gameTrpPath);
+
+            // Array with all games and their trophy information
+            QVector<TrophyGameInfo> allTrophyGames;
+            for (const auto& game : m_games) {
+                TrophyGameInfo gameInfo;
+                gameInfo.name = QString::fromStdString(game.name);
+                Common::FS::PathToQString(gameInfo.trophyPath, game.serial);
+                Common::FS::PathToQString(gameInfo.gameTrpPath, game.path);
+
+                auto update_path = Common::FS::PathFromQString(gameInfo.gameTrpPath);
+                update_path += "-UPDATE";
+                if (std::filesystem::exists(update_path)) {
+                    Common::FS::PathToQString(gameInfo.gameTrpPath, update_path);
+                } else {
+                    update_path = Common::FS::PathFromQString(gameInfo.gameTrpPath);
+                    update_path += "-patch";
+                    if (std::filesystem::exists(update_path)) {
+                        Common::FS::PathToQString(gameInfo.gameTrpPath, update_path);
+                    }
+                }
+
+                allTrophyGames.append(gameInfo);
+            }
+
+            QString gameName = QString::fromStdString(m_games[itemID].name);
+            TrophyViewer* trophyViewer =
+                new TrophyViewer(trophyPath, gameTrpPath, gameName, allTrophyGames);
             trophyViewer->show();
             connect(widget->parent(), &QWidget::destroyed, trophyViewer,
                     [trophyViewer]() { trophyViewer->deleteLater(); });
@@ -432,6 +476,9 @@ public:
             QString folder_path, game_update_path, dlc_path, save_data_path, trophy_data_path;
             Common::FS::PathToQString(folder_path, m_games[itemID].path);
             game_update_path = folder_path + "-UPDATE";
+            if (!std::filesystem::exists(Common::FS::PathFromQString(game_update_path))) {
+                game_update_path = folder_path + "-patch";
+            }
             Common::FS::PathToQString(
                 dlc_path, Config::getAddonInstallDir() /
                               Common::FS::PathFromQString(folder_path).parent_path().filename());
@@ -521,7 +568,7 @@ public:
                 "title", QString("%1 - %2").arg(QString::fromStdString(m_games[itemID].serial),
                                                 QString::fromStdString(m_games[itemID].name)));
             query.addQueryItem("game-name", QString::fromStdString(m_games[itemID].name));
-            query.addQueryItem("game-code", QString::fromStdString(m_games[itemID].serial));
+            query.addQueryItem("game-serial", QString::fromStdString(m_games[itemID].serial));
             query.addQueryItem("game-version", QString::fromStdString(m_games[itemID].version));
             query.addQueryItem("emulator-version", QString(Common::VERSION));
             url.setQuery(query);

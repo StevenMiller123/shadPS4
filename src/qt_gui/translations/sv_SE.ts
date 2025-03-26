@@ -551,19 +551,19 @@
     </message>
     <message>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Spara</translation>
     </message>
     <message>
       <source>Apply</source>
-      <translation type="unfinished">Apply</translation>
+      <translation>Tillämpa</translation>
     </message>
     <message>
       <source>Restore Defaults</source>
-      <translation type="unfinished">Restore Defaults</translation>
+      <translation>Återställ till standard</translation>
     </message>
     <message>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Avbryt</translation>
     </message>
   </context>
   <context>
@@ -1193,19 +1193,19 @@
     </message>
     <message>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Spara</translation>
     </message>
     <message>
       <source>Apply</source>
-      <translation type="unfinished">Apply</translation>
+      <translation>Tillämpa</translation>
     </message>
     <message>
       <source>Restore Defaults</source>
-      <translation type="unfinished">Restore Defaults</translation>
+      <translation>Återställ till standard</translation>
     </message>
     <message>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Avbryt</translation>
     </message>
   </context>
   <context>
@@ -1305,6 +1305,14 @@
     <message>
       <source>Dump Game List</source>
       <translation>Dumpa spellista</translation>
+    </message>
+    <message>
+      <source>Trophy Viewer</source>
+      <translation>Trofévisare</translation>
+    </message>
+    <message>
+      <source>No games found. Please add your games to your library first.</source>
+      <translation>Inga spel hittades. Lägg till dina spel till biblioteket först.</translation>
     </message>
     <message>
       <source>PKG Viewer</source>
@@ -2190,6 +2198,10 @@
     <message>
       <source>Trophy Viewer</source>
       <translation>Trofé-visare</translation>
+    </message>
+    <message>
+      <source>Select Game:</source>
+      <translation>Välj spel:</translation>
     </message>
     <message>
       <source>Progress</source>

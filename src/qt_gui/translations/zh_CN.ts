@@ -1105,7 +1105,7 @@
     </message>
     <message>
       <source>note: click Help Button/Special Keybindings for more information</source>
-      <translation>注意：点击帮助按钮 -> Special Bindings 获取更多信息</translation>
+      <translation>注意：点击帮助按钮 -> 获取更多关于映射特殊键位的信息</translation>
     </message>
     <message>
       <source>Face Buttons</source>
@@ -1305,6 +1305,14 @@
     <message>
       <source>Dump Game List</source>
       <translation>导出游戏列表</translation>
+    </message>
+    <message>
+      <source>Trophy Viewer</source>
+      <translation>奖杯查看器</translation>
+    </message>
+    <message>
+      <source>No games found. Please add your games to your library first.</source>
+      <translation>未找到游戏。请先将您的游戏添加到您的资料库。</translation>
     </message>
     <message>
       <source>PKG Viewer</source>
@@ -2190,6 +2198,10 @@
     <message>
       <source>Trophy Viewer</source>
       <translation>奖杯查看器</translation>
+    </message>
+    <message>
+      <source>Select Game:</source>
+      <translation>选择游戏：</translation>
     </message>
     <message>
       <source>Progress</source>
