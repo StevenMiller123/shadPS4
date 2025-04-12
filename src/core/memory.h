@@ -196,7 +196,7 @@ public:
 
     s32 UnmapMemory(VAddr virtual_addr, size_t size);
 
-    int QueryProtection(VAddr addr, void** start, void** end, u32* prot);
+    s32 QueryProtection(VAddr addr, void** start, void** end, u32* prot);
 
     s32 Protect(VAddr addr, size_t size, MemoryProt prot);
 
