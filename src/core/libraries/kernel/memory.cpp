@@ -240,6 +240,37 @@ s32 PS4_SYSV_ABI sceKernelMapNamedFlexibleMemory(void** addr_in_out, std::size_t
                              Core::VMAType::Flexible, name);
 }
 
+s32 PS4_SYSV_ABI sceKernelMapNamedSystemFlexibleMemory(void** addr_in_out, std::size_t len,
+                                                       int prot, int flags, const char* name) {
+    if (len == 0 || !Common::Is16KBAligned(len)) {
+        LOG_ERROR(Kernel_Vmm, "len is 0 or not 16kb multiple");
+        return ORBIS_KERNEL_ERROR_EINVAL;
+    }
+
+    static constexpr size_t MaxNameSize = 32;
+    if (std::strlen(name) > MaxNameSize) {
+        LOG_ERROR(Kernel_Vmm, "name exceeds 32 bytes!");
+        return ORBIS_KERNEL_ERROR_ENAMETOOLONG;
+    }
+
+    if (name == nullptr) {
+        LOG_ERROR(Kernel_Vmm, "name is invalid!");
+        return ORBIS_KERNEL_ERROR_EFAULT;
+    }
+
+    const VAddr in_addr = reinterpret_cast<VAddr>(*addr_in_out);
+    const auto mem_prot = static_cast<Core::MemoryProt>(prot);
+    const auto map_flags = static_cast<Core::MemoryMapFlags>(flags);
+    SCOPE_EXIT {
+        LOG_INFO(Kernel_Vmm,
+                 "in_addr = {:#x}, out_addr = {}, len = {:#x}, prot = {:#x}, flags = {:#x}",
+                 in_addr, fmt::ptr(*addr_in_out), len, prot, flags);
+    };
+    auto* memory = Core::Memory::Instance();
+    return memory->MapSystemMemory(addr_in_out, in_addr, len, mem_prot, map_flags,
+                                   Core::VMAType::Flexible, name);
+}
+
 s32 PS4_SYSV_ABI sceKernelMapFlexibleMemory(void** addr_in_out, std::size_t len, int prot,
                                             int flags) {
     return sceKernelMapNamedFlexibleMemory(addr_in_out, len, prot, flags, "");
@@ -584,6 +615,8 @@ void RegisterMemory(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("PGhQHd-dzv8", "libkernel", 1, "libkernel", 1, 1, sceKernelMmap);
     LIB_FUNCTION("cQke9UuBQOk", "libkernel", 1, "libkernel", 1, 1, sceKernelMunmap);
     LIB_FUNCTION("mL8NDH86iQI", "libkernel", 1, "libkernel", 1, 1, sceKernelMapNamedFlexibleMemory);
+    LIB_FUNCTION("kc+LEEIYakc", "libkernel", 1, "libkernel", 1, 1,
+                 sceKernelMapNamedSystemFlexibleMemory);
     LIB_FUNCTION("aNz11fnnzi4", "libkernel", 1, "libkernel", 1, 1,
                  sceKernelAvailableFlexibleMemorySize);
     LIB_FUNCTION("aNz11fnnzi4", "libkernel_avlfmem", 1, "libkernel", 1, 1,

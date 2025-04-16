@@ -308,6 +308,18 @@ int MemoryManager::PoolCommit(VAddr virtual_addr, size_t size, MemoryProt prot) 
     return ORBIS_OK;
 }
 
+int MemoryManager::MapSystemMemory(void** out_addr, VAddr virtual_addr, size_t size,
+                                   MemoryProt prot, MemoryMapFlags flags, VMAType type,
+                                   std::string_view name) {
+    VAddr in_addr = virtual_addr;
+    if (in_addr == 0) {
+        // If address is 0, map to the PS4's system reserved area instead
+        static constexpr VAddr KernelAllocBase = 0x880000000ULL;
+        in_addr = SearchFree(KernelAllocBase, size, 1);
+    }
+    return MapMemory(out_addr, in_addr, size, prot, flags, type, name);
+}
+
 int MemoryManager::MapMemory(void** out_addr, VAddr virtual_addr, size_t size, MemoryProt prot,
                              MemoryMapFlags flags, VMAType type, std::string_view name,
                              bool is_exec, PAddr phys_addr, u64 alignment) {

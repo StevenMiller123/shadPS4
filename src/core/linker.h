@@ -139,6 +139,7 @@ public:
         dtv_generation_counter++;
     }
 
+    void InitMalloc();
     void* TlsGetAddr(u64 module_index, u64 offset);
     void* AllocateTlsForThread(bool is_primary);
     void FreeTlsForNonPrimaryThread(void* pointer);
