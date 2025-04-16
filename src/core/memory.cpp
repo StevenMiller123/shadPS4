@@ -308,7 +308,7 @@ int MemoryManager::PoolCommit(VAddr virtual_addr, size_t size, MemoryProt prot) 
     return ORBIS_OK;
 }
 
-int MemoryManager::MapSystemMemory(void** out_addr, VAddr virtual_addr, size_t size,
+s32 MemoryManager::MapSystemMemory(void** out_addr, VAddr virtual_addr, u64 size,
                                    MemoryProt prot, MemoryMapFlags flags, VMAType type,
                                    std::string_view name) {
     VAddr in_addr = virtual_addr;

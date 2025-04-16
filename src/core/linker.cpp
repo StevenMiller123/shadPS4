@@ -52,7 +52,7 @@ Linker::Linker() : memory{Memory::Instance()} {}
 
 Linker::~Linker() = default;
 
-using _malloc_init = int PS4_SYSV_ABI (*)(void);
+using _malloc_init = s32 PS4_SYSV_ABI (*)(void);
 
 void Linker::InitMalloc() {
     // During eboot relocation, libkernel runs libSceLibcInternal's _malloc_init.
@@ -63,7 +63,7 @@ void Linker::InitMalloc() {
     if (module_index == -1) {
         void* addr = 0;
         // libSceLibcInternal is not loaded, simulate the SceKernelInternalMemory mapping instead.
-        const int ret = Libraries::Kernel::sceKernelMapNamedSystemFlexibleMemory(
+        const s32 ret = Libraries::Kernel::sceKernelMapNamedSystemFlexibleMemory(
             &addr, 0x1000000, 3, 0, "SceKernelInternalMemory");
         ASSERT_MSG(ret == 0, "SceKernelInternalMemory mapping failed");
         return;
@@ -80,10 +80,9 @@ void Linker::InitMalloc() {
     ASSERT_MSG(func.nid_name == "_malloc_init", "_malloc_init not found!");
 
     // Run _malloc_init
-    int ret = Core::ExecuteGuest(reinterpret_cast<_malloc_init>(func.virtual_address));
+    s32 ret = Core::ExecuteGuest(reinterpret_cast<_malloc_init>(func.virtual_address));
     ASSERT_MSG(ret == 0, "libSceLibcInternal _malloc_init failed!");
 }
-
 
 void Linker::Execute(const std::vector<std::string> args) {
     if (Config::debugDump()) {

@@ -240,8 +240,8 @@ s32 PS4_SYSV_ABI sceKernelMapNamedFlexibleMemory(void** addr_in_out, std::size_t
                              Core::VMAType::Flexible, name);
 }
 
-s32 PS4_SYSV_ABI sceKernelMapNamedSystemFlexibleMemory(void** addr_in_out, std::size_t len,
-                                                       int prot, int flags, const char* name) {
+s32 PS4_SYSV_ABI sceKernelMapNamedSystemFlexibleMemory(void** addr_in_out, u64 len, s32 prot,
+                                                       s32 flags, const char* name) {
     if (len == 0 || !Common::Is16KBAligned(len)) {
         LOG_ERROR(Kernel_Vmm, "len is 0 or not 16kb multiple");
         return ORBIS_KERNEL_ERROR_EINVAL;
