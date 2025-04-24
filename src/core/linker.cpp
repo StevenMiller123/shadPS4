@@ -52,6 +52,38 @@ Linker::Linker() : memory{Memory::Instance()} {}
 
 Linker::~Linker() = default;
 
+using _malloc_init = s32 PS4_SYSV_ABI (*)(void);
+
+void Linker::InitMalloc() {
+    // During eboot relocation, libkernel runs libSceLibcInternal's _malloc_init.
+    // Properly emulating this is required for some LLE libraries to function properly.
+
+    // Find libSceLibcInternal
+    u32 module_index = Core::Linker::FindByName("libSceLibcInternal");
+    if (module_index == -1) {
+        void* addr = 0;
+        // libSceLibcInternal is not loaded, simulate the SceKernelInternalMemory mapping instead.
+        const s32 ret = Libraries::Kernel::sceKernelMapNamedSystemFlexibleMemory(
+            &addr, 0x1000000, 3, 0, "SceKernelInternalMemory");
+        ASSERT_MSG(ret == 0, "SceKernelInternalMemory mapping failed");
+        return;
+    }
+
+    // Search through libSceLibcInternal's exports to find _malloc_init
+    auto symbols = Core::Linker::GetModule(module_index)->export_sym.GetSymbols();
+    Core::Loader::SymbolRecord func;
+    for (u32 i = 0; i < symbols.size(); i++) {
+        if (symbols[i].nid_name == "_malloc_init") {
+            func = symbols[i];
+        }
+    }
+    ASSERT_MSG(func.nid_name == "_malloc_init", "_malloc_init not found!");
+
+    // Run _malloc_init
+    s32 ret = Core::ExecuteGuest(reinterpret_cast<_malloc_init>(func.virtual_address));
+    ASSERT_MSG(ret == 0, "libSceLibcInternal _malloc_init failed!");
+}
+
 void Linker::Execute(const std::vector<std::string> args) {
     if (Config::debugDump()) {
         DebugDump();
@@ -101,20 +133,10 @@ void Linker::Execute(const std::vector<std::string> args) {
 
     memory->SetupMemoryRegions(fmem_size, use_extended_mem1, use_extended_mem2);
 
-    // Simulate sceKernelInternalMemory mapping, a mapping usually performed during libkernel init.
-    // Due to the large size of this mapping, failing to emulate it causes issues in some titles.
-    // This mapping belongs in the system reserved area, which starts at address 0x880000000.
-    static constexpr VAddr KernelAllocBase = 0x880000000ULL;
-    static constexpr s64 InternalMemorySize = 0x1000000;
-    void* addr_out{reinterpret_cast<void*>(KernelAllocBase)};
-
-    s32 ret = Libraries::Kernel::sceKernelMapNamedFlexibleMemory(&addr_out, InternalMemorySize, 3,
-                                                                 0, "SceKernelInternalMemory");
-    ASSERT_MSG(ret == 0, "Unable to perform sceKernelInternalMemory mapping");
-
     main_thread.Run([this, module, args](std::stop_token) {
         Common::SetCurrentThreadName("GAME_MainThread");
         LoadSharedLibraries();
+        InitMalloc();
 
         // Start main module.
         EntryParams params{};
@@ -152,7 +174,7 @@ s32 Linker::LoadModule(const std::filesystem::path& elf_name, bool is_dynamic) {
 
 s32 Linker::LoadAndStartModule(const std::filesystem::path& path, u64 args, const void* argp,
                                int* pRes) {
-    u32 handle = FindByName(path);
+    u32 handle = FindByPath(path);
     if (handle != -1) {
         return handle;
     }
@@ -381,19 +403,14 @@ void* Linker::AllocateTlsForThread(bool is_primary) {
     static constexpr size_t TlsAllocAlign = 0x20;
     const size_t total_tls_size = Common::AlignUp(static_tls_size, TlsAllocAlign) + TcbSize;
 
-    // If sceKernelMapNamedFlexibleMemory is being called from libkernel and addr = 0
-    // it automatically places mappings in system reserved area instead of managed.
-    // Since the system reserved area already has a mapping in it, this address is slightly higher.
-    static constexpr VAddr KernelAllocBase = 0x881000000ULL;
-
     // The kernel module has a few different paths for TLS allocation.
     // For SDK < 1.7 it allocates both main and secondary thread blocks using libc mspace/malloc.
     // In games compiled with newer SDK, the main thread gets mapped from flexible memory,
     // with addr = 0, so system managed area. Here we will only implement the latter.
-    void* addr_out{reinterpret_cast<void*>(KernelAllocBase)};
+    void* addr_out{0};
     if (is_primary) {
         const size_t tls_aligned = Common::AlignUp(total_tls_size, 16_KB);
-        const int ret = Libraries::Kernel::sceKernelMapNamedFlexibleMemory(
+        const int ret = Libraries::Kernel::sceKernelMapNamedSystemFlexibleMemory(
             &addr_out, tls_aligned, 3, 0, "SceKernelPrimaryTcbTls");
         ASSERT_MSG(ret == 0, "Unable to allocate TLS+TCB for the primary thread");
     } else {

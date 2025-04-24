@@ -89,9 +89,18 @@ public:
         return nullptr;
     }
 
-    u32 FindByName(const std::filesystem::path& name) const {
+    u32 FindByPath(const std::filesystem::path& name) const {
         for (u32 i = 0; i < m_modules.size(); i++) {
             if (name == m_modules[i]->file) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    u32 FindByName(const std::string& name) const {
+        for (u32 i = 0; i < m_modules.size(); i++) {
+            if (name == m_modules[i]->name) {
                 return i;
             }
         }
@@ -139,6 +148,7 @@ public:
         dtv_generation_counter++;
     }
 
+    void InitMalloc();
     void* TlsGetAddr(u64 module_index, u64 offset);
     void* AllocateTlsForThread(bool is_primary);
     void FreeTlsForNonPrimaryThread(void* pointer);
