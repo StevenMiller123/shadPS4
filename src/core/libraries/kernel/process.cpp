@@ -199,7 +199,8 @@ void RegisterProcess(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("f7KBOafysXo", "libkernel", 1, "libkernel", 1, 1, sceKernelGetModuleInfoFromAddr);
     LIB_FUNCTION("kUpgrXIrz7Q", "libkernel", 1, "libkernel", 1, 1, sceKernelGetModuleInfo);
     // sceKernelGetModuleInfo2
-    LIB_FUNCTION("QgsKEUfkqMA", "libkernel_module_info", 1, "libkernel", 1, 1, sceKernelGetModuleInfo);
+    LIB_FUNCTION("QgsKEUfkqMA", "libkernel_module_info", 1, "libkernel", 1, 1,
+                 sceKernelGetModuleInfo);
     LIB_FUNCTION("HZO7xOos4xc", "libkernel", 1, "libkernel", 1, 1, sceKernelGetModuleInfoInternal);
     LIB_FUNCTION("IuxnUuXk6Bg", "libkernel", 1, "libkernel", 1, 1, sceKernelGetModuleList);
     LIB_FUNCTION("6Z83sYWFlA8", "libkernel", 1, "libkernel", 1, 1, exit);
