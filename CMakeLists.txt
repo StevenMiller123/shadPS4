@@ -597,6 +597,13 @@ set(MISC_LIBS  src/core/libraries/screenshot/screenshot.cpp
                src/core/libraries/move/move.h
                src/core/libraries/ulobjmgr/ulobjmgr.cpp
                src/core/libraries/ulobjmgr/ulobjmgr.h
+               src/core/libraries/signin_dialog/signindialog.cpp
+               src/core/libraries/signin_dialog/signindialog.h
+)
+
+set(CAMERA_LIBS  src/core/libraries/camera/camera.cpp
+                 src/core/libraries/camera/camera.h
+                 src/core/libraries/camera/camera_error.h
 )
 
 set(DEV_TOOLS src/core/devtools/layer.cpp
@@ -762,6 +769,7 @@ set(CORE src/core/aerolib/stubs.cpp
          ${FIBER_LIB}
          ${VDEC_LIB}
          ${VR_LIBS}
+         ${CAMERA_LIBS}
          ${DEV_TOOLS}
          src/core/debug_state.cpp
          src/core/debug_state.h
@@ -1086,9 +1094,13 @@ if (ENABLE_DISCORD_RPC)
     target_compile_definitions(shadps4 PRIVATE ENABLE_DISCORD_RPC)
 endif()
 
-# Optional due to https://github.com/shadps4-emu/shadPS4/issues/1704
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ENABLE_USERFAULTFD)
-    target_compile_definitions(shadps4 PRIVATE ENABLE_USERFAULTFD)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    # Optional due to https://github.com/shadps4-emu/shadPS4/issues/1704
+    if (ENABLE_USERFAULTFD)
+        target_compile_definitions(shadps4 PRIVATE ENABLE_USERFAULTFD)
+    endif()
+
+    target_link_libraries(shadps4 PRIVATE uuid)
 endif()
 
 if (APPLE)
