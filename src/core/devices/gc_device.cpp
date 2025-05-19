@@ -61,9 +61,9 @@ s32 GcDevice::ioctl(u64 cmd, Common::VaCtx* args) {
             auto prot = Core::MemoryProt::CpuRead;
             auto flags = Core::MemoryMapFlags::Shared | Core::MemoryMapFlags::Anon |
                          Core::MemoryMapFlags::System;
-            auto type = Core::VMAType::Direct;
+            auto type = Core::VMAType::Flexible;
             s32 result = memory->MapMemory(reinterpret_cast<void**>(&out_addr), in_addr, 0x4000,
-                                           prot, flags, type);
+                                           prot, flags, type, "SceAppCommArea");
             if (result != 0) {
                 return POSIX_ENOMEM;
             }
