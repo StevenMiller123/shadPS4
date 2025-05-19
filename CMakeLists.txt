@@ -54,9 +54,9 @@ else()
 endif()
 
 if (ARCHITECTURE STREQUAL "x86_64")
-    # Target the same CPU architecture as the PS4, to maintain the same level of compatibility.
-    # Exclude SSE4a as it is only available on AMD CPUs.
-    add_compile_options(-march=btver2 -mtune=generic -mno-sse4a)
+    # Target x86-64-v3 CPU architecture as this is a good balance between supporting performance critical
+    # instructions like AVX2 and maintaining support for older CPUs.
+    add_compile_options(-march=x86-64-v3)
 endif()
 
 if (APPLE AND ARCHITECTURE STREQUAL "x86_64" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
@@ -239,13 +239,6 @@ if (APPLE)
 endif()
 list(POP_BACK CMAKE_MODULE_PATH)
 
-# Note: Windows always has these functions through winpthreads
-include(CheckSymbolExists)
-check_symbol_exists(pthread_mutex_timedlock "pthread.h" HAVE_PTHREAD_MUTEX_TIMEDLOCK)
-if(HAVE_PTHREAD_MUTEX_TIMEDLOCK OR WIN32)
-    add_compile_options(-DHAVE_PTHREAD_MUTEX_TIMEDLOCK)
-endif()
-
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     # libc++ requires -fexperimental-library to enable std::jthread and std::stop_token support.
     include(CheckCXXSymbolExists)
@@ -371,11 +364,19 @@ set(NETWORK_LIBS src/core/libraries/network/http.cpp
                  src/core/libraries/network/net_ctl_obj.cpp
                  src/core/libraries/network/net_ctl_obj.h
                  src/core/libraries/network/net_ctl_codes.h
+                 src/core/libraries/network/net_util.cpp
+                 src/core/libraries/network/net_util.h
+                 src/core/libraries/network/net_error.h
                  src/core/libraries/network/net.h
                  src/core/libraries/network/ssl.cpp
                  src/core/libraries/network/ssl.h
                  src/core/libraries/network/ssl2.cpp
                  src/core/libraries/network/ssl2.h
+                 src/core/libraries/network/sys_net.cpp
+                 src/core/libraries/network/sys_net.h
+                 src/core/libraries/network/posix_sockets.cpp
+                 src/core/libraries/network/p2p_sockets.cpp
+                 src/core/libraries/network/sockets.h
 )
 
 set(AVPLAYER_LIB src/core/libraries/avplayer/avplayer_common.cpp
@@ -408,6 +409,7 @@ set(SYSTEM_LIBS src/core/libraries/system/commondialog.cpp
                 src/core/libraries/save_data/save_memory.h
                 src/core/libraries/save_data/savedata.cpp
                 src/core/libraries/save_data/savedata.h
+                src/core/libraries/save_data/savedata_error.h
                 src/core/libraries/save_data/dialog/savedatadialog.cpp
                 src/core/libraries/save_data/dialog/savedatadialog.h
                 src/core/libraries/save_data/dialog/savedatadialog_ui.cpp
@@ -589,8 +591,19 @@ set(MISC_LIBS  src/core/libraries/screenshot/screenshot.cpp
                src/core/libraries/move/move.h
                src/core/libraries/ulobjmgr/ulobjmgr.cpp
                src/core/libraries/ulobjmgr/ulobjmgr.h
+               src/core/libraries/signin_dialog/signindialog.cpp
+               src/core/libraries/signin_dialog/signindialog.h
 )
 
+set(CAMERA_LIBS  src/core/libraries/camera/camera.cpp
+                 src/core/libraries/camera/camera.h
+                 src/core/libraries/camera/camera_error.h
+)
+
+set(COMPANION_LIBS  src/core/libraries/companion/companion_httpd.cpp
+                    src/core/libraries/companion/companion_httpd.h
+                    src/core/libraries/companion/companion_error.h
+)
 set(DEV_TOOLS src/core/devtools/layer.cpp
               src/core/devtools/layer.h
               src/core/devtools/options.cpp
@@ -756,6 +769,8 @@ set(CORE src/core/aerolib/stubs.cpp
          ${FIBER_LIB}
          ${VDEC_LIB}
          ${VR_LIBS}
+         ${CAMERA_LIBS}
+         ${COMPANION_LIBS}
          ${DEV_TOOLS}
          src/core/debug_state.cpp
          src/core/debug_state.h
@@ -842,6 +857,7 @@ set(SHADER_RECOMPILER src/shader_recompiler/exception.h
                       src/shader_recompiler/ir/passes/identity_removal_pass.cpp
                       src/shader_recompiler/ir/passes/ir_passes.h
                       src/shader_recompiler/ir/passes/lower_buffer_format_to_raw.cpp
+                      src/shader_recompiler/ir/passes/lower_fp64_to_fp32.cpp
                       src/shader_recompiler/ir/passes/readlane_elimination_pass.cpp
                       src/shader_recompiler/ir/passes/resource_tracking_pass.cpp
                       src/shader_recompiler/ir/passes/ring_access_elimination.cpp
@@ -1079,40 +1095,42 @@ if (ENABLE_DISCORD_RPC)
     target_compile_definitions(shadps4 PRIVATE ENABLE_DISCORD_RPC)
 endif()
 
-# Optional due to https://github.com/shadps4-emu/shadPS4/issues/1704
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ENABLE_USERFAULTFD)
-    target_compile_definitions(shadps4 PRIVATE ENABLE_USERFAULTFD)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    # Optional due to https://github.com/shadps4-emu/shadPS4/issues/1704
+    if (ENABLE_USERFAULTFD)
+        target_compile_definitions(shadps4 PRIVATE ENABLE_USERFAULTFD)
+    endif()
+
+    target_link_libraries(shadps4 PRIVATE uuid)
 endif()
 
 if (APPLE)
     # Include MoltenVK, along with an ICD file so it can be found by the system Vulkan loader if used for loading layers.
-    set(MVK_DYLIB_SRC ${CMAKE_CURRENT_BINARY_DIR}/externals/MoltenVK/libMoltenVK.dylib)
-
     if (ENABLE_QT_GUI)
-        set_property(TARGET shadps4 APPEND PROPERTY BUILD_RPATH "@executable_path/../Frameworks")
-        set(MVK_ICD_DST ${CMAKE_CURRENT_BINARY_DIR}/shadps4.app/Contents/Resources/vulkan/icd.d/MoltenVK_icd.json)
-        set(MVK_DYLIB_DST ${CMAKE_CURRENT_BINARY_DIR}/shadps4.app/Contents/Frameworks/libMoltenVK.dylib)
-        set(MVK_DYLIB_ICD_PATH "../../../Frameworks/libMoltenVK.dylib")
+        set(MVK_BUNDLE_PATH "Resources/vulkan/icd.d")
+        set_property(TARGET shadps4 APPEND PROPERTY BUILD_RPATH "@executable_path/../${MVK_BUNDLE_PATH}")
+        set(MVK_DST ${CMAKE_CURRENT_BINARY_DIR}/shadps4.app/Contents/${MVK_BUNDLE_PATH})
     else()
         set_property(TARGET shadps4 APPEND PROPERTY BUILD_RPATH "@executable_path")
-        set(MVK_ICD_DST ${CMAKE_CURRENT_BINARY_DIR}/MoltenVK_icd.json)
-        set(MVK_DYLIB_DST ${CMAKE_CURRENT_BINARY_DIR}/libMoltenVK.dylib)
-        set(MVK_DYLIB_ICD_PATH "./libMoltenVK.dylib")
+        set(MVK_DST ${CMAKE_CURRENT_BINARY_DIR})
     endif()
 
-    cmake_path(GET MVK_ICD_DST PARENT_PATH MVK_ICD_DST_PARENT)
-    cmake_path(GET MVK_DYLIB_DST PARENT_PATH MVK_DYLIB_DST_PARENT)
+    set(MVK_DYLIB_SRC ${CMAKE_CURRENT_BINARY_DIR}/externals/MoltenVK/libMoltenVK.dylib)
+    set(MVK_DYLIB_DST ${MVK_DST}/libMoltenVK.dylib)
+    set(MVK_ICD_SRC ${CMAKE_CURRENT_SOURCE_DIR}/externals/MoltenVK/MoltenVK/MoltenVK/icd/MoltenVK_icd.json)
+    set(MVK_ICD_DST ${MVK_DST}/MoltenVK_icd.json)
 
-    set(MVK_ICD "\\\{ \\\"file_format_version\\\": \\\"1.0.0\\\", \\\"ICD\\\": \\\{ \\\"library_path\\\": \\\"${MVK_DYLIB_ICD_PATH}\\\", \\\"api_version\\\": \\\"1.3.0\\\", \\\"is_portability_driver\\\": true \\\} \\\}")
+    add_custom_command(
+        OUTPUT ${MVK_DST}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${MVK_DST})
     add_custom_command(
         OUTPUT ${MVK_ICD_DST}
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${MVK_ICD_DST_PARENT} && ${CMAKE_COMMAND} -E echo ${MVK_ICD} > ${MVK_ICD_DST})
-
+        DEPENDS ${MVK_ICD_SRC} ${MVK_DST}
+        COMMAND ${CMAKE_COMMAND} -E copy ${MVK_ICD_SRC} ${MVK_ICD_DST})
     add_custom_command(
         OUTPUT ${MVK_DYLIB_DST}
-        DEPENDS ${MVK_DYLIB_SRC}
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${MVK_DYLIB_DST_PARENT} && ${CMAKE_COMMAND} -E copy ${MVK_DYLIB_SRC} ${MVK_DYLIB_DST})
-
+        DEPENDS ${MVK_DYLIB_SRC} ${MVK_DST}
+        COMMAND ${CMAKE_COMMAND} -E copy ${MVK_DYLIB_SRC} ${MVK_DYLIB_DST})
     add_custom_target(CopyMoltenVK DEPENDS ${MVK_ICD_DST} ${MVK_DYLIB_DST})
     add_dependencies(CopyMoltenVK MoltenVK)
     add_dependencies(shadps4 CopyMoltenVK)
@@ -1139,7 +1157,7 @@ if (ENABLE_QT_GUI)
 endif()
 
 if (WIN32)
-    target_link_libraries(shadps4 PRIVATE mincore winpthreads)
+    target_link_libraries(shadps4 PRIVATE mincore)
 
     if (MSVC)
         # MSVC likes putting opinions on what people can use, disable:
