@@ -619,6 +619,8 @@ s32 MemoryManager::Protect(VAddr addr, size_t size, MemoryProt prot) {
     std::scoped_lock lk{mutex};
     s64 protected_bytes = 0;
 
+    LOG_INFO(Kernel_Vmm, "Protect called, addr = {:#x}, size = {:#x}, prot = {}", addr, size,
+             static_cast<u32>(prot));
     auto aligned_addr = Common::AlignDown(addr, 16_KB);
     auto aligned_size = Common::AlignUp(size + addr - aligned_addr, 16_KB);
     do {
