@@ -373,6 +373,7 @@ int MemoryManager::MapSystemMemory(void** out_addr, VAddr virtual_addr, size_t s
 
 s32 MemoryManager::MapFile(void** out_addr, VAddr virtual_addr, u64 size, MemoryProt prot,
                            MemoryMapFlags flags, s32 fd, s64 phys_addr) {
+    auto* h = Common::Singleton<Core::FileSys::HandleTable>::Instance();
     VAddr mapped_addr = (virtual_addr == 0) ? impl.SystemManagedVirtualBase() : virtual_addr;
     const size_t size_aligned = Common::AlignUp(size, 16_KB);
 

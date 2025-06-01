@@ -176,9 +176,8 @@ s32 PS4_SYSV_ABI sceKernelMemoryPoolDecommit(void* addr, u64 len, s32 flags);
 s32 PS4_SYSV_ABI sceKernelMemoryPoolBatch(const OrbisKernelMemoryPoolBatchEntry* entries, s32 count,
                                           s32* num_processed, s32 flags);
 
-int PS4_SYSV_ABI sceKernelMmap(void* addr, u64 len, int prot, int flags, int fd, size_t offset,
+s32 PS4_SYSV_ABI sceKernelMmap(void* addr, u64 len, s32 prot, s32 flags, s32 fd, s64 phys_addr,
                                void** res);
-
 int PS4_SYSV_ABI sceKernelMunmap(void* addr, size_t len);
 
 void RegisterMemory(Core::Loader::SymbolsResolver* sym);
