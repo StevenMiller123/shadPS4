@@ -25,17 +25,17 @@ s32 GcDevice::ioctl(u64 cmd, Common::VaCtx* args) {
         break;
     }
     case GcCommands::SubmitDone: {
-        ASSERT(true);
+        ASSERT(false);
         LOG_ERROR(Lib_GnmDriver, "ioctl SubmitDone");
         break;
     }
     case GcCommands::WaitIdle: {
-        ASSERT(true);
+        ASSERT(false);
         LOG_ERROR(Lib_GnmDriver, "ioctl WaitIdle");
         break;
     }
     case GcCommands::WaitFree: {
-        ASSERT(true);
+        ASSERT(false);
         LOG_ERROR(Lib_GnmDriver, "ioctl WaitFree");
         break;
     }
@@ -45,7 +45,7 @@ s32 GcDevice::ioctl(u64 cmd, Common::VaCtx* args) {
         break;
     }
     case GcCommands::SwitchBuffer: {
-        ASSERT(true);
+        ASSERT(false);
         LOG_ERROR(Lib_GnmDriver, "ioctl SwitchBuffer");
         break;
     }
@@ -87,7 +87,7 @@ s32 GcDevice::ioctl(u64 cmd, Common::VaCtx* args) {
         break;
     }
     case GcCommands::Submit: {
-        ASSERT(true);
+        ASSERT(false);
         LOG_ERROR(Lib_GnmDriver, "ioctl Submit");
         auto data = vaArgPtr<SubmitArgs>(&args->va_list);
         // Submit ioctl receives an indirect buffer packet
@@ -102,7 +102,7 @@ s32 GcDevice::ioctl(u64 cmd, Common::VaCtx* args) {
         break;
     }
     case GcCommands::DingDong: {
-        ASSERT(true);
+        ASSERT(false);
         LOG_ERROR(Lib_GnmDriver, "ioctl DingDong");
         break;
     }
@@ -110,14 +110,14 @@ s32 GcDevice::ioctl(u64 cmd, Common::VaCtx* args) {
         return POSIX_ENODEV;
     }
     case GcCommands::SubmitEop: {
-        ASSERT(true);
+        ASSERT(false);
         LOG_ERROR(Lib_GnmDriver, "ioctl SubmitEop");
         auto data = vaArgPtr<SubmitEopArgs>(&args->va_list);
         // Submit ioctl receives an indirect buffer packet
         break;
     }
     case GcCommands::MapComputeQueue: {
-        ASSERT(true);
+        ASSERT(false);
         auto data = vaArgPtr<MapComputeQueueArgs>(&args->va_list);
         auto pipe_id = data->pipe_lo - 1;
         auto ring_size = pow(2, data->ring_size_dw);
@@ -128,7 +128,7 @@ s32 GcDevice::ioctl(u64 cmd, Common::VaCtx* args) {
         break;
     }
     case GcCommands::MapComputeQueueWithPriority: {
-        ASSERT(true);
+        ASSERT(false);
         auto data = vaArgPtr<MapComputeQueueArgs>(&args->va_list);
         auto pipe_id = data->pipe_lo - 1;
         auto ring_size = pow(2, data->ring_size_dw);
