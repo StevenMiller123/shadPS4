@@ -302,7 +302,10 @@ s32 MemoryManager::PoolCommit(VAddr virtual_addr, u64 size, MemoryProt prot) {
     void* out_addr = impl.Map(mapped_addr, size, alignment, -1, false);
     TRACK_ALLOC(out_addr, size, "VMEM");
 
-    if (IsValidGpuMapping(mapped_addr, size)) {
+    if (prot >= MemoryProt::GpuRead) {
+        // PS4s only map to GPU memory when the protection includes GPU access.
+        // If the address to map to is too high, PS4s throw a page fault and crash.
+        ASSERT_MSG(IsValidGpuMapping(mapped_addr, size), "Invalid address for GPU mapping");
         rasterizer->MapMemory(mapped_addr, size);
     }
 
@@ -404,15 +407,19 @@ s32 MemoryManager::MapMemory(void** out_addr, VAddr virtual_addr, u64 size, Memo
         MergeAdjacent(vma_map, new_vma_handle);
     }
 
+    if (prot >= MemoryProt::GpuRead) {
+        // PS4s only map to GPU memory when the protection includes GPU access.
+        // If the address to map to is too high, PS4s throw a page fault and crash.
+        ASSERT_MSG(IsValidGpuMapping(mapped_addr, size), "Invalid address for GPU mapping");
+        rasterizer->MapMemory(mapped_addr, size);
+    }
+
     if (type == VMAType::Reserved || type == VMAType::PoolReserved) {
         // For Reserved/PoolReserved mappings, we don't perform any address space allocations.
         // Just set out_addr to mapped_addr instead.
         *out_addr = std::bit_cast<void*>(mapped_addr);
     } else {
-        // If this is not a reservation, then map to GPU and address space
-        if (IsValidGpuMapping(mapped_addr, size)) {
-            rasterizer->MapMemory(mapped_addr, size);
-        }
+        // Type is either Direct, Flexible, or Code, these need to be mapped in our address space.
         *out_addr = impl.Map(mapped_addr, size, alignment, phys_addr, is_exec);
     }
 
@@ -484,6 +491,7 @@ s32 MemoryManager::PoolDecommit(VAddr virtual_addr, u64 size) {
     const bool is_exec = vma_base.is_exec;
     const auto start_in_vma = virtual_addr - vma_base_addr;
     const auto type = vma_base.type;
+    const auto prot = vma_base.prot;
 
     if (type != VMAType::PoolReserved && type != VMAType::Pooled) {
         LOG_ERROR(Kernel_Vmm, "Attempting to decommit non-pooled memory!");
@@ -491,13 +499,13 @@ s32 MemoryManager::PoolDecommit(VAddr virtual_addr, u64 size) {
     }
 
     if (type == VMAType::Pooled) {
-        // We always map PoolCommitted memory to GPU, so unmap when decomitting.
-        if (IsValidGpuMapping(virtual_addr, size)) {
-            rasterizer->UnmapMemory(virtual_addr, size);
-        }
-
         // Track how much pooled memory is decommitted
         pool_budget += size;
+    }
+
+    if (prot >= MemoryProt::GpuRead) {
+        // If this mapping has GPU access, unmap from GPU.
+        rasterizer->UnmapMemory(virtual_addr, size);
     }
 
     // Mark region as free and attempt to coalesce it with neighbours.
@@ -540,9 +548,13 @@ u64 MemoryManager::UnmapBytesFromEntry(VAddr virtual_addr, VirtualMemoryArea vma
     if (type == VMAType::Free) {
         return adjusted_size;
     }
-
     if (type == VMAType::Flexible) {
         flexible_usage -= adjusted_size;
+    }
+
+    if (prot >= MemoryProt::GpuRead) {
+        // If this mapping has GPU access, unmap from GPU.
+        rasterizer->UnmapMemory(virtual_addr, size);
     }
 
     // Mark region as free and attempt to coalesce it with neighbours.
@@ -557,11 +569,6 @@ u64 MemoryManager::UnmapBytesFromEntry(VAddr virtual_addr, VirtualMemoryArea vma
     auto& post_merge_vma = post_merge_it->second;
     bool readonly_file = post_merge_vma.prot == MemoryProt::CpuRead && type == VMAType::File;
     if (type != VMAType::Reserved && type != VMAType::PoolReserved) {
-        // If this mapping has GPU access, unmap from GPU.
-        if (IsValidGpuMapping(virtual_addr, size)) {
-            rasterizer->UnmapMemory(virtual_addr, size);
-        }
-
         // Unmap the memory region.
         impl.Unmap(vma_base_addr, vma_base_size, start_in_vma, start_in_vma + adjusted_size,
                    phys_base, is_exec, has_backing, readonly_file);
@@ -616,6 +623,30 @@ s64 MemoryManager::ProtectBytes(VAddr addr, VirtualMemoryArea vma_base, u64 size
     if (vma_base.type == VMAType::Free) {
         // On PS4, protecting freed memory does nothing.
         return adjusted_size;
+    }
+
+    // Validate protection flags
+    constexpr static MemoryProt valid_flags = MemoryProt::NoAccess | MemoryProt::CpuRead |
+                                              MemoryProt::CpuReadWrite | MemoryProt::GpuRead |
+                                              MemoryProt::GpuWrite | MemoryProt::GpuReadWrite;
+
+    MemoryProt invalid_flags = prot & ~valid_flags;
+    if (u32(invalid_flags) != 0 && u32(invalid_flags) != u32(MemoryProt::NoAccess)) {
+        LOG_ERROR(Kernel_Vmm, "Invalid protection flags: prot = {:#x}, invalid flags = {:#x}",
+                  u32(prot), u32(invalid_flags));
+        return ORBIS_KERNEL_ERROR_EINVAL;
+    }
+
+    if (vma_base.prot < MemoryProt::GpuRead && prot >= MemoryProt::GpuRead) {
+        // New protection will give the GPU access to this VMA, perform a rasterizer map
+        ASSERT_MSG(IsValidGpuMapping(addr, size), "Invalid address for GPU mapping");
+        rasterizer->MapMemory(addr, size);
+    }
+
+    if (vma_base.prot >= MemoryProt::GpuRead && prot < MemoryProt::GpuRead) {
+        // New protection will remove the GPU's access to this VMA, perform a rasterizer unmap
+        ASSERT_MSG(IsValidGpuMapping(addr, size), "Invalid address for GPU unmap");
+        rasterizer->UnmapMemory(addr, size);
     }
 
     // Change protection
