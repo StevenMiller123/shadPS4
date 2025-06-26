@@ -214,6 +214,10 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/common/scm_rev.cpp.in" "${CMAKE_
 
 message("end git things, remote: ${GIT_REMOTE_NAME}, branch: ${GIT_BRANCH}")
 
+if(WIN32 AND ENABLE_QT_GUI AND NOT CMAKE_PREFIX_PATH)
+    include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/DetectQtInstallation.cmake")
+endif ()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 find_package(Boost 1.84.0 CONFIG)
 find_package(FFmpeg 5.1.2 MODULE)
@@ -296,6 +300,8 @@ set(AJM_LIB src/core/libraries/ajm/ajm.cpp
 
 set(AUDIO_LIB src/core/libraries/audio/audioin.cpp
               src/core/libraries/audio/audioin.h
+              src/core/libraries/voice/voice.cpp
+              src/core/libraries/voice/voice.h
               src/core/libraries/audio/audioout.cpp
               src/core/libraries/audio/audioout.h
               src/core/libraries/audio/audioout_backend.h
@@ -651,6 +657,7 @@ set(COMMON src/common/logging/backend.cpp
            src/common/arch.h
            src/common/assert.cpp
            src/common/assert.h
+           src/common/bit_array.h
            src/common/bit_field.h
            src/common/bounded_threadsafe_queue.h
            src/common/concepts.h
@@ -676,6 +683,7 @@ set(COMMON src/common/logging/backend.cpp
            src/common/path_util.h
            src/common/object_pool.h
            src/common/polyfill_thread.h
+           src/common/range_lock.h
            src/common/rdtsc.cpp
            src/common/rdtsc.h
            src/common/recursive_lock.cpp
@@ -868,6 +876,7 @@ set(SHADER_RECOMPILER src/shader_recompiler/exception.h
                       src/shader_recompiler/ir/passes/ring_access_elimination.cpp
                       src/shader_recompiler/ir/passes/shader_info_collection_pass.cpp
                       src/shader_recompiler/ir/passes/shared_memory_barrier_pass.cpp
+                      src/shader_recompiler/ir/passes/shared_memory_simplify_pass.cpp
                       src/shader_recompiler/ir/passes/shared_memory_to_storage_pass.cpp
                       src/shader_recompiler/ir/passes/ssa_rewrite_pass.cpp
                       src/shader_recompiler/ir/abstract_syntax_list.cpp
@@ -910,9 +919,10 @@ set(VIDEO_CORE src/video_core/amdgpu/liverpool.cpp
                src/video_core/buffer_cache/buffer.h
                src/video_core/buffer_cache/buffer_cache.cpp
                src/video_core/buffer_cache/buffer_cache.h
-               src/video_core/buffer_cache/memory_tracker_base.h
+               src/video_core/buffer_cache/memory_tracker.h
                src/video_core/buffer_cache/range_set.h
-               src/video_core/buffer_cache/word_manager.h
+               src/video_core/buffer_cache/region_definitions.h
+               src/video_core/buffer_cache/region_manager.h
                src/video_core/renderer_vulkan/liverpool_to_vk.cpp
                src/video_core/renderer_vulkan/liverpool_to_vk.h
                src/video_core/renderer_vulkan/vk_common.cpp
@@ -949,6 +959,10 @@ set(VIDEO_CORE src/video_core/amdgpu/liverpool.cpp
                src/video_core/renderer_vulkan/host_passes/fsr_pass.h
                src/video_core/renderer_vulkan/host_passes/pp_pass.cpp
                src/video_core/renderer_vulkan/host_passes/pp_pass.h
+               src/video_core/texture_cache/blit_helper.cpp
+               src/video_core/texture_cache/blit_helper.h
+               src/video_core/texture_cache/host_compatibility.cpp
+               src/video_core/texture_cache/host_compatibility.h
                src/video_core/texture_cache/image.cpp
                src/video_core/texture_cache/image.h
                src/video_core/texture_cache/image_info.cpp
@@ -962,7 +976,6 @@ set(VIDEO_CORE src/video_core/amdgpu/liverpool.cpp
                src/video_core/texture_cache/tile_manager.cpp
                src/video_core/texture_cache/tile_manager.h
                src/video_core/texture_cache/types.h
-               src/video_core/texture_cache/host_compatibility.h
                src/video_core/page_manager.cpp
                src/video_core/page_manager.h
                src/video_core/multi_level_page_table.h
@@ -1051,6 +1064,10 @@ set(QT_GUI src/qt_gui/about_dialog.cpp
            src/qt_gui/settings_dialog.h
            src/qt_gui/settings_dialog.ui
            src/qt_gui/main.cpp
+           src/qt_gui/gui_settings.cpp
+           src/qt_gui/gui_settings.h
+           src/qt_gui/settings.cpp
+           src/qt_gui/settings.h
            ${EMULATOR}
            ${RESOURCE_FILES}
            ${TRANSLATIONS}
@@ -1116,6 +1133,10 @@ if (APPLE)
         set(MVK_BUNDLE_PATH "Resources/vulkan/icd.d")
         set_property(TARGET shadps4 APPEND PROPERTY BUILD_RPATH "@executable_path/../${MVK_BUNDLE_PATH}")
         set(MVK_DST ${CMAKE_CURRENT_BINARY_DIR}/shadps4.app/Contents/${MVK_BUNDLE_PATH})
+
+        add_custom_command(
+            OUTPUT ${MVK_DST}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${MVK_DST})
     else()
         set_property(TARGET shadps4 APPEND PROPERTY BUILD_RPATH "@executable_path")
         set(MVK_DST ${CMAKE_CURRENT_BINARY_DIR})
@@ -1126,9 +1147,6 @@ if (APPLE)
     set(MVK_ICD_SRC ${CMAKE_CURRENT_SOURCE_DIR}/externals/MoltenVK/MoltenVK/MoltenVK/icd/MoltenVK_icd.json)
     set(MVK_ICD_DST ${MVK_DST}/MoltenVK_icd.json)
 
-    add_custom_command(
-        OUTPUT ${MVK_DST}
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${MVK_DST})
     add_custom_command(
         OUTPUT ${MVK_ICD_DST}
         DEPENDS ${MVK_ICD_SRC} ${MVK_DST}
@@ -1143,15 +1161,11 @@ if (APPLE)
 
     if (ARCHITECTURE STREQUAL "x86_64")
         # Reserve system-managed memory space.
-        target_link_options(shadps4 PRIVATE -Wl,-no_pie,-no_fixup_chains,-no_huge,-pagezero_size,0x4000,-segaddr,TCB_SPACE,0x4000,-segaddr,SYSTEM_MANAGED,0x400000,-segaddr,SYSTEM_RESERVED,0x7FFFFC000,-image_base,0x20000000000)
+        target_link_options(shadps4 PRIVATE -Wl,-ld_classic,-no_pie,-no_fixup_chains,-no_huge,-pagezero_size,0x4000,-segaddr,TCB_SPACE,0x4000,-segaddr,SYSTEM_MANAGED,0x400000,-segaddr,SYSTEM_RESERVED,0x7FFFFC000,-image_base,0x20000000000)
     endif()
 
     # Replacement for std::chrono::time_zone
     target_link_libraries(shadps4 PRIVATE date::date-tz)
-endif()
-
-if (NOT ENABLE_QT_GUI)
-  target_link_libraries(shadps4 PRIVATE SDL3::SDL3)
 endif()
 
 if (ENABLE_QT_GUI)

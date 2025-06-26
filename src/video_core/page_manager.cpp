@@ -4,6 +4,7 @@
 #include <boost/container/small_vector.hpp>
 #include "common/assert.h"
 #include "common/debug.h"
+#include "common/range_lock.h"
 #include "common/signal_context.h"
 #include "core/memory.h"
 #include "core/signals.h"
@@ -48,21 +49,18 @@ struct PageManager::Impl {
         u8 AddDelta() {
             if constexpr (delta == 1) {
                 return ++num_watchers;
-            } else {
+            } else if constexpr (delta == -1) {
                 ASSERT_MSG(num_watchers > 0, "Not enough watchers");
                 return --num_watchers;
+            } else {
+                return num_watchers;
             }
         }
     };
 
-    struct UpdateProtectRange {
-        VAddr addr;
-        u64 size;
-        Core::MemoryPermission perms;
-    };
-
     static constexpr size_t ADDRESS_BITS = 40;
     static constexpr size_t NUM_ADDRESS_PAGES = 1ULL << (40 - PAGE_BITS);
+    static constexpr size_t NUM_ADDRESS_LOCKS = NUM_ADDRESS_PAGES / PAGES_PER_LOCK;
     inline static Vulkan::Rasterizer* rasterizer;
 #ifdef ENABLE_USERFAULTFD
     Impl(Vulkan::Rasterizer* rasterizer_) {
@@ -190,74 +188,149 @@ struct PageManager::Impl {
     }
 
 #endif
-    template <s32 delta>
+    template <bool track>
     void UpdatePageWatchers(VAddr addr, u64 size) {
         RENDERER_TRACE;
-        boost::container::small_vector<UpdateProtectRange, 16> update_ranges;
-        {
-            std::scoped_lock lk(lock);
 
-            size_t page = addr >> PAGE_BITS;
-            auto perms = cached_pages[page].Perm();
-            u64 range_begin = 0;
-            u64 range_bytes = 0;
+        size_t page = addr >> PAGE_BITS;
+        const u64 page_end = Common::DivCeil(addr + size, PAGE_SIZE);
 
-            const auto release_pending = [&] {
-                if (range_bytes > 0) {
-                    RENDERER_TRACE;
-                    // Add pending (un)protect action
-                    update_ranges.push_back({range_begin << PAGE_BITS, range_bytes, perms});
-                    range_bytes = 0;
-                }
-            };
+        // Acquire locks for the range of pages
+        const auto lock_start = locks.begin() + (page / PAGES_PER_LOCK);
+        const auto lock_end = locks.begin() + Common::DivCeil(page_end, PAGES_PER_LOCK);
+        Common::RangeLockGuard lk(lock_start, lock_end);
 
-            // Iterate requested pages
-            const u64 page_end = Common::DivCeil(addr + size, PAGE_SIZE);
-            const u64 aligned_addr = page << PAGE_BITS;
-            const u64 aligned_end = page_end << PAGE_BITS;
-            ASSERT_MSG(rasterizer->IsMapped(aligned_addr, aligned_end - aligned_addr),
-                       "Attempted to track non-GPU memory at address {:#x}, size {:#x}.",
-                       aligned_addr, aligned_end - aligned_addr);
+        auto perms = cached_pages[page].Perm();
+        u64 range_begin = 0;
+        u64 range_bytes = 0;
+        u64 potential_range_bytes = 0;
 
-            for (; page != page_end; ++page) {
-                PageState& state = cached_pages[page];
+        const auto release_pending = [&] {
+            if (range_bytes > 0) {
+                RENDERER_TRACE;
+                // Perform pending (un)protect action
+                Protect(range_begin << PAGE_BITS, range_bytes, perms);
+                range_bytes = 0;
+                potential_range_bytes = 0;
+            }
+        };
 
-                // Apply the change to the page state
-                const u8 new_count = state.AddDelta<delta>();
+        // Iterate requested pages
+        const u64 aligned_addr = page << PAGE_BITS;
+        const u64 aligned_end = page_end << PAGE_BITS;
+        ASSERT_MSG(rasterizer->IsMapped(aligned_addr, aligned_end - aligned_addr),
+                   "Attempted to track non-GPU memory at address {:#x}, size {:#x}.", aligned_addr,
+                   aligned_end - aligned_addr);
 
+        for (; page != page_end; ++page) {
+            PageState& state = cached_pages[page];
+
+            // Apply the change to the page state
+            const u8 new_count = state.AddDelta<track ? 1 : -1>();
+
+            if (auto new_perms = state.Perm(); new_perms != perms) [[unlikely]] {
                 // If the protection changed add pending (un)protect action
-                if (auto new_perms = state.Perm(); new_perms != perms) [[unlikely]] {
-                    release_pending();
-                    perms = new_perms;
-                }
-
-                // If the page must be (un)protected, add it to the pending range
-                if ((new_count == 0 && delta < 0) || (new_count == 1 && delta > 0)) {
-                    if (range_bytes == 0) {
-                        range_begin = page;
-                    }
-                    range_bytes += PAGE_SIZE;
-                } else {
-                    release_pending();
-                }
+                release_pending();
+                perms = new_perms;
+            } else if (range_bytes != 0) {
+                // If the protection did not change, extend the potential range
+                potential_range_bytes += PAGE_SIZE;
             }
 
-            // Add pending (un)protect action
-            release_pending();
+            // Only start a new range if the page must be (un)protected
+            if ((new_count == 0 && !track) || (new_count == 1 && track)) {
+                if (range_bytes == 0) {
+                    // Start a new potential range
+                    range_begin = page;
+                    potential_range_bytes = PAGE_SIZE;
+                }
+                // Extend current range up to potential range
+                range_bytes = potential_range_bytes;
+            }
         }
 
-        // Flush deferred protects
-        for (const auto& range : update_ranges) {
-            Protect(range.addr, range.size, range.perms);
+        // Add pending (un)protect action
+        release_pending();
+    }
+
+    template <bool track>
+    void UpdatePageWatchersForRegion(VAddr base_addr, RegionBits& mask) {
+        RENDERER_TRACE;
+        auto start_range = mask.FirstRange();
+        auto end_range = mask.LastRange();
+
+        if (start_range.second == end_range.second) {
+            // Optimization: if all pages are contiguous, use the regular UpdatePageWatchers
+            const VAddr start_addr = base_addr + (start_range.first << PAGE_BITS);
+            const u64 size = (start_range.second - start_range.first) << PAGE_BITS;
+
+            UpdatePageWatchers<track>(start_addr, size);
+            return;
         }
+
+        size_t base_page = (base_addr >> PAGE_BITS);
+        ASSERT(base_page % PAGES_PER_LOCK == 0);
+        std::scoped_lock lk(locks[base_page / PAGES_PER_LOCK]);
+        auto perms = cached_pages[base_page + start_range.first].Perm();
+        u64 range_begin = 0;
+        u64 range_bytes = 0;
+        u64 potential_range_bytes = 0;
+
+        const auto release_pending = [&] {
+            if (range_bytes > 0) {
+                RENDERER_TRACE;
+                // Perform pending (un)protect action
+                Protect((range_begin << PAGE_BITS), range_bytes, perms);
+                range_bytes = 0;
+                potential_range_bytes = 0;
+            }
+        };
+
+        // Iterate pages
+        for (size_t page = start_range.first; page < end_range.second; ++page) {
+            PageState& state = cached_pages[base_page + page];
+            const bool update = mask.Get(page);
+
+            // Apply the change to the page state
+            const u8 new_count = update ? state.AddDelta<track ? 1 : -1>() : state.AddDelta<0>();
+
+            if (auto new_perms = state.Perm(); new_perms != perms) [[unlikely]] {
+                // If the protection changed add pending (un)protect action
+                release_pending();
+                perms = new_perms;
+            } else if (range_bytes != 0) {
+                // If the protection did not change, extend the potential range
+                potential_range_bytes += PAGE_SIZE;
+            }
+
+            // If the page is not being updated, skip it
+            if (!update) {
+                continue;
+            }
+
+            // If the page must be (un)protected
+            if ((new_count == 0 && !track) || (new_count == 1 && track)) {
+                if (range_bytes == 0) {
+                    // Start a new potential range
+                    range_begin = base_page + page;
+                    potential_range_bytes = PAGE_SIZE;
+                }
+                // Extend current rango up to potential range
+                range_bytes = potential_range_bytes;
+            }
+        }
+
+        // Add pending (un)protect action
+        release_pending();
     }
 
     std::array<PageState, NUM_ADDRESS_PAGES> cached_pages{};
 #ifdef __linux__
-    Common::AdaptiveMutex lock;
+    using LockType = Common::AdaptiveMutex;
 #else
-    Common::SpinLock lock;
+    using LockType = Common::SpinLock;
 #endif
+    std::array<LockType, NUM_ADDRESS_LOCKS> locks{};
 };
 
 PageManager::PageManager(Vulkan::Rasterizer* rasterizer_)
@@ -273,12 +346,21 @@ void PageManager::OnGpuUnmap(VAddr address, size_t size) {
     impl->OnUnmap(address, size);
 }
 
-template <s32 delta>
+template <bool track>
 void PageManager::UpdatePageWatchers(VAddr addr, u64 size) const {
-    impl->UpdatePageWatchers<delta>(addr, size);
+    impl->UpdatePageWatchers<track>(addr, size);
 }
 
-template void PageManager::UpdatePageWatchers<1>(VAddr addr, u64 size) const;
-template void PageManager::UpdatePageWatchers<-1>(VAddr addr, u64 size) const;
+template <bool track>
+void PageManager::UpdatePageWatchersForRegion(VAddr base_addr, RegionBits& mask) const {
+    impl->UpdatePageWatchersForRegion<track>(base_addr, mask);
+}
+
+template void PageManager::UpdatePageWatchers<true>(VAddr addr, u64 size) const;
+template void PageManager::UpdatePageWatchers<false>(VAddr addr, u64 size) const;
+template void PageManager::UpdatePageWatchersForRegion<true>(VAddr base_addr,
+                                                             RegionBits& mask) const;
+template void PageManager::UpdatePageWatchersForRegion<false>(VAddr base_addr,
+                                                              RegionBits& mask) const;
 
 } // namespace VideoCore
