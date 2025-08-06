@@ -61,7 +61,7 @@ void Linker::InitMalloc() {
     // Properly emulating this is required for some LLE libraries to function properly.
 
     // Find libSceLibcInternal
-    u32 module_index = Core::Linker::FindByName("libSceLibcInternal");
+    u32 module_index = Core::Linker::FindByName("libSceLibcInternal.sprx");
     if (module_index == -1) {
         void* addr = 0;
         // libSceLibcInternal is not loaded, simulate the SceKernelInternalMemory mapping instead.
@@ -143,18 +143,6 @@ void Linker::Execute(const std::vector<std::string> args) {
 
         LoadSharedLibraries();
         InitMalloc();
-
-        // Simulate libSceGnmDriver initialization, which maps a chunk of direct memory.
-        // Some games fail without accurately emulating this behavior.
-        s64 phys_addr{};
-        s32 result = Libraries::Kernel::sceKernelAllocateDirectMemory(
-            0, Libraries::Kernel::sceKernelGetDirectMemorySize(), 0x10000, 0x10000, 3, &phys_addr);
-        if (result == 0) {
-            void* addr{reinterpret_cast<void*>(0xfe0000000)};
-            result = Libraries::Kernel::sceKernelMapNamedDirectMemory(
-                &addr, 0x10000, 0x13, 0, phys_addr, 0x10000, "SceGnmDriver");
-        }
-        ASSERT_MSG(result == 0, "Unable to emulate libSceGnmDriver initialization");
 
         // Start main module.
         EntryParams params{};
