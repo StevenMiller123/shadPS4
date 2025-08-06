@@ -26,7 +26,7 @@
     </message>
     <message>
       <source>Cheats/Patches are experimental.\nUse with caution.\n\nDownload cheats individually by selecting the repository and clicking the download button.\nIn the Patches tab, you can download all patches at once, choose which ones you want to use, and save your selection.\n\nSince we do not develop the Cheats/Patches,\nplease report issues to the cheat author.\n\nCreated a new cheat? Visit:\n</source>
-      <translation type="unfinished">Cheats/Patches are experimental.\nUse with caution.\n\nDownload cheats individually by selecting the repository and clicking the download button.\nIn the Patches tab, you can download all patches at once, choose which ones you want to use, and save your selection.\n\nSince we do not develop the Cheats/Patches,\nplease report issues to the cheat author.\n\nCreated a new cheat? Visit:\n</translation>
+      <translation>تقلب‌ها/پچ‌ها آزمایشی هستند.\n با احتیاط استفاده کنید.\n\n با انتخاب مخزن و کلیک روی دکمه دانلود، تقلب‌ها را به‌صورت جداگانه دانلود کنید.\n در تب پچ‌ها، می‌توانید همه پچ‌ها را به‌طور همزمان دانلود کنید، انتخاب کنید که می‌خواهید از کدام استفاده کنید و انتخاب خود را ذخیره کنید.\n\n از آنجایی که ما تقلب‌ها/پچ‌ها را توسعه نمی‌دهیم،\n لطفاً مشکلات را به نویسنده تقلب گزارش دهید.\n\n تقلب جدیدی ایجاد کرده‌اید؟ به این صفحه مراجعه کنید: \n</translation>
     </message>
     <message>
       <source>No Image Available</source>
@@ -214,7 +214,7 @@
     </message>
     <message>
       <source>XML ERROR:</source>
-      <translation type="unfinished">XML ERROR:</translation>
+      <translation>XML خطای :</translation>
     </message>
     <message>
       <source>Failed to open files.json for writing</source>
@@ -407,43 +407,43 @@
     <name>ControlSettings</name>
     <message>
       <source>Configure Controls</source>
-      <translation type="unfinished">Configure Controls</translation>
+      <translation>پیکربندی دسته ها</translation>
     </message>
     <message>
       <source>D-Pad</source>
-      <translation type="unfinished">D-Pad</translation>
+      <translation>D-Pad</translation>
     </message>
     <message>
       <source>Up</source>
-      <translation type="unfinished">Up</translation>
+      <translation>بالا</translation>
     </message>
     <message>
       <source>Left</source>
-      <translation type="unfinished">Left</translation>
+      <translation>چپ</translation>
     </message>
     <message>
       <source>Right</source>
-      <translation type="unfinished">Right</translation>
+      <translation>راست</translation>
     </message>
     <message>
       <source>Down</source>
-      <translation type="unfinished">Down</translation>
+      <translation>پایین</translation>
     </message>
     <message>
       <source>Left Stick Deadzone (def:2 max:127)</source>
-      <translation type="unfinished">Left Stick Deadzone (def:2 max:127)</translation>
+      <translation>منطقه‌ی حساس به حرکت چپ  (def:2 max:127)</translation>
     </message>
     <message>
       <source>Left Deadzone</source>
-      <translation type="unfinished">Left Deadzone</translation>
+      <translation>منطقه مرده چپ</translation>
     </message>
     <message>
       <source>Left Stick</source>
-      <translation type="unfinished">Left Stick</translation>
+      <translation>جواستیک چپ</translation>
     </message>
     <message>
       <source>Config Selection</source>
-      <translation type="unfinished">Config Selection</translation>
+      <translation>انتخاب پیکربندی</translation>
     </message>
     <message>
       <source>Common Config</source>
@@ -451,59 +451,19 @@
     </message>
     <message>
       <source>Use per-game configs</source>
-      <translation type="unfinished">Use per-game configs</translation>
-    </message>
-    <message>
-      <source>L1 / LB</source>
-      <translation type="unfinished">L1 / LB</translation>
-    </message>
-    <message>
-      <source>L2 / LT</source>
-      <translation type="unfinished">L2 / LT</translation>
-    </message>
-    <message>
-      <source>Back</source>
-      <translation type="unfinished">Back</translation>
-    </message>
-    <message>
-      <source>R1 / RB</source>
-      <translation type="unfinished">R1 / RB</translation>
-    </message>
-    <message>
-      <source>R2 / RT</source>
-      <translation type="unfinished">R2 / RT</translation>
+      <translation>از پیکربندی‌های مخصوص هر بازی استفاده کنید</translation>
     </message>
     <message>
       <source>L3</source>
       <translation type="unfinished">L3</translation>
     </message>
     <message>
-      <source>Options / Start</source>
-      <translation type="unfinished">Options / Start</translation>
-    </message>
-    <message>
       <source>R3</source>
-      <translation type="unfinished">R3</translation>
+      <translation>R3</translation>
     </message>
     <message>
       <source>Face Buttons</source>
       <translation type="unfinished">Face Buttons</translation>
-    </message>
-    <message>
-      <source>Triangle / Y</source>
-      <translation type="unfinished">Triangle / Y</translation>
-    </message>
-    <message>
-      <source>Square / X</source>
-      <translation type="unfinished">Square / X</translation>
-    </message>
-    <message>
-      <source>Circle / B</source>
-      <translation type="unfinished">Circle / B</translation>
-    </message>
-    <message>
-      <source>Cross / A</source>
-      <translation type="unfinished">Cross / A</translation>
     </message>
     <message>
       <source>Right Stick Deadzone (def:2, max:127)</source>
@@ -531,7 +491,7 @@
     </message>
     <message>
       <source>B:</source>
-      <translation type="unfinished">B:</translation>
+      <translation>B:</translation>
     </message>
     <message>
       <source>Override Lightbar Color</source>
@@ -543,7 +503,7 @@
     </message>
     <message>
       <source>Unable to Save</source>
-      <translation type="unfinished">Unable to Save</translation>
+      <translation>ذخیره امکان پذیر نیست</translation>
     </message>
     <message>
       <source>Cannot bind axis values more than once</source>
@@ -565,12 +525,136 @@
       <source>Cancel</source>
       <translation type="unfinished">Cancel</translation>
     </message>
+    <message>
+      <source>unmapped</source>
+      <translation type="unfinished">unmapped</translation>
+    </message>
+    <message>
+      <source>L1</source>
+      <translation type="unfinished">L1</translation>
+    </message>
+    <message>
+      <source>R1</source>
+      <translation type="unfinished">R1</translation>
+    </message>
+    <message>
+      <source>L2</source>
+      <translation type="unfinished">L2</translation>
+    </message>
+    <message>
+      <source>Options</source>
+      <translation type="unfinished">Options</translation>
+    </message>
+    <message>
+      <source>R2</source>
+      <translation type="unfinished">R2</translation>
+    </message>
+    <message>
+      <source>Touchpad Left</source>
+      <translation type="unfinished">Touchpad Left</translation>
+    </message>
+    <message>
+      <source>Touchpad Center</source>
+      <translation type="unfinished">Touchpad Center</translation>
+    </message>
+    <message>
+      <source>Touchpad Right</source>
+      <translation type="unfinished">Touchpad Right</translation>
+    </message>
+    <message>
+      <source>Triangle</source>
+      <translation type="unfinished">Triangle</translation>
+    </message>
+    <message>
+      <source>Square</source>
+      <translation type="unfinished">Square</translation>
+    </message>
+    <message>
+      <source>Circle</source>
+      <translation type="unfinished">Circle</translation>
+    </message>
+    <message>
+      <source>Cross</source>
+      <translation type="unfinished">Cross</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation type="unfinished">Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</translation>
+    </message>
+    <message>
+      <source>Press a button</source>
+      <translation type="unfinished">Press a button</translation>
+    </message>
+    <message>
+      <source>Move analog stick</source>
+      <translation type="unfinished">Move analog stick</translation>
+    </message>
+    <message>
+      <source>L1 and L2</source>
+      <translation type="unfinished">L1 and L2</translation>
+    </message>
+    <message>
+      <source>Active Gamepad</source>
+      <translation type="unfinished">Active Gamepad</translation>
+    </message>
+    <message>
+      <source>Gamepad ID</source>
+      <translation type="unfinished">Gamepad ID</translation>
+    </message>
+    <message>
+      <source>Default Gamepad</source>
+      <translation type="unfinished">Default Gamepad</translation>
+    </message>
+    <message>
+      <source>No default selected</source>
+      <translation type="unfinished">No default selected</translation>
+    </message>
+    <message>
+      <source>n/a</source>
+      <translation type="unfinished">n/a</translation>
+    </message>
+    <message>
+      <source>Set Active Gamepad as Default</source>
+      <translation type="unfinished">Set Active Gamepad as Default</translation>
+    </message>
+    <message>
+      <source>Remove Default Gamepad</source>
+      <translation type="unfinished">Remove Default Gamepad</translation>
+    </message>
+    <message>
+      <source>R1 and R2</source>
+      <translation type="unfinished">R1 and R2</translation>
+    </message>
+    <message>
+      <source>ID: </source>
+      <translation type="unfinished">ID: </translation>
+    </message>
+    <message>
+      <source>Default Controller Selected</source>
+      <translation type="unfinished">Default Controller Selected</translation>
+    </message>
+    <message>
+      <source>Active controller set as default</source>
+      <translation type="unfinished">Active controller set as default</translation>
+    </message>
+    <message>
+      <source>Default Controller Removed</source>
+      <translation type="unfinished">Default Controller Removed</translation>
+    </message>
+    <message>
+      <source>Default controller setting removed</source>
+      <translation type="unfinished">Default controller setting removed</translation>
+    </message>
   </context>
   <context>
     <name>EditorDialog</name>
     <message>
       <source>Edit Keyboard + Mouse and Controller input bindings</source>
-      <translation type="unfinished">Edit Keyboard + Mouse and Controller input bindings</translation>
+      <translation>تغییر دکمه های کیبرد + ماوس و دسته</translation>
     </message>
     <message>
       <source>Use Per-Game configs</source>
@@ -582,7 +666,7 @@
     </message>
     <message>
       <source>Could not open the file for reading</source>
-      <translation type="unfinished">Could not open the file for reading</translation>
+      <translation>نمی تواند فایل را برای خواندن باز کند</translation>
     </message>
     <message>
       <source>Could not open the file for writing</source>
@@ -602,7 +686,7 @@
     </message>
     <message>
       <source>Do you want to reset your custom default config to the original default config?</source>
-      <translation type="unfinished">Do you want to reset your custom default config to the original default config?</translation>
+      <translation>آیا می‌خواهید پیکربندی سفارشی خود را به پیکربندی پیش‌فرض اصلی بازگردانید ؟</translation>
     </message>
     <message>
       <source>Do you want to reset this config to your custom default config?</source>
@@ -748,6 +832,10 @@
       <source>Last updated</source>
       <translation>آخرین به‌روزرسانی</translation>
     </message>
+    <message>
+      <source>Favorite</source>
+      <translation type="unfinished">Favorite</translation>
+    </message>
   </context>
   <context>
     <name>GameListUtils</name>
@@ -860,7 +948,7 @@
     </message>
     <message>
       <source>View report</source>
-      <translation type="unfinished">View report</translation>
+      <translation>مشاهده گزارش</translation>
     </message>
     <message>
       <source>Submit a report</source>
@@ -916,11 +1004,11 @@
     </message>
     <message>
       <source>Delete Save Data</source>
-      <translation type="unfinished">Delete Save Data</translation>
+      <translation>پاک کردن داده های ذخیره شده</translation>
     </message>
     <message>
       <source>This game has no update folder to open!</source>
-      <translation type="unfinished">This game has no update folder to open!</translation>
+      <translation>این بازی هیچ پوشه‌ی به‌روزرسانی برای باز کردن ندارد!</translation>
     </message>
     <message>
       <source>No log file found for this game!</source>
@@ -948,7 +1036,15 @@
     </message>
     <message>
       <source>SFO Viewer for </source>
-      <translation type="unfinished">SFO Viewer for </translation>
+      <translation>SFO مشاهده </translation>
+    </message>
+    <message>
+      <source>Remove from Favorites</source>
+      <translation type="unfinished">Remove from Favorites</translation>
+    </message>
+    <message>
+      <source>Add to Favorites</source>
+      <translation type="unfinished">Add to Favorites</translation>
     </message>
   </context>
   <context>
@@ -1057,10 +1153,6 @@
       <translation type="unfinished">L3</translation>
     </message>
     <message>
-      <source>Touchpad Click</source>
-      <translation type="unfinished">Touchpad Click</translation>
-    </message>
-    <message>
       <source>Mouse to Joystick</source>
       <translation type="unfinished">Mouse to Joystick</translation>
     </message>
@@ -1078,7 +1170,7 @@
     </message>
     <message>
       <source>Mouse Movement Parameters</source>
-      <translation type="unfinished">Mouse Movement Parameters</translation>
+      <translation/>
     </message>
     <message>
       <source>note: click Help Button/Special Keybindings for more information</source>
@@ -1102,7 +1194,7 @@
     </message>
     <message>
       <source>Cross</source>
-      <translation type="unfinished">Cross</translation>
+      <translation>ضربدر</translation>
     </message>
     <message>
       <source>Right Analog Halfmode</source>
@@ -1122,7 +1214,7 @@
     </message>
     <message>
       <source>Copy from Common Config</source>
-      <translation type="unfinished">Copy from Common Config</translation>
+      <translation>کپی از پیکربندی مشترک</translation>
     </message>
     <message>
       <source>Deadzone Offset (def 0.50):</source>
@@ -1130,31 +1222,27 @@
     </message>
     <message>
       <source>Speed Multiplier (def 1.0):</source>
-      <translation type="unfinished">Speed Multiplier (def 1.0):</translation>
+      <translation>ضریب سرعت (def 1.0):</translation>
     </message>
     <message>
       <source>Common Config Selected</source>
-      <translation type="unfinished">Common Config Selected</translation>
+      <translation>پیکربندی مشترک انتخاب شده</translation>
     </message>
     <message>
       <source>This button copies mappings from the Common Config to the currently selected profile, and cannot be used when the currently selected profile is the Common Config.</source>
-      <translation type="unfinished">This button copies mappings from the Common Config to the currently selected profile, and cannot be used when the currently selected profile is the Common Config.</translation>
+      <translation>این دکمه نگاشت‌ها را از پیکربندی مشترک به پروفایل انتخاب‌شده‌ی فعلی کپی می‌کند و وقتی پروفایل انتخاب‌شده‌ی فعلی پیکربندی مشترک باشد، نمی‌توان از آن استفاده کرد.</translation>
     </message>
     <message>
       <source>Copy values from Common Config</source>
-      <translation type="unfinished">Copy values from Common Config</translation>
+      <translation>کپی کردن مقادیر از پیکربندی مشترک</translation>
     </message>
     <message>
       <source>Do you want to overwrite existing mappings with the mappings from the Common Config?</source>
-      <translation type="unfinished">Do you want to overwrite existing mappings with the mappings from the Common Config?</translation>
+      <translation>آیا می‌خواهید نگاشت‌های موجود را با نگاشت‌های پیکربندی مشترک جایگزین کنید؟</translation>
     </message>
     <message>
       <source>Unable to Save</source>
       <translation type="unfinished">Unable to Save</translation>
-    </message>
-    <message>
-      <source>Cannot bind any unique input more than once</source>
-      <translation type="unfinished">Cannot bind any unique input more than once</translation>
     </message>
     <message>
       <source>Press a key</source>
@@ -1170,7 +1258,7 @@
     </message>
     <message>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>ذخیره‌سازی</translation>
     </message>
     <message>
       <source>Apply</source>
@@ -1183,6 +1271,26 @@
     <message>
       <source>Cancel</source>
       <translation type="unfinished">Cancel</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation type="unfinished">Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</translation>
+    </message>
+    <message>
+      <source>Touchpad Left</source>
+      <translation type="unfinished">Touchpad Left</translation>
+    </message>
+    <message>
+      <source>Touchpad Center</source>
+      <translation type="unfinished">Touchpad Center</translation>
+    </message>
+    <message>
+      <source>Touchpad Right</source>
+      <translation type="unfinished">Touchpad Right</translation>
     </message>
   </context>
   <context>
@@ -1213,7 +1321,7 @@
     </message>
     <message>
       <source>Open shadPS4 Folder</source>
-      <translation type="unfinished">Open shadPS4 Folder</translation>
+      <translation>پوشه shadPS4 را باز کنید</translation>
     </message>
     <message>
       <source>Exit</source>
@@ -1346,10 +1454,6 @@
     <message>
       <source>Game List</source>
       <translation>لیست بازی</translation>
-    </message>
-    <message>
-      <source> * Unsupported Vulkan Version</source>
-      <translation>شما پشتیبانی نمیشود Vulkan ورژن *</translation>
     </message>
     <message>
       <source>Download Cheats For All Installed Games</source>
@@ -1539,16 +1643,24 @@
       <translation>مخفی کردن زمان توقف مکان نما</translation>
     </message>
     <message>
+      <source>Microphone</source>
+      <translation type="unfinished">Microphone</translation>
+    </message>
+    <message>
+      <source>None</source>
+      <translation type="unfinished">None</translation>
+    </message>
+    <message>
+      <source>Default Device</source>
+      <translation type="unfinished">Default Device</translation>
+    </message>
+    <message>
       <source>s</source>
       <translation type="unfinished">s</translation>
     </message>
     <message>
       <source>Controller</source>
       <translation>دسته بازی</translation>
-    </message>
-    <message>
-      <source>Back Button Behavior</source>
-      <translation>رفتار دکمه بازگشت</translation>
     </message>
     <message>
       <source>Graphics</source>
@@ -1628,7 +1740,7 @@
     </message>
     <message>
       <source>Collect Shaders</source>
-      <translation type="unfinished">Collect Shaders</translation>
+      <translation>جمع آوری شیدرها</translation>
     </message>
     <message>
       <source>Copy GPU Buffers</source>
@@ -1641,6 +1753,14 @@
     <message>
       <source>Guest Debug Markers</source>
       <translation type="unfinished">Guest Debug Markers</translation>
+    </message>
+    <message>
+      <source>Enable Readbacks</source>
+      <translation type="unfinished">Enable Readbacks</translation>
+    </message>
+    <message>
+      <source>Enable Readback Linear Images</source>
+      <translation type="unfinished">Enable Readback Linear Images</translation>
     </message>
     <message>
       <source>Update</source>
@@ -1668,7 +1788,7 @@
     </message>
     <message>
       <source>Title Music</source>
-      <translation type="unfinished">Title Music</translation>
+      <translation/>
     </message>
     <message>
       <source>Disable Trophy Notification</source>
@@ -1732,7 +1852,7 @@
     </message>
     <message>
       <source>Console Language:\nSets the language that the PS4 game uses.\nIt&apos;s recommended to set this to a language the game supports, which will vary by region.</source>
-      <translation type="unfinished">Console Language:\nSets the language that the PS4 game uses.\nIt&apos;s recommended to set this to a language the game supports, which will vary by region.</translation>
+      <translation>زبان کنسول:\nزبانی را که بازی PS4 استفاده می‌کند تنظیم می‌کند.\nتوصیه می‌شود این را روی زبانی که بازی پشتیبانی می‌کند تنظیم کنید، که بسته به منطقه متفاوت خواهد بود.</translation>
     </message>
     <message>
       <source>Emulator Language:\nSets the language of the emulator&apos;s user interface.</source>
@@ -1752,7 +1872,7 @@
     </message>
     <message>
       <source>Trophy Key:\nKey used to decrypt trophies. Must be obtained from your jailbroken console.\nMust contain only hex characters.</source>
-      <translation type="unfinished">Trophy Key:\nKey used to decrypt trophies. Must be obtained from your jailbroken console.\nMust contain only hex characters.</translation>
+      <translation>کلید تروفی:\و کلیدی که برای رمزگشایی تروفی‌ها استفاده می‌شود. باید از کنسول جیلبریک شده شما دریافت شود.\باید فقط شامل کاراکترهای هگز باشد.</translation>
     </message>
     <message>
       <source>Log Type:\nSets whether to synchronize the output of the log window for performance. May have adverse effects on emulation.</source>
@@ -1760,7 +1880,7 @@
     </message>
     <message>
       <source>Log Filter:\nFilters the log to only print specific information.\nExamples: &quot;Core:Trace&quot; &quot;Lib.Pad:Debug Common.Filesystem:Error&quot; &quot;*:Critical&quot;\nLevels: Trace, Debug, Info, Warning, Error, Critical - in this order, a specific level silences all levels preceding it in the list and logs every level after it.</source>
-      <translation type="unfinished">Log Filter:\nFilters the log to only print specific information.\nExamples: &quot;Core:Trace&quot; &quot;Lib.Pad:Debug Common.Filesystem:Error&quot; &quot;*:Critical&quot;\nLevels: Trace, Debug, Info, Warning, Error, Critical - in this order, a specific level silences all levels preceding it in the list and logs every level after it.</translation>
+      <translation>فیلتر گزارش:\nگزارش را فیلتر می‌کند تا فقط اطلاعات خاصی چاپ شود.\nمثال‌ها: &quot;هسته:ردیابی&quot; &quot;Lib.Pad:اشکال‌زدایی Common.Filesystem:خطا&quot; &quot;*:بحرانی&quot;\nسطوح: ردیابی، اشکال‌زدایی، اطلاعات، هشدار، خطا، بحرانی - به این ترتیب، یک سطح خاص تمام سطوح قبل از خود را در لیست بی‌صدا می‌کند و هر سطح بعد از خود را ثبت می‌کند.</translation>
     </message>
     <message>
       <source>Update:\nRelease: Official versions released every month that may be very outdated, but are more reliable and tested.\nNightly: Development versions that have all the latest features and fixes, but may contain bugs and are less stable.</source>
@@ -1768,7 +1888,7 @@
     </message>
     <message>
       <source>Background Image:\nControl the opacity of the game background image.</source>
-      <translation type="unfinished">Background Image:\nControl the opacity of the game background image.</translation>
+      <translation>تصویر پس‌زمینه: میزان شفافیت تصویر پس‌زمینه بازی را کنترل کنید.</translation>
     </message>
     <message>
       <source>Play Title Music:\nIf a game supports it, enable playing special music when selecting the game in the GUI.</source>
@@ -1785,10 +1905,6 @@
     <message>
       <source>Hide Idle Cursor Timeout:\nThe duration (seconds) after which the cursor that has been idle hides itself.</source>
       <translation>زمانی را برای ناپدید شدن ماوس بعد از غیرفعالی تعیین کنید.</translation>
-    </message>
-    <message>
-      <source>Back Button Behavior:\nSets the controller&apos;s back button to emulate tapping the specified position on the PS4 touchpad.</source>
-      <translation>رفتار دکمه برگشت:\nدکمه برگشت کنترلر را طوری تنظیم می کند که ضربه زدن روی موقعیت مشخص شده روی صفحه لمسی PS4 را شبیه سازی کند.</translation>
     </message>
     <message>
       <source>Display Compatibility Data:\nDisplays game compatibility information in table view. Enable &quot;Update Compatibility On Startup&quot; to get up-to-date information.</source>
@@ -1815,22 +1931,6 @@
       <translation>همیشه</translation>
     </message>
     <message>
-      <source>Touchpad Left</source>
-      <translation>صفحه لمسی سمت چپ</translation>
-    </message>
-    <message>
-      <source>Touchpad Right</source>
-      <translation>صفحه لمسی سمت راست</translation>
-    </message>
-    <message>
-      <source>Touchpad Center</source>
-      <translation>مرکز صفحه لمسی</translation>
-    </message>
-    <message>
-      <source>None</source>
-      <translation>هیچ کدام</translation>
-    </message>
-    <message>
       <source>Graphics Device:\nOn multiple GPU systems, select the GPU the emulator will use from the drop down list,\nor select &quot;Auto Select&quot; to automatically determine it.</source>
       <translation>دستگاه گرافیکی:\nدر سیستم‌های با چندین پردازنده گرافیکی، از فهرست کشویی، پردازنده گرافیکی که شبیه‌ساز از آن استفاده می‌کند را انتخاب کنید، یا گزینه &quot;انتخاب خودکار&quot; را انتخاب کنید تا به طور خودکار تعیین شود.</translation>
     </message>
@@ -1848,11 +1948,11 @@
     </message>
     <message>
       <source>Enable Null GPU:\nFor the sake of technical debugging, disables game rendering as if there were no graphics card.</source>
-      <translation type="unfinished">Enable Null GPU:\nFor the sake of technical debugging, disables game rendering as if there were no graphics card.</translation>
+      <translation>فعال کردن پردازنده گرافیکی خالی:\برای رفع اشکال فنی، رندر بازی را طوری غیرفعال کنید که انگار هیچ کارت گرافیکی وجود ندارد.</translation>
     </message>
     <message>
       <source>Enable HDR:\nEnables HDR in games that support it.\nYour monitor must have support for the BT2020 PQ color space and the RGB10A2 swapchain format.</source>
-      <translation type="unfinished">Enable HDR:\nEnables HDR in games that support it.\nYour monitor must have support for the BT2020 PQ color space and the RGB10A2 swapchain format.</translation>
+      <translation>فعال کردن HDR و :\n این گزینه HDR را در بازی‌هایی که از آن پشتیبانی می‌کنند فعال می‌کند.\n مانیتور شما باید از فضای رنگی BT2020 PQ و فرمت swapchain RGB10A2 پشتیبانی کند.</translation>
     </message>
     <message>
       <source>Game Folders:\nThe list of folders to check for installed games.</source>
@@ -1864,7 +1964,7 @@
     </message>
     <message>
       <source>Remove:\nRemove a folder from the list.</source>
-      <translation>حذف:\nیک پوشه را از لیست حذف کنید.</translation>
+      <translation>حذف:\n یک پوشه را از لیست حذف کنید.</translation>
     </message>
     <message>
       <source>Enable Debug Dumping:\nSaves the import and export symbols and file header information of the currently running PS4 program to a directory.</source>
@@ -1872,11 +1972,11 @@
     </message>
     <message>
       <source>Enable Vulkan Validation Layers:\nEnables a system that validates the state of the Vulkan renderer and logs information about its internal state.\nThis will reduce performance and likely change the behavior of emulation.</source>
-      <translation type="unfinished">Enable Vulkan Validation Layers:\nEnables a system that validates the state of the Vulkan renderer and logs information about its internal state.\nThis will reduce performance and likely change the behavior of emulation.</translation>
+      <translation>فعال کردن لایه‌های اعتبارسنجی Vulkan: \nسیستمی را فعال می‌کند که وضعیت رندرکننده Vulkan را اعتبارسنجی کرده و اطلاعات مربوط به وضعیت داخلی آن را ثبت می‌کند.\n این کار باعث کاهش عملکرد و احتمالاً تغییر رفتار شبیه‌سازی می‌شود.</translation>
     </message>
     <message>
       <source>Enable Vulkan Synchronization Validation:\nEnables a system that validates the timing of Vulkan rendering tasks.\nThis will reduce performance and likely change the behavior of emulation.</source>
-      <translation type="unfinished">Enable Vulkan Synchronization Validation:\nEnables a system that validates the timing of Vulkan rendering tasks.\nThis will reduce performance and likely change the behavior of emulation.</translation>
+      <translation>فعال کردن اعتبارسنجی همگام‌سازی Vulkan: \nسیستمی را فعال می‌کند که زمان‌بندی وظایف رندر Vulkan را اعتبارسنجی می‌کند.\n این کار باعث کاهش عملکرد و احتمالاً تغییر رفتار شبیه‌سازی می‌شود.</translation>
     </message>
     <message>
       <source>Enable RenderDoc Debugging:\nIf enabled, the emulator will provide compatibility with Renderdoc to allow capture and analysis of the currently rendered frame.</source>
@@ -1884,11 +1984,19 @@
     </message>
     <message>
       <source>Collect Shaders:\nYou need this enabled to edit shaders with the debug menu (Ctrl + F10).</source>
-      <translation type="unfinished">Collect Shaders:\nYou need this enabled to edit shaders with the debug menu (Ctrl + F10).</translation>
+      <translation>جمع‌آوری سایه‌زن‌ها:\n برای ویرایش سایه‌زن‌ها با منوی اشکال‌زدایی (Ctrl + F10) باید این گزینه فعال باشد.</translation>
     </message>
     <message>
       <source>Crash Diagnostics:\nCreates a .yaml file with info about the Vulkan state at the time of crashing.\nUseful for debugging &apos;Device lost&apos; errors. If you have this enabled, you should enable Host AND Guest Debug Markers.\nDoes not work on Intel GPUs.\nYou need Vulkan Validation Layers enabled and the Vulkan SDK for this to work.</source>
       <translation type="unfinished">Crash Diagnostics:\nCreates a .yaml file with info about the Vulkan state at the time of crashing.\nUseful for debugging &apos;Device lost&apos; errors. If you have this enabled, you should enable Host AND Guest Debug Markers.\nDoes not work on Intel GPUs.\nYou need Vulkan Validation Layers enabled and the Vulkan SDK for this to work.</translation>
+    </message>
+    <message>
+      <source>Enable Readbacks:\nEnable GPU memory readbacks and writebacks.\nThis is required for proper behavior in some games.\nMight cause stability and/or performance issues.</source>
+      <translation type="unfinished">Enable Readbacks:\nEnable GPU memory readbacks and writebacks.\nThis is required for proper behavior in some games.\nMight cause stability and/or performance issues.</translation>
+    </message>
+    <message>
+      <source>Enable Readback Linear Images:\nEnables async downloading of GPU modified linear images.\nMight fix issues in some games.</source>
+      <translation type="unfinished">Enable Readback Linear Images:\nEnables async downloading of GPU modified linear images.\nMight fix issues in some games.</translation>
     </message>
     <message>
       <source>Copy GPU Buffers:\nGets around race conditions involving GPU submits.\nMay or may not help with PM4 type 0 crashes.</source>
@@ -1916,7 +2024,7 @@
     </message>
     <message>
       <source>Nightly</source>
-      <translation type="unfinished">Nightly</translation>
+      <translation>اخرین نسخه شبانه</translation>
     </message>
     <message>
       <source>Set the volume of the background music.</source>
@@ -1940,7 +2048,7 @@
     </message>
     <message>
       <source>sync</source>
-      <translation type="unfinished">sync</translation>
+      <translation>همزمان</translation>
     </message>
     <message>
       <source>Auto Select</source>
@@ -2004,7 +2112,7 @@
     </message>
     <message>
       <source>Right</source>
-      <translation type="unfinished">Right</translation>
+      <translation>راست</translation>
     </message>
     <message>
       <source>Top</source>
@@ -2036,7 +2144,7 @@
     </message>
     <message>
       <source>%1 already exists</source>
-      <translation type="unfinished">%1 already exists</translation>
+      <translation>%1 از قبل وجود دارد</translation>
     </message>
     <message>
       <source>Portable user folder created</source>
@@ -2048,7 +2156,23 @@
     </message>
     <message>
       <source>Open the custom trophy images/sounds folder:\nYou can add custom images to the trophies and an audio.\nAdd the files to custom_trophy with the following names:\ntrophy.wav OR trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNote: The sound will only work in QT versions.</source>
-      <translation type="unfinished">Open the custom trophy images/sounds folder:\nYou can add custom images to the trophies and an audio.\nAdd the files to custom_trophy with the following names:\ntrophy.wav OR trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNote: The sound will only work in QT versions.</translation>
+      <translation>پوشه تصاویر/صداهای تروفی سفارشی را باز کنید:\n شما می‌توانید تصاویر و صدای سفارشی به تروفی‌ها اضافه کنید.\n فایل‌ها را با نام‌های زیر به custom_trophy اضافه کنید:\ntrophy.wav یا trophy.mp3، bronze.png، gold.png، platinum.png، silver.png \nتوجه: صدا فقط در نسخه‌های QT کار می‌کند.</translation>
+    </message>
+    <message>
+      <source> * Unsupported Vulkan Version</source>
+      <translation type="unfinished"> * Unsupported Vulkan Version</translation>
+    </message>
+    <message>
+      <source>100%</source>
+      <translation type="unfinished">100%</translation>
+    </message>
+    <message>
+      <source>Experimental Features</source>
+      <translation type="unfinished">Experimental Features</translation>
+    </message>
+    <message>
+      <source>WARNING: These features are experimental and should not be enabled unless you were told to, or a game requires it. Please ask in the shadPS4 Discord server if you have any questions.</source>
+      <translation type="unfinished">WARNING: These features are experimental and should not be enabled unless you were told to, or a game requires it. Please ask in the shadPS4 Discord server if you have any questions.</translation>
     </message>
   </context>
   <context>
@@ -2075,7 +2199,7 @@
     </message>
     <message>
       <source>Show Hidden Trophies</source>
-      <translation type="unfinished">Show Hidden Trophies</translation>
+      <translation>نمایش جوایز مخفی</translation>
     </message>
   </context>
 </TS>

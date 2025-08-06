@@ -138,7 +138,7 @@
     </message>
     <message>
       <source>File Exists</source>
-      <translation>Dosya mevcut</translation>
+      <translation>Dosya Mevcut</translation>
     </message>
     <message>
       <source>File already exists. Do you want to replace it?</source>
@@ -454,32 +454,8 @@
       <translation>Oyuna özel yapılandırma kullan</translation>
     </message>
     <message>
-      <source>L1 / LB</source>
-      <translation>L1 / LB</translation>
-    </message>
-    <message>
-      <source>L2 / LT</source>
-      <translation>L2 / LT</translation>
-    </message>
-    <message>
-      <source>Back</source>
-      <translation>Geri</translation>
-    </message>
-    <message>
-      <source>R1 / RB</source>
-      <translation>R1 / RB</translation>
-    </message>
-    <message>
-      <source>R2 / RT</source>
-      <translation>R2 / RT</translation>
-    </message>
-    <message>
       <source>L3</source>
       <translation>L3</translation>
-    </message>
-    <message>
-      <source>Options / Start</source>
-      <translation>Seçenekler / Başlat</translation>
     </message>
     <message>
       <source>R3</source>
@@ -488,22 +464,6 @@
     <message>
       <source>Face Buttons</source>
       <translation>Eylem Düğmeleri</translation>
-    </message>
-    <message>
-      <source>Triangle / Y</source>
-      <translation>Üçgen / Y</translation>
-    </message>
-    <message>
-      <source>Square / X</source>
-      <translation>Kare / X</translation>
-    </message>
-    <message>
-      <source>Circle / B</source>
-      <translation>Daire / B</translation>
-    </message>
-    <message>
-      <source>Cross / A</source>
-      <translation>Çarpı / A</translation>
     </message>
     <message>
       <source>Right Stick Deadzone (def:2, max:127)</source>
@@ -564,6 +524,130 @@
     <message>
       <source>Cancel</source>
       <translation>İptal</translation>
+    </message>
+    <message>
+      <source>unmapped</source>
+      <translation>atanmamış</translation>
+    </message>
+    <message>
+      <source>L1</source>
+      <translation>L1</translation>
+    </message>
+    <message>
+      <source>R1</source>
+      <translation>R1</translation>
+    </message>
+    <message>
+      <source>L2</source>
+      <translation>L2</translation>
+    </message>
+    <message>
+      <source>Options</source>
+      <translation>Seçenekler</translation>
+    </message>
+    <message>
+      <source>R2</source>
+      <translation>R2</translation>
+    </message>
+    <message>
+      <source>Touchpad Left</source>
+      <translation>Dokunmatik Yüzey Sol</translation>
+    </message>
+    <message>
+      <source>Touchpad Center</source>
+      <translation>Dokunmatik Yüzey Orta</translation>
+    </message>
+    <message>
+      <source>Touchpad Right</source>
+      <translation>Dokunmatik Yüzey Sağ</translation>
+    </message>
+    <message>
+      <source>Triangle</source>
+      <translation>Üçgen</translation>
+    </message>
+    <message>
+      <source>Square</source>
+      <translation>Kare</translation>
+    </message>
+    <message>
+      <source>Circle</source>
+      <translation>Yuvarlak</translation>
+    </message>
+    <message>
+      <source>Cross</source>
+      <translation>Çarpı</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation>Aynı tuş birden fazla kez atanamaz. Aşağıdaki tuşlara birden fazla giriş atanmış:
+
+%1</translation>
+    </message>
+    <message>
+      <source>Press a button</source>
+      <translation>Bir Düğmeye Bas</translation>
+    </message>
+    <message>
+      <source>Move analog stick</source>
+      <translation>Analog çubuğu taşı</translation>
+    </message>
+    <message>
+      <source>L1 and L2</source>
+      <translation type="unfinished">L1 and L2</translation>
+    </message>
+    <message>
+      <source>Active Gamepad</source>
+      <translation type="unfinished">Active Gamepad</translation>
+    </message>
+    <message>
+      <source>Gamepad ID</source>
+      <translation type="unfinished">Gamepad ID</translation>
+    </message>
+    <message>
+      <source>Default Gamepad</source>
+      <translation type="unfinished">Default Gamepad</translation>
+    </message>
+    <message>
+      <source>No default selected</source>
+      <translation type="unfinished">No default selected</translation>
+    </message>
+    <message>
+      <source>n/a</source>
+      <translation type="unfinished">n/a</translation>
+    </message>
+    <message>
+      <source>Set Active Gamepad as Default</source>
+      <translation type="unfinished">Set Active Gamepad as Default</translation>
+    </message>
+    <message>
+      <source>Remove Default Gamepad</source>
+      <translation type="unfinished">Remove Default Gamepad</translation>
+    </message>
+    <message>
+      <source>R1 and R2</source>
+      <translation type="unfinished">R1 and R2</translation>
+    </message>
+    <message>
+      <source>ID: </source>
+      <translation type="unfinished">ID: </translation>
+    </message>
+    <message>
+      <source>Default Controller Selected</source>
+      <translation type="unfinished">Default Controller Selected</translation>
+    </message>
+    <message>
+      <source>Active controller set as default</source>
+      <translation type="unfinished">Active controller set as default</translation>
+    </message>
+    <message>
+      <source>Default Controller Removed</source>
+      <translation type="unfinished">Default Controller Removed</translation>
+    </message>
+    <message>
+      <source>Default controller setting removed</source>
+      <translation type="unfinished">Default controller setting removed</translation>
     </message>
   </context>
   <context>
@@ -747,6 +831,10 @@
     <message>
       <source>Last updated</source>
       <translation>Son güncelleme</translation>
+    </message>
+    <message>
+      <source>Favorite</source>
+      <translation>Sık Kullanılan</translation>
     </message>
   </context>
   <context>
@@ -950,6 +1038,14 @@
       <source>SFO Viewer for </source>
       <translation>SFO Görüntüleyici: </translation>
     </message>
+    <message>
+      <source>Remove from Favorites</source>
+      <translation>Favorilerden kaldır</translation>
+    </message>
+    <message>
+      <source>Add to Favorites</source>
+      <translation>Favorilere Ekle</translation>
+    </message>
   </context>
   <context>
     <name>HelpDialog</name>
@@ -1057,10 +1153,6 @@
       <translation>L3</translation>
     </message>
     <message>
-      <source>Touchpad Click</source>
-      <translation>Dokunmatik Yüzey Tıklaması</translation>
-    </message>
-    <message>
       <source>Mouse to Joystick</source>
       <translation>Mouse'dan Kontrolcü</translation>
     </message>
@@ -1153,10 +1245,6 @@
       <translation>Kaydedilemedi</translation>
     </message>
     <message>
-      <source>Cannot bind any unique input more than once</source>
-      <translation>Herhangi bir benzersiz girdi birden fazla kez bağlanamaz</translation>
-    </message>
-    <message>
       <source>Press a key</source>
       <translation>Bir tuşa basın</translation>
     </message>
@@ -1183,6 +1271,26 @@
     <message>
       <source>Cancel</source>
       <translation>İptal</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation>Aynı tuş birden fazla kez atanamaz. Aşağıdaki tuşlara birden fazla giriş atanmış:
+
+%1</translation>
+    </message>
+    <message>
+      <source>Touchpad Left</source>
+      <translation>Dokunmatik Yüzey Sol</translation>
+    </message>
+    <message>
+      <source>Touchpad Center</source>
+      <translation>Dokunmatik Yüzey Orta</translation>
+    </message>
+    <message>
+      <source>Touchpad Right</source>
+      <translation>Dokunmatik Yüzey Sağ</translation>
     </message>
   </context>
   <context>
@@ -1221,7 +1329,7 @@
     </message>
     <message>
       <source>Exit shadPS4</source>
-      <translation>shadPS4&apos;ten Çık</translation>
+      <translation>shadPS4 Çıkış</translation>
     </message>
     <message>
       <source>Exit the application.</source>
@@ -1348,10 +1456,6 @@
       <translation>Oyun Listesi</translation>
     </message>
     <message>
-      <source> * Unsupported Vulkan Version</source>
-      <translation> * Desteklenmeyen Vulkan Sürümü</translation>
-    </message>
-    <message>
       <source>Download Cheats For All Installed Games</source>
       <translation>Tüm Yüklenmiş Oyunlar İçin Hileleri İndir</translation>
     </message>
@@ -1385,7 +1489,7 @@
     </message>
     <message>
       <source>Game Boot</source>
-      <translation>Oyun Başlatma</translation>
+      <translation>Oyun Başlat</translation>
     </message>
     <message>
       <source>Only one file can be selected!</source>
@@ -1539,16 +1643,24 @@
       <translation>İmleç İçin Hareketsizlik Zaman Aşımı</translation>
     </message>
     <message>
+      <source>Microphone</source>
+      <translation type="unfinished">Microphone</translation>
+    </message>
+    <message>
+      <source>None</source>
+      <translation>Hiçbiri</translation>
+    </message>
+    <message>
+      <source>Default Device</source>
+      <translation>Varsayılan Cihaz</translation>
+    </message>
+    <message>
       <source>s</source>
       <translation>sn</translation>
     </message>
     <message>
       <source>Controller</source>
       <translation>Kontrolcü</translation>
-    </message>
-    <message>
-      <source>Back Button Behavior</source>
-      <translation>Geri Dönme Butonu Davranışı</translation>
     </message>
     <message>
       <source>Graphics</source>
@@ -1641,6 +1753,14 @@
     <message>
       <source>Guest Debug Markers</source>
       <translation>Konuk Hata Ayıklama İşaretleyicileri</translation>
+    </message>
+    <message>
+      <source>Enable Readbacks</source>
+      <translation>Geri okuma özelliğini etkinleştir</translation>
+    </message>
+    <message>
+      <source>Enable Readback Linear Images</source>
+      <translation type="unfinished">Enable Readback Linear Images</translation>
     </message>
     <message>
       <source>Update</source>
@@ -1787,10 +1907,6 @@
       <translation>İmleç İçin Hareketsizlik Zaman Aşımı:\nBoşta kalan imlecin kendini kaç saniye sonra gizleyeceğidir.</translation>
     </message>
     <message>
-      <source>Back Button Behavior:\nSets the controller&apos;s back button to emulate tapping the specified position on the PS4 touchpad.</source>
-      <translation>Geri düğmesi davranışı:\nKontrol cihazındaki geri düğmesini, PS4&apos;ün dokunmatik panelindeki belirlenen noktaya dokunmak için ayarlar.</translation>
-    </message>
-    <message>
       <source>Display Compatibility Data:\nDisplays game compatibility information in table view. Enable &quot;Update Compatibility On Startup&quot; to get up-to-date information.</source>
       <translation>Uyumluluk Verilerini Göster:\nOyun uyumluluk bilgilerini tablo görünümünde görüntüler. Güncel bilgileri almak için &quot;Başlangıçta Uyumluluk Veritabanını Güncelle&quot;yi etkinleştirin.</translation>
     </message>
@@ -1813,22 +1929,6 @@
     <message>
       <source>Always</source>
       <translation>Her zaman</translation>
-    </message>
-    <message>
-      <source>Touchpad Left</source>
-      <translation>Dokunmatik Yüzey Sol</translation>
-    </message>
-    <message>
-      <source>Touchpad Right</source>
-      <translation>Dokunmatik Yüzey Sağ</translation>
-    </message>
-    <message>
-      <source>Touchpad Center</source>
-      <translation>Dokunmatik Yüzey Orta</translation>
-    </message>
-    <message>
-      <source>None</source>
-      <translation>Yok</translation>
     </message>
     <message>
       <source>Graphics Device:\nOn multiple GPU systems, select the GPU the emulator will use from the drop down list,\nor select &quot;Auto Select&quot; to automatically determine it.</source>
@@ -1889,6 +1989,14 @@
     <message>
       <source>Crash Diagnostics:\nCreates a .yaml file with info about the Vulkan state at the time of crashing.\nUseful for debugging &apos;Device lost&apos; errors. If you have this enabled, you should enable Host AND Guest Debug Markers.\nDoes not work on Intel GPUs.\nYou need Vulkan Validation Layers enabled and the Vulkan SDK for this to work.</source>
       <translation>Çökme Tanılamaları:\nÇökme anındaki Vulkan durumu hakkında bilgi içeren bir .yaml dosyası oluşturur.\n&apos;Cihaz kayıp&apos; hatalarını ayıklamak için kullanışlıdır. Bunu etkinleştirdiyseniz, Ana Bilgisayar ve Konuk Hata Ayıklama İşaretleyicileri'ni etkinleştirmelisiniz.\nIntel GPU'lar üzerinde çalışmaz.\nÇalışabilmesi için Vulkan Doğrulama Katmanları'nın etkinleştirilmesine ve Vulkan SDK'sine ihtiyacınız vardır.</translation>
+    </message>
+    <message>
+      <source>Enable Readbacks:\nEnable GPU memory readbacks and writebacks.\nThis is required for proper behavior in some games.\nMight cause stability and/or performance issues.</source>
+      <translation>Geri Okuma özelliğini etkinleştir:\nGPU belleğinden veri geri okuma ve yazmayı etkinleştirir.\nBazı oyunların doğru çalışması için gereklidir.\nKararlılık ve/veya performans sorunlarına neden olabilir.</translation>
+    </message>
+    <message>
+      <source>Enable Readback Linear Images:\nEnables async downloading of GPU modified linear images.\nMight fix issues in some games.</source>
+      <translation>Doğrusal görüntülerde geri okumayı etkinleştir:\nGPU tarafından değiştirilmiş doğrusal görüntülerin eşzamanlı olmayan indirilmesini etkinleştirir.\nBazı oyunlardaki sorunları düzeltebilir.</translation>
     </message>
     <message>
       <source>Copy GPU Buffers:\nGets around race conditions involving GPU submits.\nMay or may not help with PM4 type 0 crashes.</source>
@@ -2049,6 +2157,22 @@
     <message>
       <source>Open the custom trophy images/sounds folder:\nYou can add custom images to the trophies and an audio.\nAdd the files to custom_trophy with the following names:\ntrophy.wav OR trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNote: The sound will only work in QT versions.</source>
       <translation>Özel kupa görüntüleri/sesleri klasörünü aç:\nKupalara özel görüntüler ve sesler ekleyebilirsiniz.\nDosyaları aşağıdaki adlarla custom_trophy'ye ekleyin:\ntrophy.wav ya da trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNot: Ses yalnızca QT sürümlerinde çalışacaktır.</translation>
+    </message>
+    <message>
+      <source> * Unsupported Vulkan Version</source>
+      <translation> * Desteklenmeyen Vulkan Sürümü</translation>
+    </message>
+    <message>
+      <source>100%</source>
+      <translation type="unfinished">100%</translation>
+    </message>
+    <message>
+      <source>Experimental Features</source>
+      <translation>Deneysel Özellikler</translation>
+    </message>
+    <message>
+      <source>WARNING: These features are experimental and should not be enabled unless you were told to, or a game requires it. Please ask in the shadPS4 Discord server if you have any questions.</source>
+      <translation type="unfinished">WARNING: These features are experimental and should not be enabled unless you were told to, or a game requires it. Please ask in the shadPS4 Discord server if you have any questions.</translation>
     </message>
   </context>
   <context>

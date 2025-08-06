@@ -61,8 +61,6 @@ enum class SeekOrigin : u32 {
     SetOrigin,       // Seeks from the start of the file.
     CurrentPosition, // Seeks from the current file pointer position.
     End,             // Seeks from the end of the file.
-    SeekHole,        // Seeks from the start of the next hole in the file.
-    SeekData,        // Seeks from the start of the next non-hole region in the file.
 };
 
 class IOFile final {
@@ -188,7 +186,9 @@ public:
 
     template <typename T>
     size_t WriteRaw(const void* data, size_t size) const {
-        return std::fwrite(data, sizeof(T), size, file);
+        auto bytes = std::fwrite(data, sizeof(T), size, file);
+        std::fflush(file);
+        return bytes;
     }
 
     template <typename T>

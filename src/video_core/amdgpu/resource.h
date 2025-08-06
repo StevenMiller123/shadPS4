@@ -6,7 +6,6 @@
 #include "common/alignment.h"
 #include "common/assert.h"
 #include "common/bit_field.h"
-#include "common/types.h"
 #include "video_core/amdgpu/pixel_format.h"
 
 namespace AmdGpu {
@@ -34,6 +33,13 @@ struct Buffer {
     static constexpr Buffer Null() {
         Buffer buffer{};
         buffer.base_address = 1;
+        return buffer;
+    }
+
+    static constexpr Buffer Placeholder(u32 size) {
+        Buffer buffer{};
+        buffer.base_address = 1;
+        buffer.num_records = size;
         return buffer;
     }
 
@@ -68,7 +74,7 @@ struct Buffer {
     }
 
     NumberConversion GetNumberConversion() const noexcept {
-        return MapNumberConversion(NumberFormat(num_format));
+        return MapNumberConversion(NumberFormat(num_format), DataFormat(data_format));
     }
 
     u32 GetStride() const noexcept {
@@ -219,6 +225,19 @@ struct Image {
         return image;
     }
 
+    static constexpr Image NullDepth() {
+        Image image{};
+        image.data_format = u64(DataFormat::Format32);
+        image.num_format = u64(NumberFormat::Float);
+        image.dst_sel_x = u64(CompSwizzle::Red);
+        image.dst_sel_y = u64(CompSwizzle::Green);
+        image.dst_sel_z = u64(CompSwizzle::Blue);
+        image.dst_sel_w = u64(CompSwizzle::Alpha);
+        image.tiling_index = u64(TilingMode::Texture_MicroTiled);
+        image.type = u64(ImageType::Color2D);
+        return image;
+    }
+
     bool Valid() const {
         return (type & 0x8u) != 0;
     }
@@ -292,7 +311,7 @@ struct Image {
     }
 
     NumberConversion GetNumberConversion() const noexcept {
-        return MapNumberConversion(NumberFormat(num_format));
+        return MapNumberConversion(NumberFormat(num_format), DataFormat(data_format));
     }
 
     TilingMode GetTilingMode() const {
@@ -465,6 +484,10 @@ struct Sampler {
 
     operator bool() const noexcept {
         return raw0 != 0 || raw1 != 0;
+    }
+
+    bool Valid() const {
+        return true;
     }
 
     bool operator==(const Sampler& other) const noexcept {

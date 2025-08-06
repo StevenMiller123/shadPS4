@@ -16,6 +16,7 @@
 #include "common/scm_rev.h"
 #include "compatibility_info.h"
 #include "game_info.h"
+#include "gui_settings.h"
 #include "trophy_viewer.h"
 
 #ifdef Q_OS_WIN
@@ -30,11 +31,13 @@
 class GuiContextMenus : public QObject {
     Q_OBJECT
 public:
-    void RequestGameMenu(const QPoint& pos, QVector<GameInfo>& m_games,
-                         std::shared_ptr<CompatibilityInfoClass> m_compat_info,
-                         QTableWidget* widget, bool isList) {
+    int RequestGameMenu(const QPoint& pos, QVector<GameInfo>& m_games,
+                        std::shared_ptr<CompatibilityInfoClass> m_compat_info,
+                        std::shared_ptr<gui_settings> settings, QTableWidget* widget, bool isList) {
         QPoint global_pos = widget->viewport()->mapToGlobal(pos);
+        std::shared_ptr<gui_settings> m_gui_settings = std::move(settings);
         int itemID = 0;
+        int changedFavorite = 0;
         if (isList) {
             itemID = widget->currentRow();
         } else {
@@ -43,7 +46,7 @@ public:
 
         // Do not show the menu if no item is selected
         if (itemID < 0 || itemID >= m_games.size()) {
-            return;
+            return changedFavorite;
         }
 
         // Setup menu.
@@ -63,11 +66,22 @@ public:
 
         menu.addMenu(openFolderMenu);
 
+        QString serialStr = QString::fromStdString(m_games[itemID].serial);
+        QList<QString> list = gui_settings::Var2List(m_gui_settings->GetValue(gui::favorites_list));
+        bool isFavorite = list.contains(serialStr);
+        QAction* toggleFavorite;
+
+        if (isFavorite) {
+            toggleFavorite = new QAction(tr("Remove from Favorites"), widget);
+        } else {
+            toggleFavorite = new QAction(tr("Add to Favorites"), widget);
+        }
         QAction createShortcut(tr("Create Shortcut"), widget);
         QAction openCheats(tr("Cheats / Patches"), widget);
         QAction openSfoViewer(tr("SFO Viewer"), widget);
         QAction openTrophyViewer(tr("Trophy Viewer"), widget);
 
+        menu.addAction(toggleFavorite);
         menu.addAction(&createShortcut);
         menu.addAction(&openCheats);
         menu.addAction(&openSfoViewer);
@@ -128,7 +142,7 @@ public:
         // Show menu.
         auto selected = menu.exec(global_pos);
         if (!selected) {
-            return;
+            return changedFavorite;
         }
 
         if (selected == openGameFolder) {
@@ -156,11 +170,9 @@ public:
         }
 
         if (selected == openSaveDataFolder) {
-            QString userPath;
-            Common::FS::PathToQString(userPath,
-                                      Common::FS::GetUserPath(Common::FS::PathType::UserDir));
-            QString saveDataPath =
-                userPath + "/savedata/1/" + QString::fromStdString(m_games[itemID].serial);
+            QString saveDataPath;
+            Common::FS::PathToQString(saveDataPath,
+                                      Config::GetSaveDataPath() / "1" / m_games[itemID].save_dir);
             QDir(saveDataPath).mkpath(saveDataPath);
             QDesktopServices::openUrl(QUrl::fromLocalFile(saveDataPath));
         }
@@ -303,6 +315,16 @@ public:
             }
         }
 
+        if (selected == toggleFavorite) {
+            if (isFavorite) {
+                list.removeOne(serialStr);
+            } else {
+                list.append(serialStr);
+            }
+            m_gui_settings->SetValue(gui::favorites_list, gui_settings::List2Var(list));
+            changedFavorite = 1;
+        }
+
         if (selected == &openCheats) {
             QString gameName = QString::fromStdString(m_games[itemID].name);
             QString gameSerial = QString::fromStdString(m_games[itemID].serial);
@@ -359,7 +381,7 @@ public:
 
             QString gameName = QString::fromStdString(m_games[itemID].name);
             TrophyViewer* trophyViewer =
-                new TrophyViewer(trophyPath, gameTrpPath, gameName, allTrophyGames);
+                new TrophyViewer(m_gui_settings, trophyPath, gameTrpPath, gameName, allTrophyGames);
             trophyViewer->show();
             connect(widget->parent(), &QWidget::destroyed, trophyViewer,
                     [trophyViewer]() { trophyViewer->deleteLater(); });
@@ -485,8 +507,7 @@ public:
                 dlc_path, Config::getAddonInstallDir() /
                               Common::FS::PathFromQString(folder_path).parent_path().filename());
             Common::FS::PathToQString(save_data_path,
-                                      Common::FS::GetUserPath(Common::FS::PathType::UserDir) /
-                                          "savedata/1" / m_games[itemID].serial);
+                                      Config::GetSaveDataPath() / "1" / m_games[itemID].save_dir);
 
             Common::FS::PathToQString(trophy_data_path,
                                       Common::FS::GetUserPath(Common::FS::PathType::MetaDataDir) /
@@ -560,7 +581,7 @@ public:
         if (selected == viewCompatibilityReport) {
             if (m_games[itemID].compatibility.issue_number != "") {
                 auto url_issues =
-                    "https://github.com/shadps4-emu/shadps4-game-compatibility/issues/";
+                    "https://github.com/shadps4-compatibility/shadps4-game-compatibility/issues/";
                 QDesktopServices::openUrl(
                     QUrl(url_issues + m_games[itemID].compatibility.issue_number));
             }
@@ -568,8 +589,8 @@ public:
 
         if (selected == submitCompatibilityReport) {
             if (m_games[itemID].compatibility.issue_number == "") {
-                QUrl url =
-                    QUrl("https://github.com/shadps4-emu/shadps4-game-compatibility/issues/new");
+                QUrl url = QUrl("https://github.com/shadps4-compatibility/"
+                                "shadps4-game-compatibility/issues/new");
                 QUrlQuery query;
                 query.addQueryItem("template", QString("game_compatibility.yml"));
                 query.addQueryItem(
@@ -584,11 +605,12 @@ public:
                 QDesktopServices::openUrl(url);
             } else {
                 auto url_issues =
-                    "https://github.com/shadps4-emu/shadps4-game-compatibility/issues/";
+                    "https://github.com/shadps4-compatibility/shadps4-game-compatibility/issues/";
                 QDesktopServices::openUrl(
                     QUrl(url_issues + m_games[itemID].compatibility.issue_number));
             }
         }
+        return changedFavorite;
     }
 
     int GetRowIndex(QTreeWidget* treeWidget, QTreeWidgetItem* item) {

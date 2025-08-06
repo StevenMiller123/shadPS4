@@ -11,6 +11,7 @@
 namespace Core {
 
 enum class MemoryPermission : u32 {
+    None = 0,
     Read = 1 << 0,
     Write = 1 << 1,
     ReadWrite = Read | Write,
@@ -18,8 +19,6 @@ enum class MemoryPermission : u32 {
     ReadWriteExecute = Read | Write | Execute,
 };
 DECLARE_ENUM_FLAG_OPERATORS(MemoryPermission)
-
-constexpr VAddr CODE_BASE_OFFSET = 0x100000000ULL;
 
 constexpr VAddr SYSTEM_MANAGED_MIN = 0x00000400000ULL;
 constexpr VAddr SYSTEM_MANAGED_MAX = 0x07FFFFBFFFULL;

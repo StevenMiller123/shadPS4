@@ -12,6 +12,10 @@
 #include "common/logging/formatter.h"
 #include "core/devices/base_device.h"
 
+namespace Libraries::Net {
+struct Socket;
+}
+
 namespace Core::FileSys {
 
 class MntPoints {
@@ -21,6 +25,7 @@ class MntPoints {
     static constexpr bool NeedsCaseInsensitiveSearch = true;
 #endif
 public:
+    static bool ignore_game_patches;
     struct MntPair {
         std::filesystem::path host_path;
         std::string mount; // e.g /app0
@@ -76,6 +81,7 @@ enum class FileType {
     Regular, // standard file
     Directory,
     Device,
+    Socket,
 };
 
 struct File {
@@ -87,7 +93,8 @@ struct File {
     std::vector<DirEntry> dirents;
     u32 dirents_index;
     std::mutex m_mutex;
-    std::shared_ptr<Devices::BaseDevice> device; // only valid for type == Device
+    std::shared_ptr<Devices::BaseDevice> device;    // only valid for type == Device
+    std::shared_ptr<Libraries::Net::Socket> socket; // only valid for type == Socket
 };
 
 class HandleTable {
@@ -98,6 +105,7 @@ public:
     int CreateHandle();
     void DeleteHandle(int d);
     File* GetFile(int d);
+    File* GetSocket(int d);
     File* GetFile(const std::filesystem::path& host_name);
     int GetFileDescriptor(File* file);
 

@@ -220,7 +220,7 @@ s32 PS4_SYSV_ABI sceVideoOutGetEventData(const Kernel::SceKernelEvent* ev, s64* 
     if (ev->ident != static_cast<s32>(OrbisVideoOutInternalEventId::Flip) || ev->data == 0) {
         *data = event_data;
     } else {
-        *data = event_data | 0xFFFF000000000000;
+        *data = event_data | 0xffff000000000000;
     }
     return ORBIS_OK;
 }
@@ -233,7 +233,8 @@ s32 PS4_SYSV_ABI sceVideoOutGetEventCount(const Kernel::SceKernelEvent* ev) {
         return ORBIS_VIDEO_OUT_ERROR_INVALID_EVENT;
     }
 
-    return (ev->data >> 0xc) & 0xf;
+    auto event_data = static_cast<OrbisVideoOutEventData>(ev->data);
+    return event_data.count;
 }
 
 s32 PS4_SYSV_ABI sceVideoOutGetFlipStatus(s32 handle, FlipStatus* status) {
@@ -281,7 +282,12 @@ s32 PS4_SYSV_ABI sceVideoOutGetVblankStatus(int handle, SceVideoOutVblankStatus*
 
 s32 PS4_SYSV_ABI sceVideoOutGetResolutionStatus(s32 handle, SceVideoOutResolutionStatus* status) {
     LOG_INFO(Lib_VideoOut, "called");
-    *status = driver->GetPort(handle)->resolution;
+    auto* port = driver->GetPort(handle);
+    if (!port || !port->is_open) {
+        return ORBIS_VIDEO_OUT_ERROR_INVALID_HANDLE;
+    }
+
+    *status = port->resolution;
     return ORBIS_OK;
 }
 
@@ -439,7 +445,8 @@ s32 PS4_SYSV_ABI sceVideoOutConfigureOutputMode_(s32 handle, u32 reserved, const
 }
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
-    driver = std::make_unique<VideoOutDriver>(Config::getScreenWidth(), Config::getScreenHeight());
+    driver = std::make_unique<VideoOutDriver>(Config::getInternalScreenWidth(),
+                                              Config::getInternalScreenHeight());
 
     LIB_FUNCTION("SbU3dwp80lQ", "libSceVideoOut", 1, "libSceVideoOut", 0, 0,
                  sceVideoOutGetFlipStatus);

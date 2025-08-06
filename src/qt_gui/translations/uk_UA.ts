@@ -454,32 +454,8 @@
       <translation>Використовувати ігрові конфігурації</translation>
     </message>
     <message>
-      <source>L1 / LB</source>
-      <translation>L1 / Лівий Бампер</translation>
-    </message>
-    <message>
-      <source>L2 / LT</source>
-      <translation>L2 / Лівий Тригер</translation>
-    </message>
-    <message>
-      <source>Back</source>
-      <translation>Назад</translation>
-    </message>
-    <message>
-      <source>R1 / RB</source>
-      <translation>R1 / Правий Бампер</translation>
-    </message>
-    <message>
-      <source>R2 / RT</source>
-      <translation>R2 / Правий Тригер</translation>
-    </message>
-    <message>
       <source>L3</source>
       <translation>Кнопка лівого стику</translation>
-    </message>
-    <message>
-      <source>Options / Start</source>
-      <translation>Опції / Старт</translation>
     </message>
     <message>
       <source>R3</source>
@@ -488,22 +464,6 @@
     <message>
       <source>Face Buttons</source>
       <translation>Лицьові кнопки</translation>
-    </message>
-    <message>
-      <source>Triangle / Y</source>
-      <translation>Трикутник / Y</translation>
-    </message>
-    <message>
-      <source>Square / X</source>
-      <translation>Квадрат / X</translation>
-    </message>
-    <message>
-      <source>Circle / B</source>
-      <translation>Коло / B</translation>
-    </message>
-    <message>
-      <source>Cross / A</source>
-      <translation>Хрест / A</translation>
     </message>
     <message>
       <source>Right Stick Deadzone (def:2, max:127)</source>
@@ -564,6 +524,130 @@
     <message>
       <source>Cancel</source>
       <translation>Відмінити</translation>
+    </message>
+    <message>
+      <source>unmapped</source>
+      <translation>Не назначено</translation>
+    </message>
+    <message>
+      <source>L1</source>
+      <translation>L1</translation>
+    </message>
+    <message>
+      <source>R1</source>
+      <translation>R1</translation>
+    </message>
+    <message>
+      <source>L2</source>
+      <translation>L2</translation>
+    </message>
+    <message>
+      <source>Options</source>
+      <translation>Опції</translation>
+    </message>
+    <message>
+      <source>R2</source>
+      <translation>R2</translation>
+    </message>
+    <message>
+      <source>Touchpad Left</source>
+      <translation>Ліва сторона сенсору</translation>
+    </message>
+    <message>
+      <source>Touchpad Center</source>
+      <translation>Середина сенсору</translation>
+    </message>
+    <message>
+      <source>Touchpad Right</source>
+      <translation>Права сторона сенсору</translation>
+    </message>
+    <message>
+      <source>Triangle</source>
+      <translation>Трикутник</translation>
+    </message>
+    <message>
+      <source>Square</source>
+      <translation>Квадрат</translation>
+    </message>
+    <message>
+      <source>Circle</source>
+      <translation>Коло</translation>
+    </message>
+    <message>
+      <source>Cross</source>
+      <translation>Хрест</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation>Неможливо призначити одну й ту саму кнопку більше одного разу. Повторне призначення виявлено для таких кнопок:
+
+%1</translation>
+    </message>
+    <message>
+      <source>Press a button</source>
+      <translation>Натисніть кнопку</translation>
+    </message>
+    <message>
+      <source>Move analog stick</source>
+      <translation>Перемістити аналоговий стік</translation>
+    </message>
+    <message>
+      <source>L1 and L2</source>
+      <translation type="unfinished">L1 and L2</translation>
+    </message>
+    <message>
+      <source>Active Gamepad</source>
+      <translation type="unfinished">Active Gamepad</translation>
+    </message>
+    <message>
+      <source>Gamepad ID</source>
+      <translation type="unfinished">Gamepad ID</translation>
+    </message>
+    <message>
+      <source>Default Gamepad</source>
+      <translation type="unfinished">Default Gamepad</translation>
+    </message>
+    <message>
+      <source>No default selected</source>
+      <translation type="unfinished">No default selected</translation>
+    </message>
+    <message>
+      <source>n/a</source>
+      <translation type="unfinished">n/a</translation>
+    </message>
+    <message>
+      <source>Set Active Gamepad as Default</source>
+      <translation type="unfinished">Set Active Gamepad as Default</translation>
+    </message>
+    <message>
+      <source>Remove Default Gamepad</source>
+      <translation type="unfinished">Remove Default Gamepad</translation>
+    </message>
+    <message>
+      <source>R1 and R2</source>
+      <translation type="unfinished">R1 and R2</translation>
+    </message>
+    <message>
+      <source>ID: </source>
+      <translation type="unfinished">ID: </translation>
+    </message>
+    <message>
+      <source>Default Controller Selected</source>
+      <translation type="unfinished">Default Controller Selected</translation>
+    </message>
+    <message>
+      <source>Active controller set as default</source>
+      <translation type="unfinished">Active controller set as default</translation>
+    </message>
+    <message>
+      <source>Default Controller Removed</source>
+      <translation type="unfinished">Default Controller Removed</translation>
+    </message>
+    <message>
+      <source>Default controller setting removed</source>
+      <translation type="unfinished">Default controller setting removed</translation>
     </message>
   </context>
   <context>
@@ -747,6 +831,10 @@
     <message>
       <source>Last updated</source>
       <translation>Останнє оновлення</translation>
+    </message>
+    <message>
+      <source>Favorite</source>
+      <translation>Обране</translation>
     </message>
   </context>
   <context>
@@ -950,6 +1038,14 @@
       <source>SFO Viewer for </source>
       <translation>Перегляд SFO </translation>
     </message>
+    <message>
+      <source>Remove from Favorites</source>
+      <translation>Видалити з обраного</translation>
+    </message>
+    <message>
+      <source>Add to Favorites</source>
+      <translation>Додати до обраного</translation>
+    </message>
   </context>
   <context>
     <name>HelpDialog</name>
@@ -1057,10 +1153,6 @@
       <translation>Кнопка лівого стику</translation>
     </message>
     <message>
-      <source>Touchpad Click</source>
-      <translation>Натискання на сенсорну панель</translation>
-    </message>
-    <message>
       <source>Mouse to Joystick</source>
       <translation>Миша в джойстик</translation>
     </message>
@@ -1153,10 +1245,6 @@
       <translation>Не вдалося зберегти</translation>
     </message>
     <message>
-      <source>Cannot bind any unique input more than once</source>
-      <translation>Не можна прив'язати кнопку вводу більш ніж один раз</translation>
-    </message>
-    <message>
       <source>Press a key</source>
       <translation>Натисніть клавішу</translation>
     </message>
@@ -1183,6 +1271,26 @@
     <message>
       <source>Cancel</source>
       <translation>Відмінити</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation>Унікальний вхід не може бути призначений двічі. Дублікати на кнопках:
+
+%1</translation>
+    </message>
+    <message>
+      <source>Touchpad Left</source>
+      <translation>Ліва сторона сенсору</translation>
+    </message>
+    <message>
+      <source>Touchpad Center</source>
+      <translation>Середина сенсору</translation>
+    </message>
+    <message>
+      <source>Touchpad Right</source>
+      <translation>Права сторона сенсору</translation>
     </message>
   </context>
   <context>
@@ -1346,10 +1454,6 @@
     <message>
       <source>Game List</source>
       <translation>Список ігор</translation>
-    </message>
-    <message>
-      <source> * Unsupported Vulkan Version</source>
-      <translation> * Непідтримувана версія Vulkan</translation>
     </message>
     <message>
       <source>Download Cheats For All Installed Games</source>
@@ -1539,16 +1643,24 @@
       <translation>Тайм-аут приховування курсора при бездіяльності</translation>
     </message>
     <message>
+      <source>Microphone</source>
+      <translation>Мікрофон</translation>
+    </message>
+    <message>
+      <source>None</source>
+      <translation>Ні</translation>
+    </message>
+    <message>
+      <source>Default Device</source>
+      <translation>Стандартний Пристрій</translation>
+    </message>
+    <message>
       <source>s</source>
       <translation>сек</translation>
     </message>
     <message>
       <source>Controller</source>
       <translation>Контролер</translation>
-    </message>
-    <message>
-      <source>Back Button Behavior</source>
-      <translation>Перепризначення кнопки назад</translation>
     </message>
     <message>
       <source>Graphics</source>
@@ -1641,6 +1753,14 @@
     <message>
       <source>Guest Debug Markers</source>
       <translation>Гостьові маркери налагодження</translation>
+    </message>
+    <message>
+      <source>Enable Readbacks</source>
+      <translation>Увімкнути відгуки</translation>
+    </message>
+    <message>
+      <source>Enable Readback Linear Images</source>
+      <translation>Увімкнути відгуки лінійних зображень</translation>
     </message>
     <message>
       <source>Update</source>
@@ -1787,10 +1907,6 @@
       <translation>Встановіть час, через який курсор зникне в разі бездіяльності.</translation>
     </message>
     <message>
-      <source>Back Button Behavior:\nSets the controller&apos;s back button to emulate tapping the specified position on the PS4 touchpad.</source>
-      <translation>Перепризначення кнопки «Назад»:\nНалаштовує кнопку «Назад» контролера на емуляцію натискання на зазначену область на сенсорній панелі контролера PS4.</translation>
-    </message>
-    <message>
       <source>Display Compatibility Data:\nDisplays game compatibility information in table view. Enable &quot;Update Compatibility On Startup&quot; to get up-to-date information.</source>
       <translation>Відображати данні ігрової сумістністі:\nВідображає інформацію про сумісність ігор у вигляді таблиці. Увімкніть &quot;Оновлення даних ігрової сумісності під час запуску&quot; для отримання актуальної інформації.</translation>
     </message>
@@ -1813,22 +1929,6 @@
     <message>
       <source>Always</source>
       <translation>Завжди</translation>
-    </message>
-    <message>
-      <source>Touchpad Left</source>
-      <translation>Ліва сторона тачпаду</translation>
-    </message>
-    <message>
-      <source>Touchpad Right</source>
-      <translation>Права сторона тачпаду</translation>
-    </message>
-    <message>
-      <source>Touchpad Center</source>
-      <translation>Середина тачпаду</translation>
-    </message>
-    <message>
-      <source>None</source>
-      <translation>Без змін</translation>
     </message>
     <message>
       <source>Graphics Device:\nOn multiple GPU systems, select the GPU the emulator will use from the drop down list,\nor select &quot;Auto Select&quot; to automatically determine it.</source>
@@ -1889,6 +1989,14 @@
     <message>
       <source>Crash Diagnostics:\nCreates a .yaml file with info about the Vulkan state at the time of crashing.\nUseful for debugging &apos;Device lost&apos; errors. If you have this enabled, you should enable Host AND Guest Debug Markers.\nDoes not work on Intel GPUs.\nYou need Vulkan Validation Layers enabled and the Vulkan SDK for this to work.</source>
       <translation>Діагностика збоїв:\nСтворює .yaml файл з інформацією про стан Vulkan на момент збою.\nКорисно для налагодження помилок &apos;Device lost&apos;. Якщо у вас увімкнено цей параметр, вам слід увімкнути маркери налагодження Хоста ТА Гостя.\nНе працює на графічних процесорах Intel.\nДля цього вам потрібно увімкнути шари валідації Vulkan і мати Vulkan SDK.</translation>
+    </message>
+    <message>
+      <source>Enable Readbacks:\nEnable GPU memory readbacks and writebacks.\nThis is required for proper behavior in some games.\nMight cause stability and/or performance issues.</source>
+      <translation>Увімкнути відгуки:\nувімкнути відгуки та запис пам'яті GPU\nЦе потрібно для коректної поведінки у деяких іграх.\nМоже спричинити проблеми зі стабільністю та/або продуктивністю.</translation>
+    </message>
+    <message>
+      <source>Enable Readback Linear Images:\nEnables async downloading of GPU modified linear images.\nMight fix issues in some games.</source>
+      <translation>Увімкнути відгуки лінійних зображень:\nУвімкнути асинхронне завантаження зображень, модифікованих GPU.\nМоже виправити проблеми у деяких іграх.</translation>
     </message>
     <message>
       <source>Copy GPU Buffers:\nGets around race conditions involving GPU submits.\nMay or may not help with PM4 type 0 crashes.</source>
@@ -2049,6 +2157,22 @@
     <message>
       <source>Open the custom trophy images/sounds folder:\nYou can add custom images to the trophies and an audio.\nAdd the files to custom_trophy with the following names:\ntrophy.wav OR trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNote: The sound will only work in QT versions.</source>
       <translation>Відкрити папку користувацьких зображень трофеїв/звуків:\nВи можете додати користувацькі зображення до трофеїв та звук.\nДодайте файли до теки custom_trophy з такими назвами:\ntrophy.wav АБО trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nПримітка: Звук буде працювати лише у версіях ShadPS4 з графічним інтерфейсом.</translation>
+    </message>
+    <message>
+      <source> * Unsupported Vulkan Version</source>
+      <translation> * Непідтримувана версія Vulkan</translation>
+    </message>
+    <message>
+      <source>100%</source>
+      <translation>100%</translation>
+    </message>
+    <message>
+      <source>Experimental Features</source>
+      <translation>Експериментальні функції</translation>
+    </message>
+    <message>
+      <source>WARNING: These features are experimental and should not be enabled unless you were told to, or a game requires it. Please ask in the shadPS4 Discord server if you have any questions.</source>
+      <translation>ПОПЕРЕДЖЕННЯ: Ці функції є експериментальними і не повинні бути ввімкнені, якщо вам не було сказано про це, або якщо цього вимагає гра. Будь ласка, запитуйте на Discord сервері  shadPS4, якщо у вас виникнуть запитання.</translation>
     </message>
   </context>
   <context>

@@ -454,31 +454,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>L1 / LB</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>L2 / LT</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Back</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>R1 / RB</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>R2 / RT</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>L3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Options / Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -487,22 +463,6 @@
     </message>
     <message>
         <source>Face Buttons</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Triangle / Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Square / X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Circle / B</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cross / A</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -564,6 +524,128 @@
     <message>
         <source>Cancel</source>
         <translation type="unfinished">Cancel</translation>
+    </message>
+    <message>
+        <source>unmapped</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>L1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>R1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>L2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>R2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Touchpad Left</source>
+        <translation type="unfinished">Touchpad Left</translation>
+    </message>
+    <message>
+        <source>Touchpad Center</source>
+        <translation type="unfinished">Touchpad Center</translation>
+    </message>
+    <message>
+        <source>Touchpad Right</source>
+        <translation type="unfinished">Touchpad Right</translation>
+    </message>
+    <message>
+        <source>Triangle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Square</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Circle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cross</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Press a button</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move analog stick</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>L1 and L2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Active Gamepad</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Gamepad ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default Gamepad</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No default selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>n/a</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Active Gamepad as Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove Default Gamepad</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>R1 and R2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ID: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default Controller Selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Active controller set as default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default Controller Removed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default controller setting removed</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -747,6 +829,10 @@
     <message>
         <source>Last updated</source>
         <translation>Last updated</translation>
+    </message>
+    <message>
+        <source>Favorite</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -950,6 +1036,14 @@
         <source>SFO Viewer for </source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Remove from Favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add to Favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HelpDialog</name>
@@ -1057,10 +1151,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Touchpad Click</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Mouse to Joystick</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1153,10 +1243,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Cannot bind any unique input more than once</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Press a key</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1183,6 +1269,24 @@
     <message>
         <source>Cancel</source>
         <translation type="unfinished">Cancel</translation>
+    </message>
+    <message>
+        <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Touchpad Left</source>
+        <translation type="unfinished">Touchpad Left</translation>
+    </message>
+    <message>
+        <source>Touchpad Center</source>
+        <translation type="unfinished">Touchpad Center</translation>
+    </message>
+    <message>
+        <source>Touchpad Right</source>
+        <translation type="unfinished">Touchpad Right</translation>
     </message>
 </context>
 <context>
@@ -1348,10 +1452,6 @@
         <translation>Game List</translation>
     </message>
     <message>
-        <source> * Unsupported Vulkan Version</source>
-        <translation> * Unsupported Vulkan Version</translation>
-    </message>
-    <message>
         <source>Download Cheats For All Installed Games</source>
         <translation>Download Cheats For All Installed Games</translation>
     </message>
@@ -1447,6 +1547,10 @@
         <source>Show Labels Under Icons</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Customize Hotkeys</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsDialog</name>
@@ -1539,16 +1643,24 @@
         <translation>Hide Cursor Idle Timeout</translation>
     </message>
     <message>
+        <source>Microphone</source>
+        <translation>Microphone</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>None</translation>
+    </message>
+    <message>
+        <source>Default Device</source>
+        <translation>Default Device</translation>
+    </message>
+    <message>
         <source>s</source>
         <translation>s</translation>
     </message>
     <message>
         <source>Controller</source>
         <translation>Controller</translation>
-    </message>
-    <message>
-        <source>Back Button Behavior</source>
-        <translation>Back Button Behavior</translation>
     </message>
     <message>
         <source>Graphics</source>
@@ -1641,6 +1753,14 @@
     <message>
         <source>Guest Debug Markers</source>
         <translation>Guest Debug Markers</translation>
+    </message>
+    <message>
+        <source>Enable Readbacks</source>
+        <translation>Enable Readbacks</translation>
+    </message>
+    <message>
+        <source>Enable Readback Linear Images</source>
+        <translation>Enable Readback Linear Images</translation>
     </message>
     <message>
         <source>Update</source>
@@ -1787,10 +1907,6 @@
         <translation>Hide Idle Cursor Timeout:\nThe duration (seconds) after which the cursor that has been idle hides itself.</translation>
     </message>
     <message>
-        <source>Back Button Behavior:\nSets the controller&apos;s back button to emulate tapping the specified position on the PS4 touchpad.</source>
-        <translation>Back Button Behavior:\nSets the controller&apos;s back button to emulate tapping the specified position on the PS4 touchpad.</translation>
-    </message>
-    <message>
         <source>Display Compatibility Data:\nDisplays game compatibility information in table view. Enable &quot;Update Compatibility On Startup&quot; to get up-to-date information.</source>
         <translation>Display Compatibility Data:\nDisplays game compatibility information in table view. Enable &quot;Update Compatibility On Startup&quot; to get up-to-date information.</translation>
     </message>
@@ -1813,22 +1929,6 @@
     <message>
         <source>Always</source>
         <translation>Always</translation>
-    </message>
-    <message>
-        <source>Touchpad Left</source>
-        <translation>Touchpad Left</translation>
-    </message>
-    <message>
-        <source>Touchpad Right</source>
-        <translation>Touchpad Right</translation>
-    </message>
-    <message>
-        <source>Touchpad Center</source>
-        <translation>Touchpad Center</translation>
-    </message>
-    <message>
-        <source>None</source>
-        <translation>None</translation>
     </message>
     <message>
         <source>Graphics Device:\nOn multiple GPU systems, select the GPU the emulator will use from the drop down list,\nor select &quot;Auto Select&quot; to automatically determine it.</source>
@@ -1889,6 +1989,14 @@
     <message>
         <source>Crash Diagnostics:\nCreates a .yaml file with info about the Vulkan state at the time of crashing.\nUseful for debugging &apos;Device lost&apos; errors. If you have this enabled, you should enable Host AND Guest Debug Markers.\nDoes not work on Intel GPUs.\nYou need Vulkan Validation Layers enabled and the Vulkan SDK for this to work.</source>
         <translation>Crash Diagnostics:\nCreates a .yaml file with info about the Vulkan state at the time of crashing.\nUseful for debugging &apos;Device lost&apos; errors. If you have this enabled, you should enable Host AND Guest Debug Markers.\nDoes not work on Intel GPUs.\nYou need Vulkan Validation Layers enabled and the Vulkan SDK for this to work.</translation>
+    </message>
+    <message>
+        <source>Enable Readbacks:\nEnable GPU memory readbacks and writebacks.\nThis is required for proper behavior in some games.\nMight cause stability and/or performance issues.</source>
+        <translation>Enable Readbacks:\nEnable GPU memory readbacks and writebacks.\nThis is required for proper behavior in some games.\nMight cause stability and/or performance issues.</translation>
+    </message>
+    <message>
+        <source>Enable Readback Linear Images:\nEnables async downloading of GPU modified linear images.\nMight fix issues in some games.</source>
+        <translation>Enable Readback Linear Images:\nEnables async downloading of GPU modified linear images.\nMight fix issues in some games.</translation>
     </message>
     <message>
         <source>Copy GPU Buffers:\nGets around race conditions involving GPU submits.\nMay or may not help with PM4 type 0 crashes.</source>
@@ -2050,6 +2158,22 @@
         <source>Open the custom trophy images/sounds folder:\nYou can add custom images to the trophies and an audio.\nAdd the files to custom_trophy with the following names:\ntrophy.wav OR trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNote: The sound will only work in QT versions.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source> * Unsupported Vulkan Version</source>
+        <translation type="unfinished"> * Unsupported Vulkan Version</translation>
+    </message>
+    <message>
+        <source>100%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Experimental Features</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>WARNING: These features are experimental and should not be enabled unless you were told to, or a game requires it. Please ask in the shadPS4 Discord server if you have any questions.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>TrophyViewer</name>
@@ -2075,6 +2199,77 @@
     </message>
     <message>
         <source>Show Hidden Trophies</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>hotkeys</name>
+    <message>
+        <source>Customize Hotkeys</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Controller Hotkeys</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show FPS Counter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>unmapped</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stop Emulator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggle Fullscreen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggle Pause</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Keyboard Hotkeys</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Fps Counter: F10</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stop Emulator: n/a</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggle Fullscreen: F11</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggle Pause: F9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tip: Up to three inputs can be assigned for each function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation type="unfinished">Save</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation type="unfinished">Apply</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished">Cancel</translation>
+    </message>
+    <message>
+        <source>Press a button</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -98,12 +98,17 @@ enum class Class : u8 {
     Lib_Fiber,             ///< The LibSceFiber implementation.
     Lib_Vdec2,             ///< The LibSceVideodec2 implementation.
     Lib_Videodec,          ///< The LibSceVideodec implementation.
+    Lib_Voice,             ///< The LibSceVoice implementation.
     Lib_RazorCpu,          ///< The LibRazorCpu implementation.
     Lib_Mouse,             ///< The LibSceMouse implementation
     Lib_WebBrowserDialog,  ///< The LibSceWebBrowserDialog implementation
     Lib_NpParty,           ///< The LibSceNpParty implementation
     Lib_Zlib,              ///< The LibSceZlib implementation.
     Lib_Hmd,               ///< The LibSceHmd implementation.
+    Lib_SigninDialog,      ///< The LibSigninDialog implementation.
+    Lib_Camera,            ///< The LibCamera implementation.
+    Lib_CompanionHttpd,    ///< The LibCompanionHttpd implementation.
+    Lib_CompanionUtil,     ///< The LibCompanionUtil implementation.
     Frontend,              ///< Emulator UI
     Render,                ///< Video Core
     Render_Vulkan,         ///< Vulkan backend

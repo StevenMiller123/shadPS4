@@ -11,6 +11,7 @@
 #include "common/config.h"
 #include "common/elf_info.h"
 #include "core/debug_state.h"
+#include "core/devtools/layer.h"
 #include "core/libraries/kernel/time.h"
 #include "core/libraries/pad/pad.h"
 #include "imgui/renderer/imgui_core.h"
@@ -19,6 +20,10 @@
 #include "input/input_mouse.h"
 #include "sdl_window.h"
 #include "video_core/renderdoc.h"
+
+#ifdef ENABLE_QT_GUI
+#include "qt_gui/sdl_event_wrapper.h"
+#endif
 
 #ifdef __APPLE__
 #include "SDL3/SDL_metal.h"
@@ -110,12 +115,31 @@ void SDLInputEngine::Init() {
         return;
     }
 
-    LOG_INFO(Input, "Got {} gamepads. Opening the first one.", gamepad_count);
-    m_gamepad = SDL_OpenGamepad(gamepads[0]);
+    int selectedIndex = GamepadSelect::GetIndexfromGUID(gamepads, gamepad_count,
+                                                        GamepadSelect::GetSelectedGamepad());
+    int defaultIndex =
+        GamepadSelect::GetIndexfromGUID(gamepads, gamepad_count, Config::getDefaultControllerID());
+
+    // If user selects a gamepad in the GUI, use that, otherwise try the default
     if (!m_gamepad) {
-        LOG_ERROR(Input, "Failed to open gamepad 0: {}", SDL_GetError());
-        SDL_free(gamepads);
-        return;
+        if (selectedIndex != -1) {
+            m_gamepad = SDL_OpenGamepad(gamepads[selectedIndex]);
+            LOG_INFO(Input, "Opening gamepad selected in GUI.");
+        } else if (defaultIndex != -1) {
+            m_gamepad = SDL_OpenGamepad(gamepads[defaultIndex]);
+            LOG_INFO(Input, "Opening default gamepad.");
+        } else {
+            m_gamepad = SDL_OpenGamepad(gamepads[0]);
+            LOG_INFO(Input, "Got {} gamepads. Opening the first one.", gamepad_count);
+        }
+    }
+
+    if (!m_gamepad) {
+        if (!m_gamepad) {
+            LOG_ERROR(Input, "Failed to open gamepad: {}", SDL_GetError());
+            SDL_free(gamepads);
+            return;
+        }
     }
 
     SDL_Joystick* joystick = SDL_GetGamepadJoystick(m_gamepad);
@@ -328,6 +352,7 @@ WindowSDL::WindowSDL(s32 width_, s32 height_, Input::GameController* controller_
     Input::ControllerOutput::SetControllerOutputController(controller);
     Input::ControllerOutput::LinkJoystickAxes();
     Input::ParseInputConfig(std::string(Common::ElfInfo::Instance().GameSerial()));
+    Input::LoadHotkeyInputs();
 }
 
 WindowSDL::~WindowSDL() = default;
@@ -339,6 +364,13 @@ void WindowSDL::WaitEvent() {
     if (!SDL_WaitEvent(&event)) {
         return;
     }
+
+#ifdef ENABLE_QT_GUI
+    if (SdlEventWrapper::Wrapper::wrapperActive) {
+        if (SdlEventWrapper::Wrapper::GetInstance()->ProcessEvent(&event))
+            return;
+    }
+#endif
 
     if (ImGui::Core::ProcessEvent(&event)) {
         return;
@@ -415,6 +447,9 @@ void WindowSDL::WaitEvent() {
             DebugState.PauseGuestThreads();
         }
         break;
+    case SDL_EVENT_CHANGE_CONTROLLER:
+        controller->GetEngine()->Init();
+        break;
     default:
         break;
     }
@@ -474,11 +509,16 @@ void WindowSDL::OnKeyboardMouseInput(const SDL_Event* event) {
             Input::ParseInputConfig(std::string(Common::ElfInfo::Instance().GameSerial()));
             return;
         }
-        // Toggle mouse capture and movement input
+        // Toggle mouse capture and joystick input emulation
         else if (input_id == SDLK_F7) {
-            Input::ToggleMouseEnabled();
             SDL_SetWindowRelativeMouseMode(this->GetSDLWindow(),
-                                           !SDL_GetWindowRelativeMouseMode(this->GetSDLWindow()));
+                                           Input::ToggleMouseModeTo(Input::MouseMode::Joystick));
+            return;
+        }
+        // Toggle mouse capture and gyro input emulation
+        else if (input_id == SDLK_F6) {
+            SDL_SetWindowRelativeMouseMode(this->GetSDLWindow(),
+                                           Input::ToggleMouseModeTo(Input::MouseMode::Gyro));
             return;
         }
         // Toggle fullscreen
@@ -511,7 +551,6 @@ void WindowSDL::OnKeyboardMouseInput(const SDL_Event* event) {
 }
 
 void WindowSDL::OnGamepadEvent(const SDL_Event* event) {
-
     bool input_down = event->type == SDL_EVENT_GAMEPAD_AXIS_MOTION ||
                       event->type == SDL_EVENT_GAMEPAD_BUTTON_DOWN;
     Input::InputEvent input_event = Input::InputBinding::GetInputEventFromSDLEvent(*event);
@@ -527,9 +566,54 @@ void WindowSDL::OnGamepadEvent(const SDL_Event* event) {
     // add/remove it from the list
     bool inputs_changed = Input::UpdatePressedKeys(input_event);
 
-    // update bindings
     if (inputs_changed) {
+        // process hotkeys
+        if (event->type == SDL_EVENT_GAMEPAD_BUTTON_UP) {
+            process_hotkeys = true;
+        } else if (event->type == SDL_EVENT_GAMEPAD_BUTTON_DOWN) {
+            if (event->gbutton.timestamp)
+                CheckHotkeys();
+        } else if (event->type == SDL_EVENT_GAMEPAD_AXIS_MOTION) {
+            if (event->gaxis.axis == SDL_GAMEPAD_AXIS_LEFT_TRIGGER ||
+                event->gaxis.axis == SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) {
+                if (event->gaxis.value < 5000) {
+                    process_hotkeys = true;
+                } else if (event->gaxis.value > 16000) {
+                    CheckHotkeys();
+                }
+            }
+        }
+
+        // update bindings
         Input::ActivateOutputsFromInputs();
+    }
+}
+
+void WindowSDL::CheckHotkeys() {
+    if (Input::HotkeyInputsPressed(Input::GetHotkeyInputs(Input::HotkeyPad::FullscreenPad))) {
+        SDL_Event event;
+        SDL_memset(&event, 0, sizeof(event));
+        event.type = SDL_EVENT_TOGGLE_FULLSCREEN;
+        SDL_PushEvent(&event);
+        process_hotkeys = false;
+    }
+
+    if (Input::HotkeyInputsPressed(Input::GetHotkeyInputs(Input::HotkeyPad::PausePad))) {
+        SDL_Event event;
+        SDL_memset(&event, 0, sizeof(event));
+        event.type = SDL_EVENT_TOGGLE_PAUSE;
+        SDL_PushEvent(&event);
+        process_hotkeys = false;
+    }
+
+    if (Input::HotkeyInputsPressed(Input::GetHotkeyInputs(Input::HotkeyPad::SimpleFpsPad))) {
+        Overlay::ToggleSimpleFps();
+        process_hotkeys = false;
+    }
+
+    if (Input::HotkeyInputsPressed(Input::GetHotkeyInputs(Input::HotkeyPad::QuitPad))) {
+        Overlay::ToggleQuitWindow();
+        process_hotkeys = false;
     }
 }
 
