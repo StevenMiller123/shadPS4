@@ -279,9 +279,13 @@ int PS4_SYSV_ABI sceAppContentGetRegion() {
 
 int PS4_SYSV_ABI sceAppContentInitialize(const OrbisAppContentInitParam* initParam,
                                          OrbisAppContentBootParam* bootParam) {
-    LOG_ERROR(Lib_AppContent, "(DUMMY) called");
-    auto* param_sfo = Common::Singleton<PSF>::Instance();
+    LOG_INFO(Lib_AppContent, "called");
+    if (addcont_count > 0) {
+        // This function has already been called, avoid re-searching for DLC.
+        return ORBIS_OK;
+    }
 
+    auto* param_sfo = Common::Singleton<PSF>::Instance();
     const auto addons_dir = Config::getAddonInstallDir();
     if (const auto value = param_sfo->GetString("TITLE_ID"); value.has_value()) {
         title_id = *value;
