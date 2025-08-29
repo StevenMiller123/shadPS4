@@ -48,6 +48,7 @@ private:
     u64 directory_size = 0;
     u64 directory_content_size = 0;
     s64 dirents_index = 0;
+    std::string_view dir_path;
     std::vector<PfsDirectoryDirent> dirents;
 };
 } // namespace Core::Directories

@@ -17,6 +17,7 @@ std::shared_ptr<BaseDirectory> NormalDirectory::Create(std::string_view guest_di
 
 NormalDirectory::NormalDirectory(std::string_view guest_directory) {
     auto* mnt = Common::Singleton<Core::FileSys::MntPoints>::Instance();
+    dir_path = guest_directory;
 
     static s32 fileno = 0;
     mnt->IterateDirectory(guest_directory, [this](const auto& ent_path, const auto ent_is_file) {
@@ -66,6 +67,7 @@ NormalDirectory::NormalDirectory(std::string_view guest_directory) {
 }
 
 s64 NormalDirectory::read(void* buf, u64 nbytes) {
+    LOG_INFO(Kernel_Fs, "called on {}", dir_path);
     // Nothing left to read.
     if (file_offset >= directory_size) {
         return ORBIS_OK;
@@ -102,6 +104,7 @@ s64 NormalDirectory::preadv(const Libraries::Kernel::OrbisKernelIovec* iov, s32 
 }
 
 s64 NormalDirectory::lseek(s64 offset, s32 whence) {
+    LOG_INFO(Kernel_Fs, "called on {}", dir_path);
     switch (whence) {
     case 0: {
         file_offset = offset;
@@ -123,6 +126,7 @@ s64 NormalDirectory::lseek(s64 offset, s32 whence) {
 }
 
 s32 NormalDirectory::fstat(Libraries::Kernel::OrbisKernelStat* stat) {
+    LOG_INFO(Kernel_Fs, "called on {}", dir_path);
     stat->st_mode = 0000777u | 0040000u;
     stat->st_size = directory_size;
     stat->st_blksize = 0x8000;

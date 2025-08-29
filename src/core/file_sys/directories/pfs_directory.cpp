@@ -16,7 +16,7 @@ std::shared_ptr<BaseDirectory> PfsDirectory::Create(std::string_view guest_direc
 
 PfsDirectory::PfsDirectory(std::string_view guest_directory) {
     auto* mnt = Common::Singleton<Core::FileSys::MntPoints>::Instance();
-
+    dir_path = guest_directory;
     static s32 fileno = 0;
     mnt->IterateDirectory(guest_directory, [this](const auto& ent_path, const auto ent_is_file) {
         auto& dirent = dirents.emplace_back();
@@ -41,6 +41,7 @@ PfsDirectory::PfsDirectory(std::string_view guest_directory) {
 }
 
 s64 PfsDirectory::read(void* buf, u64 nbytes) {
+    LOG_INFO(Kernel_Fs, "called on {}", dir_path);
     if (dirents_index >= dirents.size()) {
         if (dirents_index < directory_content_size) {
             // We need to find the appropriate dirents_index to start from.
@@ -120,6 +121,7 @@ s64 PfsDirectory::preadv(const Libraries::Kernel::OrbisKernelIovec* iov, s32 iov
 }
 
 s64 PfsDirectory::lseek(s64 offset, s32 whence) {
+    LOG_INFO(Kernel_Fs, "called on {}", dir_path);
     switch (whence) {
     // Seek start
     case 0: {
@@ -158,6 +160,7 @@ s64 PfsDirectory::lseek(s64 offset, s32 whence) {
 }
 
 s32 PfsDirectory::fstat(Libraries::Kernel::OrbisKernelStat* stat) {
+    LOG_INFO(Kernel_Fs, "called on {}", dir_path);
     stat->st_mode = 0000777u | 0040000u;
     stat->st_size = directory_size;
     stat->st_blksize = 0x10000;
@@ -166,6 +169,7 @@ s32 PfsDirectory::fstat(Libraries::Kernel::OrbisKernelStat* stat) {
 }
 
 s64 PfsDirectory::getdents(void* buf, u64 nbytes, s64* basep) {
+    LOG_INFO(Kernel_Fs, "called on {}", dir_path);
     // basep is set at the start of the function.
     if (basep != nullptr) {
         *basep = dirents_index;
