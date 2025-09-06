@@ -1551,6 +1551,10 @@
       <source>Show Labels Under Icons</source>
       <translation>Visa etiketter under ikoner</translation>
     </message>
+    <message>
+      <source>Customize Hotkeys</source>
+      <translation>Anpassa snabbtangenter</translation>
+    </message>
   </context>
   <context>
     <name>SettingsDialog</name>
@@ -1987,10 +1991,6 @@
       <translation>Samla shaders:\nDu behöver aktivera detta för att redigera shaders med felsökningsmenyn (Ctrl + F10)</translation>
     </message>
     <message>
-      <source>Crash Diagnostics:\nCreates a .yaml file with info about the Vulkan state at the time of crashing.\nUseful for debugging &apos;Device lost&apos; errors. If you have this enabled, you should enable Host AND Guest Debug Markers.\nDoes not work on Intel GPUs.\nYou need Vulkan Validation Layers enabled and the Vulkan SDK for this to work.</source>
-      <translation>Krashdiagnostik:\nSkapar en .yaml-fil med information om Vulkan-tillståndet vid tid för kraschen.\nAnvändbart för felsökning av &apos;Device lost&apos;-fel. Om du har aktiverat detta bör du aktivera felsökningsmarkörer för Värd OCH Gäst.\nFungerar inte på Intel GPUer.\nDu behöver aktivera Vulkan Validation Layers och Vulkan SDK för att detta ska fungera.</translation>
-    </message>
-    <message>
       <source>Enable Readbacks:\nEnable GPU memory readbacks and writebacks.\nThis is required for proper behavior in some games.\nMight cause stability and/or performance issues.</source>
       <translation>Aktivera återläsning:\nAktivera återläsning och återskrivning av GPU-minnet.\nDetta krävs för att vissa spel ska fungera korrekt.\nKan orsaka stabilitets- och/eller prestandaproblem.</translation>
     </message>
@@ -2174,6 +2174,82 @@
       <source>WARNING: These features are experimental and should not be enabled unless you were told to, or a game requires it. Please ask in the shadPS4 Discord server if you have any questions.</source>
       <translation>VARNING: Dessa funktioner är experimentella och bör inte aktiveras om du inte har blivit tillsagd att göra det eller om ett spel kräver det. Fråga i shadPS4s Discord-server om du har några frågor.</translation>
     </message>
+    <message>
+      <source>Enable Background Controller Input</source>
+      <translation>Aktivera bakgrundsinmatning från handkontroll</translation>
+    </message>
+    <message>
+      <source>Enable Controller Background Input:\nAllow shadPS4 to detect controller inputs when the game window is not in focus.</source>
+      <translation>Aktivera bakgrundsinmatning från handkontroll:\nTillåt shadPS4 att upptäcka inmatningar från handkontrollen när spelfönstret inte är aktivt.</translation>
+    </message>
+    <message>
+      <source>Crash Diagnostics:\nCreates a .yaml file with info about the Vulkan state at the time of crashing.\nUseful for debugging &apos;Device lost&apos; errors. If you have this enabled, you should enable Host AND Guest Debug Markers.\nYou need Vulkan Validation Layers enabled and the Vulkan SDK for this to work.</source>
+      <translation>Kraschdiagnostik:\nSkapar en .yaml-fil med information om Vulkan-status vid kraschen.\nAnvändbart för felsökning av felmeddelanden om att enheten har förlorats. Om du har aktiverat detta bör du aktivera felsökningsmarkörer för både värd och gäst.\nDu måste ha Vulkan Validation Layers aktiverat och Vulkan SDK för att detta ska fungera.</translation>
+    </message>
+    <message>
+      <source>Enable Logging</source>
+      <translation>Aktivera loggning</translation>
+    </message>
+    <message>
+      <source>Enable Logging:\nEnables logging.\nDo not change this if you do not know what you&apos;re doing!\nWhen asking for help, make sure this setting is ENABLED.</source>
+      <translation>Aktivera loggning:\nAktiverar loggning.\nÄndra inte detta om du inte vet vad du gör!\nNär du ber om hjälp, se till att denna inställning är AKTIVERAD.</translation>
+    </message>
+    <message>
+      <source>Present Mode</source>
+      <translation>Nuvarande läge</translation>
+    </message>
+    <message>
+      <source>Mailbox (Vsync)</source>
+      <translation>Mailbox (Vsync)</translation>
+    </message>
+    <message>
+      <source>Fifo (Vsync)</source>
+      <translation>Fifo (Vsync)</translation>
+    </message>
+    <message>
+      <source>Immediate (No Vsync)</source>
+      <translation>Omedelbar (Ingen Vsync)</translation>
+    </message>
+    <message>
+      <source>DLC Folder</source>
+      <translation>DLC-mapp</translation>
+    </message>
+    <message>
+      <source>Select the DLC folder</source>
+      <translation>Välj DLC-mappen</translation>
+    </message>
+    <message>
+      <source>Present Mode:\nConfigures how video output will be presented to your screen.\n\nMailbox: Frames synchronize with your screen&apos;s refresh rate. New frames will replace any pending frames. Reduces latency but may skip frames if running behind.\nFifo: Frames synchronize with your screen&apos;s refresh rate. New frames will be queued behind pending frames. Ensures all frames are presented but may increase latency.\nImmediate: Frames immediately present to your screen when ready. May result in tearing.</source>
+      <translation>Nuvarande läge:\nKonfigurerar hur videoutgången ska visas på skärmen.\n\nMailbox: Bildrutorna synkroniseras med skärmens uppdateringsfrekvens. Nya bildrutor ersätter alla väntande bildrutor. Minskar fördröjningen men kan hoppa över bildrutor om det uppstår fördröjning.\nFifo: Bildrutorna synkroniseras med skärmens uppdateringsfrekvens. Nya bildrutor placeras i kö bakom väntande bildrutor. Säkerställer att alla bildrutor visas men kan öka fördröjningen.\nOmedelbar: Bildrutorna visas omedelbart på skärmen när de är klara. Kan resultera i tearing.</translation>
+    </message>
+    <message>
+      <source>DLC Path:\nThe folder where game DLC loaded from.</source>
+      <translation>DLC-sökväg:\nMappen där spelens DLC läses in från.</translation>
+    </message>
+    <message>
+      <source>Browse:\nBrowse for a folder to set as the DLC path.</source>
+      <translation>Bläddra:\nBläddra efter en mapp att ställa in som DLC-sökvägen.</translation>
+    </message>
+    <message>
+      <source>FSR Settings</source>
+      <translation>FSR-inställningar</translation>
+    </message>
+    <message>
+      <source>Enable FSR</source>
+      <translation>Aktivera FSR</translation>
+    </message>
+    <message>
+      <source>Enable RCAS (sharpening)</source>
+      <translation>Aktivera RCAS (uppskärpning)</translation>
+    </message>
+    <message>
+      <source>RCAS Attenuation:</source>
+      <translation>RCAS-dämpning:</translation>
+    </message>
+    <message>
+      <source>0.250</source>
+      <translation>0.250</translation>
+    </message>
   </context>
   <context>
     <name>TrophyViewer</name>
@@ -2200,6 +2276,77 @@
     <message>
       <source>Show Hidden Trophies</source>
       <translation>Visa dolda troféer</translation>
+    </message>
+  </context>
+  <context>
+    <name>hotkeys</name>
+    <message>
+      <source>Customize Hotkeys</source>
+      <translation>Anpassa snabbtangenter</translation>
+    </message>
+    <message>
+      <source>Controller Hotkeys</source>
+      <translation>Snabbtangenter för kontroller</translation>
+    </message>
+    <message>
+      <source>Show FPS Counter</source>
+      <translation>Visa FPS-räknare</translation>
+    </message>
+    <message>
+      <source>unmapped</source>
+      <translation>inte mappad</translation>
+    </message>
+    <message>
+      <source>Stop Emulator</source>
+      <translation>Stoppa emulator</translation>
+    </message>
+    <message>
+      <source>Toggle Fullscreen</source>
+      <translation>Växla helskärm</translation>
+    </message>
+    <message>
+      <source>Toggle Pause</source>
+      <translation>Växla paus</translation>
+    </message>
+    <message>
+      <source>Keyboard Hotkeys</source>
+      <translation>Snabbtangenter för tangentbord</translation>
+    </message>
+    <message>
+      <source>Show Fps Counter: F10</source>
+      <translation>Visa FPS-räknare: F10</translation>
+    </message>
+    <message>
+      <source>Stop Emulator: n/a</source>
+      <translation>Stoppa emulator: inte tillgänglig</translation>
+    </message>
+    <message>
+      <source>Toggle Fullscreen: F11</source>
+      <translation>Växla helskärm: F11</translation>
+    </message>
+    <message>
+      <source>Toggle Pause: F9</source>
+      <translation>Växla paus: F9</translation>
+    </message>
+    <message>
+      <source>Tip: Up to three inputs can be assigned for each function</source>
+      <translation>Tips: Upp till tre inmatningar kan tilldelas för varje funktion</translation>
+    </message>
+    <message>
+      <source>Save</source>
+      <translation>Spara</translation>
+    </message>
+    <message>
+      <source>Apply</source>
+      <translation>Tillämpa</translation>
+    </message>
+    <message>
+      <source>Cancel</source>
+      <translation>Avbryt</translation>
+    </message>
+    <message>
+      <source>Press a button</source>
+      <translation>Tryck en knapp</translation>
     </message>
   </context>
 </TS>

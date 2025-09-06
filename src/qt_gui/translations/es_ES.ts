@@ -1551,6 +1551,10 @@
       <source>Show Labels Under Icons</source>
       <translation>Mostrar etiquetas debajo de los iconos</translation>
     </message>
+    <message>
+      <source>Customize Hotkeys</source>
+      <translation>Personalizar Atajos</translation>
+    </message>
   </context>
   <context>
     <name>SettingsDialog</name>
@@ -1987,10 +1991,6 @@
       <translation>Recopilar Shaders:\nNecesitas esto habilitado para editar shaders con el menú de depuración (Ctrl + F10).</translation>
     </message>
     <message>
-      <source>Crash Diagnostics:\nCreates a .yaml file with info about the Vulkan state at the time of crashing.\nUseful for debugging &apos;Device lost&apos; errors. If you have this enabled, you should enable Host AND Guest Debug Markers.\nDoes not work on Intel GPUs.\nYou need Vulkan Validation Layers enabled and the Vulkan SDK for this to work.</source>
-      <translation>Diagnóstico de cuelgues:\nCrea un archivo .yaml con información sobre el estado de Vulkan en el momento del cuelgue.\nÚtil para depurar errores de tipo &apos;Dispositivo perdido&apos; . Con esto activado, deberías habilitar los marcadores de depuración de Host E Invitado.\nNo funciona en GPUs de Intel.\nNecesitas activar las Capas de Validación de Vulkan y el SDK de Vulkan para que funcione.</translation>
-    </message>
-    <message>
       <source>Enable Readbacks:\nEnable GPU memory readbacks and writebacks.\nThis is required for proper behavior in some games.\nMight cause stability and/or performance issues.</source>
       <translation>Habilitar Retrolectura:\nHabilita la lectura y escritura de memoria desde y hacia la GPU.\nNecesario para el correcto funcionamiento de algunos juegos.\nPuede afectar el rendimiento o causar inestabilidad.</translation>
     </message>
@@ -2174,6 +2174,82 @@
       <source>WARNING: These features are experimental and should not be enabled unless you were told to, or a game requires it. Please ask in the shadPS4 Discord server if you have any questions.</source>
       <translation>ADVERTENCIA: Estas funciones son experimentales y no deben activarse a menos que se te haya indicado o que un juego lo requiera específicamente. Si tienes dudas, por favor consulta en el servidor de Discord de shadPS4.</translation>
     </message>
+    <message>
+      <source>Enable Background Controller Input</source>
+      <translation type="unfinished">Enable Background Controller Input</translation>
+    </message>
+    <message>
+      <source>Enable Controller Background Input:\nAllow shadPS4 to detect controller inputs when the game window is not in focus.</source>
+      <translation>.</translation>
+    </message>
+    <message>
+      <source>Crash Diagnostics:\nCreates a .yaml file with info about the Vulkan state at the time of crashing.\nUseful for debugging &apos;Device lost&apos; errors. If you have this enabled, you should enable Host AND Guest Debug Markers.\nYou need Vulkan Validation Layers enabled and the Vulkan SDK for this to work.</source>
+      <translation type="unfinished">Crash Diagnostics:\nCreates a .yaml file with info about the Vulkan state at the time of crashing.\nUseful for debugging &apos;Device lost&apos; errors. If you have this enabled, you should enable Host AND Guest Debug Markers.\nYou need Vulkan Validation Layers enabled and the Vulkan SDK for this to work.</translation>
+    </message>
+    <message>
+      <source>Enable Logging</source>
+      <translation type="unfinished">Enable Logging</translation>
+    </message>
+    <message>
+      <source>Enable Logging:\nEnables logging.\nDo not change this if you do not know what you&apos;re doing!\nWhen asking for help, make sure this setting is ENABLED.</source>
+      <translation type="unfinished">Enable Logging:\nEnables logging.\nDo not change this if you do not know what you&apos;re doing!\nWhen asking for help, make sure this setting is ENABLED.</translation>
+    </message>
+    <message>
+      <source>Present Mode</source>
+      <translation type="unfinished">Present Mode</translation>
+    </message>
+    <message>
+      <source>Mailbox (Vsync)</source>
+      <translation type="unfinished">Mailbox (Vsync)</translation>
+    </message>
+    <message>
+      <source>Fifo (Vsync)</source>
+      <translation type="unfinished">Fifo (Vsync)</translation>
+    </message>
+    <message>
+      <source>Immediate (No Vsync)</source>
+      <translation type="unfinished">Immediate (No Vsync)</translation>
+    </message>
+    <message>
+      <source>DLC Folder</source>
+      <translation type="unfinished">DLC Folder</translation>
+    </message>
+    <message>
+      <source>Select the DLC folder</source>
+      <translation type="unfinished">Select the DLC folder</translation>
+    </message>
+    <message>
+      <source>Present Mode:\nConfigures how video output will be presented to your screen.\n\nMailbox: Frames synchronize with your screen&apos;s refresh rate. New frames will replace any pending frames. Reduces latency but may skip frames if running behind.\nFifo: Frames synchronize with your screen&apos;s refresh rate. New frames will be queued behind pending frames. Ensures all frames are presented but may increase latency.\nImmediate: Frames immediately present to your screen when ready. May result in tearing.</source>
+      <translation type="unfinished">Present Mode:\nConfigures how video output will be presented to your screen.\n\nMailbox: Frames synchronize with your screen&apos;s refresh rate. New frames will replace any pending frames. Reduces latency but may skip frames if running behind.\nFifo: Frames synchronize with your screen&apos;s refresh rate. New frames will be queued behind pending frames. Ensures all frames are presented but may increase latency.\nImmediate: Frames immediately present to your screen when ready. May result in tearing.</translation>
+    </message>
+    <message>
+      <source>DLC Path:\nThe folder where game DLC loaded from.</source>
+      <translation type="unfinished">DLC Path:\nThe folder where game DLC loaded from.</translation>
+    </message>
+    <message>
+      <source>Browse:\nBrowse for a folder to set as the DLC path.</source>
+      <translation type="unfinished">Browse:\nBrowse for a folder to set as the DLC path.</translation>
+    </message>
+    <message>
+      <source>FSR Settings</source>
+      <translation type="unfinished">FSR Settings</translation>
+    </message>
+    <message>
+      <source>Enable FSR</source>
+      <translation type="unfinished">Enable FSR</translation>
+    </message>
+    <message>
+      <source>Enable RCAS (sharpening)</source>
+      <translation type="unfinished">Enable RCAS (sharpening)</translation>
+    </message>
+    <message>
+      <source>RCAS Attenuation:</source>
+      <translation type="unfinished">RCAS Attenuation:</translation>
+    </message>
+    <message>
+      <source>0.250</source>
+      <translation type="unfinished">0.250</translation>
+    </message>
   </context>
   <context>
     <name>TrophyViewer</name>
@@ -2200,6 +2276,77 @@
     <message>
       <source>Show Hidden Trophies</source>
       <translation>Mostrar Trofeos Ocultos</translation>
+    </message>
+  </context>
+  <context>
+    <name>hotkeys</name>
+    <message>
+      <source>Customize Hotkeys</source>
+      <translation>Personalizar Atajos</translation>
+    </message>
+    <message>
+      <source>Controller Hotkeys</source>
+      <translation>Atajos de Mando</translation>
+    </message>
+    <message>
+      <source>Show FPS Counter</source>
+      <translation>Mostrar Contador de FPS</translation>
+    </message>
+    <message>
+      <source>unmapped</source>
+      <translation>sin vincular</translation>
+    </message>
+    <message>
+      <source>Stop Emulator</source>
+      <translation>Parar Emulador</translation>
+    </message>
+    <message>
+      <source>Toggle Fullscreen</source>
+      <translation>Alternar Pantalla Completa</translation>
+    </message>
+    <message>
+      <source>Toggle Pause</source>
+      <translation>Alternar Pausa</translation>
+    </message>
+    <message>
+      <source>Keyboard Hotkeys</source>
+      <translation>Atajos de teclado</translation>
+    </message>
+    <message>
+      <source>Show Fps Counter: F10</source>
+      <translation>Mostrar Contador de Fps: F10</translation>
+    </message>
+    <message>
+      <source>Stop Emulator: n/a</source>
+      <translation>Parar emulador: n/a</translation>
+    </message>
+    <message>
+      <source>Toggle Fullscreen: F11</source>
+      <translation>Alternar Pantalla Completa: F11</translation>
+    </message>
+    <message>
+      <source>Toggle Pause: F9</source>
+      <translation>Alternar Pausa: F9</translation>
+    </message>
+    <message>
+      <source>Tip: Up to three inputs can be assigned for each function</source>
+      <translation>Consejo: Se pueden asignar hasta tres entradas para cada función</translation>
+    </message>
+    <message>
+      <source>Save</source>
+      <translation>Guardar</translation>
+    </message>
+    <message>
+      <source>Apply</source>
+      <translation>Aplicar</translation>
+    </message>
+    <message>
+      <source>Cancel</source>
+      <translation>Cancelar</translation>
+    </message>
+    <message>
+      <source>Press a button</source>
+      <translation>Presiona un botón</translation>
     </message>
   </context>
 </TS>

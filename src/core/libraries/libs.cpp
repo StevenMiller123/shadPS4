@@ -15,6 +15,7 @@
 #include "core/libraries/game_live_streaming/gamelivestreaming.h"
 #include "core/libraries/gnmdriver/gnmdriver.h"
 #include "core/libraries/hmd/hmd.h"
+#include "core/libraries/hmd/hmd_setup_dialog.h"
 #include "core/libraries/ime/error_dialog.h"
 #include "core/libraries/ime/ime.h"
 #include "core/libraries/ime/ime_dialog.h"
@@ -34,6 +35,7 @@
 #include "core/libraries/np_common/np_common.h"
 #include "core/libraries/np_manager/np_manager.h"
 #include "core/libraries/np_party/np_party.h"
+#include "core/libraries/np_profiledialog/np_profiledialog.h"
 #include "core/libraries/np_score/np_score.h"
 #include "core/libraries/np_trophy/np_trophy.h"
 #include "core/libraries/np_web_api/np_web_api.h"
@@ -55,12 +57,14 @@
 #include "core/libraries/system/sysmodule.h"
 #include "core/libraries/system/systemservice.h"
 #include "core/libraries/system/userservice.h"
+#include "core/libraries/system_gesture/system_gesture.h"
 #include "core/libraries/ulobjmgr/ulobjmgr.h"
 #include "core/libraries/usbd/usbd.h"
 #include "core/libraries/videodec/videodec.h"
 #include "core/libraries/videodec/videodec2.h"
 #include "core/libraries/videoout/video_out.h"
 #include "core/libraries/voice/voice.h"
+#include "core/libraries/vr_tracker/vr_tracker.h"
 #include "core/libraries/web_browser_dialog/webbrowserdialog.h"
 #include "core/libraries/zlib/zlib_sce.h"
 #include "fiber/fiber.h"
@@ -94,6 +98,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::NpScore::RegisterLib(sym);
     Libraries::NpTrophy::RegisterLib(sym);
     Libraries::NpWebApi::RegisterLib(sym);
+    Libraries::NpProfileDialog::RegisterLib(sym);
     Libraries::NpAuth::RegisterLib(sym);
     Libraries::ScreenShot::RegisterLib(sym);
     Libraries::AppContent::RegisterLib(sym);
@@ -103,6 +108,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::Random::RegisterLib(sym);
     Libraries::Usbd::RegisterLib(sym);
     Libraries::Pad::RegisterLib(sym);
+    Libraries::SystemGesture::RegisterLib(sym);
     Libraries::Ajm::RegisterLib(sym);
     Libraries::ErrorDialog::RegisterLib(sym);
     Libraries::ImeDialog::RegisterLib(sym);
@@ -123,6 +129,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::NpParty::RegisterLib(sym);
     Libraries::Zlib::RegisterLib(sym);
     Libraries::Hmd::RegisterLib(sym);
+    Libraries::HmdSetupDialog::RegisterLib(sym);
     Libraries::DiscMap::RegisterLib(sym);
     Libraries::Ulobjmgr::RegisterLib(sym);
     Libraries::SigninDialog::RegisterLib(sym);
@@ -131,6 +138,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::CompanionUtil::RegisterLib(sym);
     Libraries::Voice::RegisterLib(sym);
     Libraries::Rtc::RegisterLib(sym);
+    Libraries::VrTracker::RegisterLib(sym);
 }
 
 } // namespace Libraries
