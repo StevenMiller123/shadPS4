@@ -55,11 +55,12 @@ enum class VMAType : u32 {
     Reserved = 1,
     Direct = 2,
     Flexible = 3,
-    Pooled = 4,
-    PoolReserved = 5,
-    Stack = 6,
-    Code = 7,
-    File = 8,
+    SystemFlexible = 4,
+    Pooled = 5,
+    PoolReserved = 6,
+    Stack = 7,
+    Code = 8,
+    File = 9,
 };
 
 struct DirectMemoryArea {
