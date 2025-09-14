@@ -184,8 +184,22 @@ public:
 
     /// Maps and commits a memory region with user provided data
     u64 Copy(auto src, size_t size, size_t alignment = 0) {
+        u32 compare_vals[15];
+        memset(compare_vals, 0, sizeof(compare_vals));
+        compare_vals[0] = 0x40e00000;
+        compare_vals[1] = 0x3f800000;
+        compare_vals[6] = 0x3f800000;
+        compare_vals[10] = 0x640;
+        compare_vals[11] = 0x384;
+        compare_vals[12] = 0x3f800000;
+        compare_vals[14] = 0x3f800000;
+
         const auto [data, offset] = Map(size, alignment);
         std::memcpy(data, reinterpret_cast<const void*>(src), size);
+        if ((u64)src % 0x10000 == 0 && memcmp((void*)src, compare_vals, 15) == 0) {
+            LOG_CRITICAL(Render, "Potentially important copy from src addr {}", fmt::ptr((void*)src));
+        }
+        
         Commit();
         return offset;
     }
