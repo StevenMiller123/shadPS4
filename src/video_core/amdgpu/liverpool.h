@@ -338,7 +338,7 @@ struct Liverpool {
         GreaterThanZ = 2,
     };
 
-    union DepthBufferControl {
+    union DepthShaderControl {
         u32 raw;
         BitField<0, 1, u32> z_export_enable;
         BitField<1, 1, u32> stencil_test_val_export_enable;
@@ -1410,7 +1410,7 @@ struct Liverpool {
             DepthControl depth_control;
             INSERT_PADDING_WORDS(1);
             ColorControl color_control;
-            DepthBufferControl depth_buffer_control;
+            DepthShaderControl depth_shader_control;
             ClipperControl clipper_control;
             PolygonControl polygon_control;
             ViewportControl viewport_control;
@@ -1666,6 +1666,8 @@ private:
     u32 num_mapped_queues{1u}; // GFX is always available
 
     VAddr indirect_args_addr{};
+    u32 num_counter_pairs{};
+    u64 pixel_counter{};
 
     struct ConstantEngine {
         void Reset() {
