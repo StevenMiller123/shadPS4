@@ -87,7 +87,7 @@ void Linker::InitMalloc() {
     ASSERT_MSG(ret == 0, "libSceLibcInternal _malloc_init failed!");
 }
 
-void Linker::Execute(const std::vector<std::string> args) {
+void Linker::Execute(const std::vector<std::string>& args) {
     if (Config::debugDump()) {
         DebugDump();
     }
@@ -102,7 +102,7 @@ void Linker::Execute(const std::vector<std::string> args) {
     }
 
     // Configure the direct and flexible memory regions.
-    u64 fmem_size = SCE_FLEXIBLE_MEMORY_SIZE;
+    u64 fmem_size = ORBIS_FLEXIBLE_MEMORY_SIZE;
     bool use_extended_mem1 = true, use_extended_mem2 = true;
 
     const auto* proc_param = GetProcParam();
@@ -115,7 +115,7 @@ void Linker::Execute(const std::vector<std::string> args) {
             if (mem_param.size >=
                 offsetof(OrbisKernelMemParam, flexible_memory_size) + sizeof(u64*)) {
                 if (const auto* flexible_size = mem_param.flexible_memory_size) {
-                    fmem_size = *flexible_size + SCE_FLEXIBLE_MEMORY_BASE;
+                    fmem_size = *flexible_size + ORBIS_FLEXIBLE_MEMORY_BASE;
                 }
             }
         }
@@ -136,7 +136,18 @@ void Linker::Execute(const std::vector<std::string> args) {
 
     memory->SetupMemoryRegions(fmem_size, use_extended_mem1, use_extended_mem2);
 
-    main_thread.Run([this, module, args](std::stop_token) {
+    // Simulate sceKernelInternalMemory mapping, a mapping usually performed during libkernel init.
+    // Due to the large size of this mapping, failing to emulate it causes issues in some titles.
+    // This mapping belongs in the system reserved area, which starts at address 0x880000000.
+    static constexpr VAddr KernelAllocBase = 0x880000000ULL;
+    static constexpr s64 InternalMemorySize = 0x1000000;
+    void* addr_out{reinterpret_cast<void*>(KernelAllocBase)};
+
+    s32 ret = Libraries::Kernel::sceKernelMapNamedFlexibleMemory(&addr_out, InternalMemorySize, 3,
+                                                                 0, "SceKernelInternalMemory");
+    ASSERT_MSG(ret == 0, "Unable to perform sceKernelInternalMemory mapping");
+
+    main_thread.Run([this, module, &args](std::stop_token) {
         Common::SetCurrentThreadName("GAME_MainThread");
         if (auto& ipc = IPC::Instance()) {
             ipc.WaitForStart();
@@ -162,9 +173,9 @@ void Linker::Execute(const std::vector<std::string> args) {
         params.argc = 1;
         params.argv[0] = "eboot.bin";
         if (!args.empty()) {
-            params.argc = args.size() + 1;
-            for (int i = 0; i < args.size() && i < 32; i++) {
-                params.argv[i + 1] = args[i].c_str();
+            params.argc = args.size();
+            for (int i = 0; i < args.size() && i < 33; i++) {
+                params.argv[i] = args[i].c_str();
             }
         }
         params.entry_addr = module->GetEntryAddress();
