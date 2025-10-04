@@ -1180,7 +1180,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     endif()
 
     target_link_libraries(shadps4 PRIVATE uuid)
-    target_link_options(shadps4 PRIVATE "-Wl,--section-start=.interp=0x700000000000")
+    target_link_options(shadps4 PRIVATE "-Wl,--section-start=.interp=0x700000000000,--no-relax,--no-pie")
 endif()
 
 if (APPLE)
