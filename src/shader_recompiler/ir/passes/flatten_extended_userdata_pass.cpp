@@ -39,7 +39,7 @@ static void DumpSrtProgram(const Shader::Info& info, const u8* code, size_t code
         std::filesystem::create_directories(dump_dir);
     }
     const auto filename = fmt::format("{}_{:#018x}.srtprogram.txt", info.stage, info.pgm_hash);
-    const auto file = IOFile{dump_dir / filename, FileAccessMode::Write, FileType::TextFile};
+    const auto file = IOFile{dump_dir / filename, FileAccessMode::Create, FileType::TextFile};
 
     u64 address = reinterpret_cast<u64>(code);
     u64 code_end = address + codesize;
@@ -205,7 +205,7 @@ static void GenerateSrtProgram(Info& info, PassInfo& pass_info) {
     }
 
     info.srt_info.walker_func = c.getCurr<PFN_SrtWalker>();
-    pass_info.dst_off_dw = NumUserDataRegs;
+    pass_info.dst_off_dw = NUM_USER_DATA_REGS;
     ASSERT(pass_info.dst_off_dw == info.srt_info.flattened_bufsize_dw);
 
     for (const auto& [sgpr_base, root] : pass_info.srt_roots) {

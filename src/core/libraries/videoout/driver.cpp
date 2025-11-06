@@ -10,6 +10,7 @@
 #include "core/libraries/videoout/driver.h"
 #include "core/libraries/videoout/videoout_error.h"
 #include "imgui/renderer/imgui_core.h"
+#include "video_core/amdgpu/liverpool.h"
 #include "video_core/renderer_vulkan/vk_presenter.h"
 
 extern std::unique_ptr<Vulkan::Presenter> presenter;
@@ -165,6 +166,9 @@ int VideoOutDriver::UnregisterBuffers(VideoOutPort* port, s32 attributeIndex) {
 }
 
 void VideoOutDriver::Flip(const Request& req) {
+    // Update HDR status before presenting.
+    presenter->SetHDR(req.port->is_hdr);
+
     // Present the frame.
     presenter->Present(req.frame);
 

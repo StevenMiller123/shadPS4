@@ -62,6 +62,10 @@ int main(int argc, char* argv[]) {
                     "parent of game path\n"
                     "  --wait-for-debugger           Wait for debugger to attach\n"
                     "  --wait-for-pid <pid>          Wait for process with specified PID to stop\n"
+                    "  --config-clean                Run the emulator with the default config "
+                    "values, ignores the config file(s) entirely.\n"
+                    "  --config-global               Run the emulator with the base config file "
+                    "only, ignores game specific configs.\n"
                     "  -h, --help                    Display this help message\n";
              exit(0);
          }},
@@ -82,13 +86,14 @@ int main(int argc, char* argv[]) {
         {"-p",
          [&](int& i) {
              if (i + 1 < argc) {
-                 MemoryPatcher::patchFile = argv[++i];
+                 MemoryPatcher::patch_file = argv[++i];
              } else {
                  std::cerr << "Error: Missing argument for -p/--patch\n";
                  exit(1);
              }
          }},
         {"--patch", [&](int& i) { arg_map["-p"](i); }},
+
         {"-i", [&](int&) { Core::FileSys::MntPoints::ignore_game_patches = true; }},
         {"--ignore-game-patch", [&](int& i) { arg_map["-i"](i); }},
         {"-f",
@@ -151,6 +156,8 @@ int main(int argc, char* argv[]) {
              exit(0);
          }},
         {"--log-append", [&](int& i) { Common::Log::SetAppend(); }},
+        {"--config-clean", [&](int& i) { Config::setConfigMode(Config::ConfigMode::Clean); }},
+        {"--config-global", [&](int& i) { Config::setConfigMode(Config::ConfigMode::Global); }},
         {"--override-root",
          [&](int& i) {
              if (++i >= argc) {
@@ -204,7 +211,6 @@ int main(int argc, char* argv[]) {
                 game_path = argv[i];
                 has_game_argument = true;
             }
-            break;
         } else {
             std::cerr << "Unknown argument: " << cur_arg << ", see --help for info.\n";
         }
