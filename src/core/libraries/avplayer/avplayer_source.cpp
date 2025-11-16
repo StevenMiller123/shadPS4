@@ -504,6 +504,7 @@ void AvPlayerSource::DemuxerThread(std::stop_token stop) {
     m_audio_packets_cv.Notify();
     m_video_frames_cv.Notify();
     m_audio_frames_cv.Notify();
+    m_video_buffers_cv.Notify();
 
     m_video_decoder_thread.Join();
     m_audio_decoder_thread.Join();
@@ -636,8 +637,9 @@ void AvPlayerSource::VideoDecoderThread(std::stop_token stop) {
                       av_err2str(res));
             return;
         }
-        while (res >= 0) {
-            if (!m_video_buffers_cv.Wait(stop, [this] { return m_video_buffers.Size() != 0; })) {
+        while (!m_is_eof && res >= 0) {
+            if (!m_video_buffers_cv.Wait(
+                    stop, [this] { return m_video_buffers.Size() != 0 || m_is_eof; })) {
                 break;
             }
             if (m_video_buffers.Size() == 0) {
