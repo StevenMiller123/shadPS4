@@ -638,11 +638,10 @@ void AvPlayerSource::VideoDecoderThread(std::stop_token stop) {
             return;
         }
         while (!m_is_eof && res >= 0) {
-            if (!m_video_buffers_cv.Wait(
-                    stop, [this] { return m_video_buffers.Size() != 0 || m_is_eof; })) {
+            if (!m_video_buffers_cv.Wait(stop, [this] { return m_video_buffers.Size() != 0; })) {
                 break;
             }
-            if (m_video_buffers.Size() == 0) {
+            if (m_video_buffers.Size() == 0 || m_is_eof) {
                 continue;
             }
             auto up_frame = AVFramePtr(av_frame_alloc(), &ReleaseAVFrame);
