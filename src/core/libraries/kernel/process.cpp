@@ -36,12 +36,22 @@ s32 PS4_SYSV_ABI sceKernelGetMainSocId() {
 }
 
 s32 PS4_SYSV_ABI sceKernelGetCompiledSdkVersion(s32* ver) {
-    s32 version = Common::ElfInfo::Instance().RawFirmwareVer();
+    s32 version = Common::ElfInfo::Instance().CompiledSdkVer();
     *ver = version;
     return (version >= 0) ? ORBIS_OK : ORBIS_KERNEL_ERROR_EINVAL;
 }
 
 s32 PS4_SYSV_ABI sceKernelGetCpumode() {
+    LOG_DEBUG(Lib_Kernel, "called");
+    auto& attrs = Common::ElfInfo::Instance().GetPSFAttributes();
+    u32 is_cpu6 = attrs.six_cpu_mode.Value();
+    u32 is_cpu7 = attrs.seven_cpu_mode.Value();
+    if (is_cpu6 == 1 && is_cpu7 == 1) {
+        return 2;
+    }
+    if (is_cpu7 == 1) {
+        return 5;
+    }
     return 0;
 }
 
