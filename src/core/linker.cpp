@@ -73,7 +73,7 @@ void Linker::Execute(const std::vector<std::string>& args) {
     // libSceLibcInternal. libSceLibcInternal's _malloc_init serves as an additional initialization
     // function called by libkernel.
     heap_api = new HeapAPI{};
-    static PS4_SYSV_ABI void (*malloc_init)();
+    static PS4_SYSV_ABI void (*malloc_init)() = nullptr;
 
     for (const auto& m : m_modules) {
         const auto& mod = m.get();
@@ -173,8 +173,10 @@ void Linker::Execute(const std::vector<std::string>& args) {
 
         LoadSharedLibraries();
 
-        // Call _malloc_init
-        malloc_init();
+        if (malloc_init != nullptr) {
+            // Call _malloc_init
+            malloc_init();
+        }
 
         // Simulate libSceGnmDriver initialization, which maps a chunk of direct memory.
         // Some games fail without accurately emulating this behavior.
