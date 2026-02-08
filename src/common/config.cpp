@@ -1,7 +1,8 @@
-// SPDX-FileCopyrightText: Copyright 2025 shadPS4 Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025-2026 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <fstream>
+#include <map>
 #include <optional>
 #include <string>
 #include <fmt/core.h>
@@ -13,6 +14,8 @@
 #include "common/logging/formatter.h"
 #include "common/path_util.h"
 #include "common/scm_rev.h"
+
+#include "input/input_handler.h"
 
 using std::nullopt;
 using std::optional;
@@ -198,7 +201,6 @@ static ConfigEntry<bool> pipelineCacheArchive(false);
 static ConfigEntry<bool> isDebugDump(false);
 static ConfigEntry<bool> isShaderDebug(false);
 static ConfigEntry<bool> isSeparateLogFilesEnabled(false);
-static ConfigEntry<bool> isFpsColor(true);
 static ConfigEntry<bool> showFpsCounter(false);
 static ConfigEntry<bool> logEnabled(true);
 
@@ -223,16 +225,6 @@ static string config_version = Common::g_scm_rev;
 // These entries aren't stored in the config
 static bool overrideControllerColor = false;
 static int controllerCustomColorRGB[3] = {0, 0, 255};
-static bool isGameRunning = false;
-static bool load_auto_patches = true;
-
-bool getGameRunning() {
-    return isGameRunning;
-}
-
-void setGameRunning(bool running) {
-    isGameRunning = running;
-}
 
 std::filesystem::path getSysModulesPath() {
     if (sys_modules_path.empty()) {
@@ -372,7 +364,7 @@ u32 getWindowHeight() {
 }
 
 u32 getInternalScreenWidth() {
-    return internalScreenHeight.get();
+    return internalScreenWidth.get();
 }
 
 u32 getInternalScreenHeight() {
@@ -461,10 +453,6 @@ bool isPipelineCacheEnabled() {
 
 bool isPipelineCacheArchived() {
     return pipelineCacheArchive.get();
-}
-
-bool fpsColor() {
-    return isFpsColor.get();
 }
 
 bool getShowFpsCounter() {
@@ -855,13 +843,6 @@ void setUsbDeviceBackend(int value, bool is_game_specific) {
     usbDeviceBackend.set(value, is_game_specific);
 }
 
-bool getLoadAutoPatches() {
-    return load_auto_patches;
-}
-void setLoadAutoPatches(bool enable) {
-    load_auto_patches = enable;
-}
-
 void load(const std::filesystem::path& path, bool is_game_specific) {
     // If the configuration file does not exist, create it and return, unless it is game specific
     std::error_code error;
@@ -977,7 +958,6 @@ void load(const std::filesystem::path& path, bool is_game_specific) {
         isDebugDump.setFromToml(debug, "DebugDump", is_game_specific);
         isSeparateLogFilesEnabled.setFromToml(debug, "isSeparateLogFilesEnabled", is_game_specific);
         isShaderDebug.setFromToml(debug, "CollectShader", is_game_specific);
-        isFpsColor.setFromToml(debug, "FPSColor", is_game_specific);
         showFpsCounter.setFromToml(debug, "showFpsCounter", is_game_specific);
         logEnabled.setFromToml(debug, "logEnabled", is_game_specific);
         current_version = toml::find_or<std::string>(debug, "ConfigVersion", current_version);
@@ -1197,7 +1177,6 @@ void save(const std::filesystem::path& path, bool is_game_specific) {
         data["GPU"]["internalScreenWidth"] = internalScreenWidth.base_value;
         data["GPU"]["internalScreenHeight"] = internalScreenHeight.base_value;
         data["GPU"]["patchShaders"] = shouldPatchShaders.base_value;
-        data["Debug"]["FPSColor"] = isFpsColor.base_value;
         data["Debug"]["showFpsCounter"] = showFpsCounter.base_value;
     }
 
@@ -1306,7 +1285,6 @@ void setDefaultValues(bool is_game_specific) {
         internalScreenHeight.base_value = 720;
 
         // Debug
-        isFpsColor.base_value = true;
         showFpsCounter.base_value = false;
     }
 }
@@ -1314,16 +1292,6 @@ void setDefaultValues(bool is_game_specific) {
 constexpr std::string_view GetDefaultGlobalConfig() {
     return R"(# Anything put here will be loaded for all games,
 # alongside the game's config or default.ini depending on your preference.
-
-hotkey_renderdoc_capture = f12
-hotkey_fullscreen = f11
-hotkey_show_fps = f10
-hotkey_pause = f9
-hotkey_reload_inputs = f8
-hotkey_toggle_mouse_to_joystick = f7
-hotkey_toggle_mouse_to_gyro = f6
-hotkey_toggle_mouse_to_touchpad = delete
-hotkey_quit = lctrl, lshift, end
 )";
 }
 
@@ -1401,7 +1369,7 @@ analog_deadzone = rightjoystick, 2, 127
 override_controller_color = false, 0, 0, 255
 )";
 }
-std::filesystem::path GetFoolproofInputConfigFile(const string& game_id) {
+std::filesystem::path GetInputConfigFile(const string& game_id) {
     // Read configuration file of the game, and if it doesn't exist, generate it from default
     // If that doesn't exist either, generate that from getDefaultConfig() and try again
     // If even the folder is missing, we start with that.
@@ -1438,6 +1406,39 @@ std::filesystem::path GetFoolproofInputConfigFile(const string& game_id) {
             if (global_config_stream) {
                 global_config_stream << global_config;
             }
+        }
+    }
+    if (game_id == "global") {
+        std::map<string, string> default_bindings_to_add = {
+            {"hotkey_renderdoc_capture", "f12"},
+            {"hotkey_fullscreen", "f11"},
+            {"hotkey_show_fps", "f10"},
+            {"hotkey_pause", "f9"},
+            {"hotkey_reload_inputs", "f8"},
+            {"hotkey_toggle_mouse_to_joystick", "f7"},
+            {"hotkey_toggle_mouse_to_gyro", "f6"},
+            {"hotkey_toggle_mouse_to_touchpad", "delete"},
+            {"hotkey_quit", "lctrl, lshift, end"},
+            {"hotkey_volume_up", "kpplus"},
+            {"hotkey_volume_down", "kpminus"},
+        };
+        std::ifstream global_in(config_file);
+        string line;
+        while (std::getline(global_in, line)) {
+            line.erase(std::remove_if(line.begin(), line.end(),
+                                      [](unsigned char c) { return std::isspace(c); }),
+                       line.end());
+            std::size_t equal_pos = line.find('=');
+            if (equal_pos == std::string::npos) {
+                continue;
+            }
+            std::string output_string = line.substr(0, equal_pos);
+            default_bindings_to_add.erase(output_string);
+        }
+        global_in.close();
+        std::ofstream global_out(config_file, std::ios::app);
+        for (auto const& b : default_bindings_to_add) {
+            global_out << b.first << " = " << b.second << "\n";
         }
     }
 
