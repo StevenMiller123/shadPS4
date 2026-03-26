@@ -1,17 +1,13 @@
-// SPDX-FileCopyrightText: Copyright 2025 shadPS4 Emulator Project
+// SPDX-FileCopyrightText: Copyright 2026 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "common/logging/log.h"
 #include "common/singleton.h"
 #include "core/libraries/libs.h"
-#include "core/libraries/pad/pad.h"
-#include "core/libraries/pad/pad_errors.h"
-#include "input/controller.h"
-#include "system_gesture.h"
+#include "core/libraries/system_gesture/system_gesture.h"
+#include "core/libraries/system_gesture/system_gesture_error.h"
 
 namespace Libraries::SystemGesture {
-
-using Input::GameController;
 
 int PS4_SYSV_ABI sceSystemGestureAppendTouchRecognizer() {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
