@@ -9,112 +9,140 @@
 
 namespace Libraries::SystemGesture {
 
-int PS4_SYSV_ABI sceSystemGestureAppendTouchRecognizer() {
+s32 PS4_SYSV_ABI
+sceSystemGestureAppendTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureClose() {
+s32 PS4_SYSV_ABI sceSystemGestureClose(s32 handle) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureCreateTouchRecognizer() {
+s32 PS4_SYSV_ABI sceSystemGestureCreateTouchRecognizer(
+    s32 handle, OrbisSystemGestureTouchRecognizer* recognizer, OrbisSystemGestureType type,
+    OrbisSystemGestureRectangle* rectangle,
+    OrbisSystemGestureTouchRecognizerParameter* recognizer_param) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureFinalizePrimitiveTouchRecognizer() {
+s32 PS4_SYSV_ABI sceSystemGestureDebugGetVersion() {
+    return 0x6a00;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureFinalizePrimitiveTouchRecognizer() {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByIndex() {
+s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByIndex(
+    s32 handle, const u32 index, OrbisSystemGesturePrimitiveTouchEvent* touch_event) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByPrimitiveID() {
+s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByPrimitiveID(
+    s32 handle, const u16 primitive_id, OrbisSystemGesturePrimitiveTouchEvent* touch_event) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEvents() {
+s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEvents(
+    s32 handle, OrbisSystemGesturePrimitiveTouchEvent* event_buffer, const u32 buffer_size,
+    u32* event_count) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventsCount() {
+s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventsCount(s32 handle) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureGetTouchEventByEventID() {
+s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventByEventID(
+    s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer, const u32 event_id,
+    OrbisSystemGestureTouchEvent* touch_event) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureGetTouchEventByIndex() {
+s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventByIndex(
+    s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer, const u32 index,
+    OrbisSystemGestureTouchEvent* touch_event) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureGetTouchEvents() {
+s32 PS4_SYSV_ABI sceSystemGestureGetTouchEvents(s32 handle,
+                                                const OrbisSystemGestureTouchRecognizer* recognizer,
+                                                OrbisSystemGestureTouchEvent* event_buffer,
+                                                const u32 buffer_size, u32* event_count) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureGetTouchEventsCount() {
+s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventsCount(
+    s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureGetTouchRecognizerInformation() {
+s32 PS4_SYSV_ABI sceSystemGestureGetTouchRecognizerInformation(
+    s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer,
+    OrbisSystemGestureTouchRecognizerInformation* info) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureInitializePrimitiveTouchRecognizer() {
+s32 PS4_SYSV_ABI sceSystemGestureInitializePrimitiveTouchRecognizer() {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureOpen() {
+s32 PS4_SYSV_ABI sceSystemGestureOpen(s32 input_type, OrbisSystemGestureOpenParameter* param) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureRemoveTouchRecognizer() {
+s32 PS4_SYSV_ABI
+sceSystemGestureRemoveTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureResetPrimitiveTouchRecognizer() {
+s32 PS4_SYSV_ABI sceSystemGestureResetPrimitiveTouchRecognizer(s32 handle) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureResetTouchRecognizer() {
+s32 PS4_SYSV_ABI
+sceSystemGestureResetTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureUpdateAllTouchRecognizer() {
+s32 PS4_SYSV_ABI sceSystemGestureUpdateAllTouchRecognizer(s32 handle) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer() {
+s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
+    s32 handle, const OrbisSystemGestureTouchPadData* input_data) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureUpdateTouchRecognizer() {
+s32 PS4_SYSV_ABI
+sceSystemGestureUpdateTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemGestureUpdateTouchRecognizerRectangle() {
+s32 PS4_SYSV_ABI sceSystemGestureUpdateTouchRecognizerRectangle(
+    s32 handle, OrbisSystemGestureTouchRecognizer* recognizer,
+    const OrbisSystemGestureRectangle* rect) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     return ORBIS_OK;
 }
@@ -126,6 +154,8 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
                  sceSystemGestureClose);
     LIB_FUNCTION("FWF8zkhr854", "libSceSystemGesture", 1, "libSceSystemGesture",
                  sceSystemGestureCreateTouchRecognizer);
+    LIB_FUNCTION("-Caws0X3+bY", "libSceSystemGesture", 1, "libSceSystemGesture",
+                 sceSystemGestureDebugGetVersion);
     LIB_FUNCTION("3QYCmMlOlCY", "libSceSystemGesture", 1, "libSceSystemGesture",
                  sceSystemGestureFinalizePrimitiveTouchRecognizer);
     LIB_FUNCTION("KAeP0+cQPVU", "libSceSystemGesture", 1, "libSceSystemGesture",
