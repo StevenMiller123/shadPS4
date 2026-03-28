@@ -190,10 +190,10 @@ struct OrbisSystemGestureTouchRecognizer {
     OrbisSystemGestureRectangle rect;
     u8 reserved2[4];
     u64 param_data;
-    u8 reserved3[0x38];
+    u8 reserved3[56];
     u32 unk2;
     u32 magic;
-    u8 reserved4[0x40];
+    u8 reserved4[64];
 };
 
 struct OrbisSystemGestureTouchPadData {

@@ -13,7 +13,10 @@
 namespace Libraries::SystemGesture {
 
 // Internal structs and data
-struct OrbisSystemGestureHandle {};
+struct OrbisSystemGestureHandle {
+    s32 touch_recognizer_count;
+    OrbisSystemGestureTouchRecognizer* touch_recognizers[55];
+};
 
 bool g_is_initialized{false};
 std::mutex g_mtx{};
@@ -22,7 +25,31 @@ s32 g_sdk_version{};
 
 s32 PS4_SYSV_ABI
 sceSystemGestureAppendTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    LOG_DEBUG(Lib_SystemGesture, "called");
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!recognizer) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    s32 handle_key = handle - (0x47000000 + (g_handle_map.size() * 0x100));
+    if (!g_handle_map.contains(handle_key)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+    if (recognizer->magic != 0x35547435) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+
+    auto& lib_handle = g_handle_map[handle_key];
+    if (lib_handle.touch_recognizer_count >= 0x37) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_OUT_OF_RECOGNIZER;
+    }
+
+    // Add touch recognizer to appropriate handle
+    lib_handle.touch_recognizers[lib_handle.touch_recognizer_count++] = recognizer;
+    recognizer->touch_recognizer_count = lib_handle.touch_recognizer_count;
     return ORBIS_OK;
 }
 
@@ -33,9 +60,57 @@ s32 PS4_SYSV_ABI sceSystemGestureClose(s32 handle) {
 
 s32 PS4_SYSV_ABI sceSystemGestureCreateTouchRecognizer(
     s32 handle, OrbisSystemGestureTouchRecognizer* recognizer, OrbisSystemGestureType type,
-    OrbisSystemGestureRectangle* rectangle,
-    OrbisSystemGestureTouchRecognizerParameter* recognizer_param) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    OrbisSystemGestureRectangle* rectangle, OrbisSystemGestureTouchRecognizerParameter* param) {
+    LOG_INFO(Lib_SystemGesture, "called");
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!recognizer) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+    if (type < OrbisSystemGestureType::Tap || type > OrbisSystemGestureType::Flick) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_SUPPORTED_GESTURE;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    s32 handle_key = handle - (0x47000000 + (g_handle_map.size() * 0x100));
+    if (!g_handle_map.contains(handle_key)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+
+    // Zero-initialize the recognizer
+    std::memset(recognizer, 0, sizeof(OrbisSystemGestureTouchRecognizer));
+    recognizer->type = type;
+    if (rectangle != nullptr) {
+        // Only copies the four float values, doesn't touch the reserved fields.
+        std::memcpy(&recognizer->rect, rectangle, sizeof(float) * 4);
+    } else {
+        recognizer->no_rectangle = true;
+    }
+
+    // Set param_data appropriately
+    switch (type) {
+    case OrbisSystemGestureType::Tap: {
+        if (!param || param->tap.max_tap_count == 0) {
+            recognizer->param_data = 1;
+        } else {
+            recognizer->param_data = param->tap.max_tap_count;
+        }
+    }
+    case OrbisSystemGestureType::TapAndHold: {
+        recognizer->param_data = !param ? 1000 : param->tap_and_hold.time_to_invoke_event;
+    }
+    default: // Do nothing
+    }
+
+    // Set the magic value, this is used to determine if the touch recognizer is initialized.
+    recognizer->magic = 0x35547435;
+
+    // Initialize recognizer touch events.
+    for (OrbisSystemGestureTouchEvent& touch_event : recognizer->touch_events) {
+        touch_event.is_updated = 1;
+        touch_event.gesture_type = type;
+    }
     return ORBIS_OK;
 }
 
@@ -103,6 +178,7 @@ s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventsCount(
     if (!recognizer) {
         return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
     }
+
     std::scoped_lock lk{g_mtx};
     s32 handle_key = handle - (0x47000000 + (g_handle_map.size() * 0x100));
     if (!g_handle_map.contains(handle_key)) {
@@ -111,6 +187,7 @@ s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventsCount(
     if (recognizer->magic != 0x35547435) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
     }
+
     return recognizer->touch_events_count;
 }
 
