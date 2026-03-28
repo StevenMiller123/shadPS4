@@ -56,10 +56,6 @@ struct OrbisSystemGesturePrimitiveTouchRecognizerParameter {
     u8 reserved[64];
 };
 
-struct OrbisSystemGestureTouchRecognizer {
-    u64 reserved[361];
-};
-
 struct OrbisSystemGestureTouchRecognizerInformation {
     OrbisSystemGestureType gesture_type;
     OrbisSystemGestureRectangle rectangle;
@@ -179,6 +175,25 @@ struct OrbisSystemGestureTouchEvent {
         OrbisSystemGestureFlickEventProperty flick;
     } property;
     u8 reserved[56];
+};
+
+struct OrbisSystemGestureTouchRecognizer {
+    u32 unk;
+    OrbisSystemGestureType type;
+    u64 creation_time;
+    u64 updated_time;
+    u32 touch_recognizer_count;
+    u32 touch_events_count;
+    OrbisSystemGestureTouchEvent touch_events[16];
+    bool no_rectangle;
+    u8 reserved[3];
+    OrbisSystemGestureRectangle rect;
+    u8 reserved2[4];
+    u64 param_data;
+    u8 reserved3[0x38];
+    u32 unk2;
+    u32 magic;
+    u8 reserved4[0x40];
 };
 
 struct OrbisSystemGestureTouchPadData {

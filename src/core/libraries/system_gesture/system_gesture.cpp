@@ -1,13 +1,24 @@
 // SPDX-FileCopyrightText: Copyright 2026 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <map>
+#include <mutex>
 #include "common/logging/log.h"
 #include "common/singleton.h"
+#include "core/libraries/kernel/process.h"
 #include "core/libraries/libs.h"
 #include "core/libraries/system_gesture/system_gesture.h"
 #include "core/libraries/system_gesture/system_gesture_error.h"
 
 namespace Libraries::SystemGesture {
+
+// Internal structs and data
+struct OrbisSystemGestureHandle {};
+
+bool g_is_initialized{false};
+std::mutex g_mtx{};
+std::map<s32, OrbisSystemGestureHandle> g_handle_map{};
+s32 g_sdk_version{};
 
 s32 PS4_SYSV_ABI
 sceSystemGestureAppendTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
@@ -85,8 +96,22 @@ s32 PS4_SYSV_ABI sceSystemGestureGetTouchEvents(s32 handle,
 
 s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventsCount(
     s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    return ORBIS_OK;
+    LOG_TRACE(Lib_SystemGesture, "called");
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!recognizer) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+    std::scoped_lock lk{g_mtx};
+    s32 handle_key = handle - (0x47000000 + (g_handle_map.size() * 0x100));
+    if (!g_handle_map.contains(handle_key)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+    if (recognizer->magic != 0x35547435) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    return recognizer->touch_events_count;
 }
 
 s32 PS4_SYSV_ABI sceSystemGestureGetTouchRecognizerInformation(
@@ -97,13 +122,35 @@ s32 PS4_SYSV_ABI sceSystemGestureGetTouchRecognizerInformation(
 }
 
 s32 PS4_SYSV_ABI sceSystemGestureInitializePrimitiveTouchRecognizer() {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    return ORBIS_OK;
+    LOG_INFO(Lib_SystemGesture, "called");
+    if (g_is_initialized) {
+        return ORBIS_OK;
+    }
+    s32 result = Libraries::Kernel::sceKernelGetCompiledSdkVersion(&g_sdk_version);
+    if (result == ORBIS_OK) {
+        g_is_initialized = true;
+    }
+    return result;
 }
 
 s32 PS4_SYSV_ABI sceSystemGestureOpen(s32 input_type, OrbisSystemGestureOpenParameter* param) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    return ORBIS_OK;
+    LOG_DEBUG(Lib_SystemGesture, "called");
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (input_type != 0 || param) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+    std::scoped_lock lk{g_mtx};
+    if (g_handle_map.size() >= 8) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_ALREADY_OPENED;
+    }
+
+    s32 handle_key = g_handle_map.size();
+    g_handle_map[handle_key] = OrbisSystemGestureHandle{};
+
+    s32 handle = (g_handle_map.size() * 0x100) + 0x47000000 + handle_key;
+    return handle;
 }
 
 s32 PS4_SYSV_ABI
