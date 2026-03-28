@@ -22,6 +22,7 @@ bool g_is_initialized{false};
 std::mutex g_mtx{};
 std::map<s32, OrbisSystemGestureHandle> g_handle_map{};
 s32 g_sdk_version{};
+s32 g_handle_count{};
 
 s32 PS4_SYSV_ABI
 sceSystemGestureAppendTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
@@ -34,15 +35,14 @@ sceSystemGestureAppendTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecogni
     }
 
     std::scoped_lock lk{g_mtx};
-    s32 handle_key = handle - (0x47000000 + (g_handle_map.size() * 0x100));
-    if (!g_handle_map.contains(handle_key)) {
+    if (!g_handle_map.contains(handle)) {
         return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
     }
     if (recognizer->magic != 0x35547435) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
     }
 
-    auto& lib_handle = g_handle_map[handle_key];
+    auto& lib_handle = g_handle_map[handle];
     if (lib_handle.touch_recognizer_count >= 0x37) {
         return ORBIS_SYSTEM_GESTURE_ERROR_OUT_OF_RECOGNIZER;
     }
@@ -54,14 +54,24 @@ sceSystemGestureAppendTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecogni
 }
 
 s32 PS4_SYSV_ABI sceSystemGestureClose(s32 handle) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    LOG_INFO(Lib_SystemGesture, "called");
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+    g_handle_map.erase(handle);
+
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceSystemGestureCreateTouchRecognizer(
     s32 handle, OrbisSystemGestureTouchRecognizer* recognizer, OrbisSystemGestureType type,
     OrbisSystemGestureRectangle* rectangle, OrbisSystemGestureTouchRecognizerParameter* param) {
-    LOG_INFO(Lib_SystemGesture, "called");
+    LOG_DEBUG(Lib_SystemGesture, "called");
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
     }
@@ -73,8 +83,7 @@ s32 PS4_SYSV_ABI sceSystemGestureCreateTouchRecognizer(
     }
 
     std::scoped_lock lk{g_mtx};
-    s32 handle_key = handle - (0x47000000 + (g_handle_map.size() * 0x100));
-    if (!g_handle_map.contains(handle_key)) {
+    if (!g_handle_map.contains(handle)) {
         return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
     }
 
@@ -180,8 +189,7 @@ s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventsCount(
     }
 
     std::scoped_lock lk{g_mtx};
-    s32 handle_key = handle - (0x47000000 + (g_handle_map.size() * 0x100));
-    if (!g_handle_map.contains(handle_key)) {
+    if (!g_handle_map.contains(handle)) {
         return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
     }
     if (recognizer->magic != 0x35547435) {
@@ -223,10 +231,11 @@ s32 PS4_SYSV_ABI sceSystemGestureOpen(s32 input_type, OrbisSystemGestureOpenPara
         return ORBIS_SYSTEM_GESTURE_ERROR_ALREADY_OPENED;
     }
 
-    s32 handle_key = g_handle_map.size();
-    g_handle_map[handle_key] = OrbisSystemGestureHandle{};
+    // Not entirely accurate, but should be a close enough value to not matter.
+    s32 handle = (g_handle_count + 1 * 0x100) + 0x47000000 + g_handle_count;
+    g_handle_map[handle] = OrbisSystemGestureHandle{};
+    g_handle_count++;
 
-    s32 handle = (g_handle_map.size() * 0x100) + 0x47000000 + handle_key;
     return handle;
 }
 
