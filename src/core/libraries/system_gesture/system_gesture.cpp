@@ -3,6 +3,7 @@
 
 #include <map>
 #include <mutex>
+#include "common/elf_info.h"
 #include "common/logging/log.h"
 #include "common/singleton.h"
 #include "core/libraries/kernel/process.h"
@@ -12,12 +13,18 @@
 
 namespace Libraries::SystemGesture {
 
-// Internal structs and data
+// Internal structs
 struct OrbisSystemGestureHandle {
+    bool has_controller_info;
+    OrbisSystemGestureRectangle rect;
+    // TODO: Why is this a float?
+    float has_rect;
     s32 touch_recognizer_count;
     OrbisSystemGestureTouchRecognizer* touch_recognizers[55];
+    u64 previous_update;
 };
 
+// Internal data
 bool g_is_initialized{false};
 std::mutex g_mtx{};
 std::map<s32, OrbisSystemGestureHandle> g_handle_map{};
@@ -264,6 +271,66 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdateAllTouchRecognizer(s32 handle) {
 s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     s32 handle, const OrbisSystemGestureTouchPadData* input_data) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!input_data || !input_data->pad_data_buffer) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+    auto& lib_handle = g_handle_map[handle];
+
+    if (g_sdk_version >= Common::ElfInfo::FW_35) {
+        // Some condition here, not entirely sure what it means yet
+        if (input_data->pad_data_buffer->timestamp == lib_handle.previous_update) {
+            return ORBIS_OK;
+        }
+    }
+
+    if (input_data->report_number != 1) {
+        // Only one report is allowed
+        return input_data->report_number < 1 ? ORBIS_OK
+                                             : ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+
+    // Make a local copy of the pad data
+    // TODO: Get far enough in understanding this to figure out if this is needed.
+    Pad::OrbisPadData data_copy{};
+    std::memcpy(&data_copy, input_data->pad_data_buffer, sizeof(Pad::OrbisPadData));
+
+    if (!data_copy.connected) {
+        // If controller is disconnected, then we invalidate old controller info,
+        // and we skip update logic.
+        lib_handle.has_controller_info = false;
+        return ORBIS_OK;
+    }
+
+    if (!lib_handle.has_controller_info) {
+        // Retrieve controller information before updating.
+        Pad::OrbisPadControllerInformation controller_info{};
+        s32 result = Pad::scePadGetControllerInformation(input_data->pad_handle, &controller_info);
+        if (result != ORBIS_OK) {
+            return result;
+        } else if (controller_info.touchPadInfo.resolution.x == 0 &&
+                   controller_info.touchPadInfo.resolution.y == 0 &&
+                   (controller_info.touchPadInfo.pixelDensity == 0 ||
+                    controller_info.touchPadInfo.pixelDensity == NAN)) {
+            // Invalid touch pad info
+            return ORBIS_OK;
+        }
+        lib_handle.rect.x = 0;
+        lib_handle.rect.y = 0;
+        lib_handle.rect.width = controller_info.touchPadInfo.resolution.x;
+        lib_handle.rect.height = controller_info.touchPadInfo.resolution.y;
+        lib_handle.has_rect = 1.f;
+
+        
+    }
+
     return ORBIS_OK;
 }
 
