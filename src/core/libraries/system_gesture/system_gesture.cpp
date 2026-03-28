@@ -319,16 +319,25 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
                    controller_info.touchPadInfo.resolution.y == 0 &&
                    (controller_info.touchPadInfo.pixelDensity == 0 ||
                     controller_info.touchPadInfo.pixelDensity == NAN)) {
-            // Invalid touch pad info
+            // Invalid touch pad info? Ends up jumping to return OK.
             return ORBIS_OK;
         }
-        lib_handle.rect.x = 0;
-        lib_handle.rect.y = 0;
         lib_handle.rect.width = controller_info.touchPadInfo.resolution.x;
         lib_handle.rect.height = controller_info.touchPadInfo.resolution.y;
         lib_handle.has_rect = 1.f;
 
-        
+        // This part is kinda weird
+        float width = lib_handle.rect.width;
+        float height = lib_handle.rect.height;
+        float diagonal = std::sqrt((width * width) + (height * height));
+        float width_ratio = width / diagonal;
+        float height_ratio = height / diagonal;
+        if (width_ratio * diagonal == 0 || width_ratio * diagonal == NAN ||
+            height_ratio * diagonal == 0 || height_ratio * diagonal == NAN) {
+            // Invalid touch pad dimensions? Ends up jumping to return OK.
+            return ORBIS_OK;
+        }
+        lib_handle.has_controller_info = true;
     }
 
     return ORBIS_OK;
@@ -348,6 +357,7 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdateTouchRecognizerRectangle(
 }
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
+
     LIB_FUNCTION("1MMK0W-kMgA", "libSceSystemGesture", 1, "libSceSystemGesture",
                  sceSystemGestureAppendTouchRecognizer);
     LIB_FUNCTION("j4yXIA2jJ68", "libSceSystemGesture", 1, "libSceSystemGesture",
