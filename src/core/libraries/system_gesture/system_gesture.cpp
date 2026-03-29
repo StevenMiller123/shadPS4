@@ -21,7 +21,7 @@ struct OrbisSystemGestureHandle {
     float has_rect;
     s32 touch_recognizer_count;
     OrbisSystemGestureTouchRecognizer* touch_recognizers[55];
-    u64 previous_update;
+    Pad::OrbisPadData cur_pad_data;
 };
 
 // Internal data
@@ -286,7 +286,7 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
 
     if (g_sdk_version >= Common::ElfInfo::FW_35) {
         // Some condition here, not entirely sure what it means yet
-        if (input_data->pad_data_buffer->timestamp == lib_handle.previous_update) {
+        if (input_data->pad_data_buffer->timestamp == lib_handle.cur_pad_data.timestamp) {
             return ORBIS_OK;
         }
     }
@@ -297,12 +297,7 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
                                              : ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
     }
 
-    // Make a local copy of the pad data
-    // TODO: Get far enough in understanding this to figure out if this is needed.
-    Pad::OrbisPadData data_copy{};
-    std::memcpy(&data_copy, input_data->pad_data_buffer, sizeof(Pad::OrbisPadData));
-
-    if (!data_copy.connected) {
+    if (!input_data->pad_data_buffer->connected) {
         // If controller is disconnected, then we invalidate old controller info,
         // and we skip update logic.
         lib_handle.has_controller_info = false;
@@ -326,19 +321,14 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
         lib_handle.rect.height = controller_info.touchPadInfo.resolution.y;
         lib_handle.has_rect = 1.f;
 
-        // This part is kinda weird
-        float width = lib_handle.rect.width;
-        float height = lib_handle.rect.height;
-        float diagonal = std::sqrt((width * width) + (height * height));
-        float width_ratio = width / diagonal;
-        float height_ratio = height / diagonal;
-        if (width_ratio * diagonal == 0 || width_ratio * diagonal == NAN ||
-            height_ratio * diagonal == 0 || height_ratio * diagonal == NAN) {
-            // Invalid touch pad dimensions? Ends up jumping to return OK.
-            return ORBIS_OK;
-        }
+        // Library does some weird checks here, but I'm pretty sure that logic is redundant.
         lib_handle.has_controller_info = true;
     }
+
+    // Copy the pad data into our handle
+    std::memcpy(&lib_handle.cur_pad_data, input_data->pad_data_buffer, sizeof(Pad::OrbisPadData));
+
+    
 
     return ORBIS_OK;
 }
