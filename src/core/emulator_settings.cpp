@@ -25,10 +25,13 @@ namespace nlohmann {
 template <>
 struct adl_serializer<std::filesystem::path> {
     static void to_json(json& j, const std::filesystem::path& p) {
-        j = p.string();
+        const auto u8 = p.u8string();
+        j = std::string(reinterpret_cast<const char*>(u8.data()), u8.size());
     }
     static void from_json(const json& j, std::filesystem::path& p) {
-        p = j.get<std::string>();
+        const std::string s = j.get<std::string>();
+        p = std::filesystem::path(
+            std::u8string_view(reinterpret_cast<const char8_t*>(s.data()), s.size()));
     }
 };
 } // namespace nlohmann
@@ -628,6 +631,41 @@ bool EmulatorSettingsImpl::TransferSettings() {
             }
         } catch (const std::exception& e) {
             LOG_WARNING(Config, "Failed to transfer addon install directory: {}", e.what());
+        }
+    }
+    if (og_data.contains("General")) {
+        const toml::value& general = og_data.at("General");
+        auto& s = m_general;
+        // Transfer sysmodules install directory
+        try {
+            std::string sysmodules_install_dir_str;
+            if (general.contains("sysModulesPath")) {
+                const auto& sysmodule_value = general.at("sysModulesPath");
+                if (sysmodule_value.is_string()) {
+                    sysmodules_install_dir_str = toml::get<std::string>(sysmodule_value);
+                    if (!sysmodules_install_dir_str.empty()) {
+                        s.sys_modules_dir.value = std::filesystem::path{sysmodules_install_dir_str};
+                    }
+                }
+            }
+        } catch (const std::exception& e) {
+            LOG_WARNING(Config, "Failed to transfer sysmodules install directory: {}", e.what());
+        }
+
+        // Transfer font install directory
+        try {
+            std::string font_install_dir_str;
+            if (general.contains("fontsPath")) {
+                const auto& font_value = general.at("fontsPath");
+                if (font_value.is_string()) {
+                    font_install_dir_str = toml::get<std::string>(font_value);
+                    if (!font_install_dir_str.empty()) {
+                        s.font_dir.value = std::filesystem::path{font_install_dir_str};
+                    }
+                }
+            }
+        } catch (const std::exception& e) {
+            LOG_WARNING(Config, "Failed to transfer font install directory: {}", e.what());
         }
     }
 
