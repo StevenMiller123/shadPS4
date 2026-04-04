@@ -359,15 +359,10 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdateAllTouchRecognizer(s32 handle) {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
-    s32 handle, const OrbisSystemGestureTouchPadData* input_data) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-
-    s32 result = UpdatePrimitiveTouchRecognizer(handle, input_data);
-
+void DumpPrimitiveEventsInternal(OrbisSystemGestureHandleInternal* handle) {
     // For debugging, dump all event data from the current global handle.
     // LOG_CRITICAL(Lib_SystemGesture, "Inactive events:");
-    auto event_ptr = global_handles[0].inactive_primitive_events;
+    auto event_ptr = handle->inactive_primitive_events;
     while (event_ptr != nullptr) {
         // LOG_CRITICAL(Lib_SystemGesture, "Id: {}", event_ptr->primitive_id);
         // LOG_CRITICAL(Lib_SystemGesture, "Updated: {}", event_ptr->is_updated);
@@ -381,7 +376,7 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
         event_ptr = event_ptr->next;
     }
 
-    event_ptr = global_handles[0].beginning_primitive_events;
+    event_ptr = handle->beginning_primitive_events;
     if (event_ptr != nullptr) {
         LOG_CRITICAL(Lib_SystemGesture, "Beginning events:");
     }
@@ -398,7 +393,7 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
         event_ptr = event_ptr->next;
     }
 
-    event_ptr = global_handles[0].active_primitive_events;
+    event_ptr = handle->active_primitive_events;
     if (event_ptr != nullptr) {
         LOG_CRITICAL(Lib_SystemGesture, "Active events:");
     }
@@ -415,7 +410,7 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
         event_ptr = event_ptr->next;
     }
 
-    event_ptr = global_handles[0].ending_primitive_events;
+    event_ptr = handle->ending_primitive_events;
     if (event_ptr != nullptr) {
         LOG_CRITICAL(Lib_SystemGesture, "Ending events:");
     }
@@ -432,7 +427,7 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
         event_ptr = event_ptr->next;
     }
 
-    event_ptr = global_handles[0].cancelled_primitive_events;
+    event_ptr = handle->cancelled_primitive_events;
     if (event_ptr != nullptr) {
         LOG_CRITICAL(Lib_SystemGesture, "Cancelled events:");
     }
@@ -449,7 +444,103 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
         event_ptr = event_ptr->next;
     }
 
-    // LOG_CRITICAL(Lib_SystemGesture, "Event count: {}", global_handles[0].touch_event_count);
+    // LOG_CRITICAL(Lib_SystemGesture, "Event count: {}", handle->touch_event_count);
+}
+
+void DumpPrimitiveEvents(OrbisSystemGestureHandle* handle) {
+    // For debugging, dump all event data from the current global handle.
+    // LOG_CRITICAL(Lib_SystemGesture, "Inactive events:");
+    auto event_ptr = handle->inactive_primitive_events;
+    while (event_ptr != nullptr) {
+        // LOG_CRITICAL(Lib_SystemGesture, "Id: {}", event_ptr->primitive_id);
+        // LOG_CRITICAL(Lib_SystemGesture, "Updated: {}", event_ptr->is_updated);
+        // LOG_CRITICAL(Lib_SystemGesture, "Pressed Position: {}, {}",
+        // event_ptr->pressed_position.x, event_ptr->pressed_position.y);
+        // LOG_CRITICAL(Lib_SystemGesture, "Current Position: {}, {}",
+        // event_ptr->current_position.x, event_ptr->current_position.y);
+        // LOG_CRITICAL(Lib_SystemGesture, "Delta Vector: {}, {}", event_ptr->delta_vector.x,
+        // event_ptr->delta_vector.y);
+
+        event_ptr = event_ptr->next;
+    }
+
+    event_ptr = handle->beginning_primitive_events;
+    if (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Beginning events:");
+    }
+    while (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Id: {}", event_ptr->primitive_id);
+        LOG_CRITICAL(Lib_SystemGesture, "Updated: {}", event_ptr->is_updated);
+        LOG_CRITICAL(Lib_SystemGesture, "Pressed Position: {}, {}", event_ptr->pressed_position.x,
+                     event_ptr->pressed_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Current Position: {}, {}", event_ptr->current_position.x,
+                     event_ptr->current_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Delta Vector: {}, {}\n", event_ptr->delta_vector.x,
+                     event_ptr->delta_vector.y);
+
+        event_ptr = event_ptr->next;
+    }
+
+    event_ptr = handle->active_primitive_events;
+    if (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Active events:");
+    }
+    while (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Id: {}", event_ptr->primitive_id);
+        LOG_CRITICAL(Lib_SystemGesture, "Updated: {}", event_ptr->is_updated);
+        LOG_CRITICAL(Lib_SystemGesture, "Pressed Position: {}, {}", event_ptr->pressed_position.x,
+                     event_ptr->pressed_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Current Position: {}, {}", event_ptr->current_position.x,
+                     event_ptr->current_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Delta Vector: {}, {}\n", event_ptr->delta_vector.x,
+                     event_ptr->delta_vector.y);
+
+        event_ptr = event_ptr->next;
+    }
+
+    event_ptr = handle->ending_primitive_events;
+    if (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Ending events:");
+    }
+    while (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Id: {}", event_ptr->primitive_id);
+        LOG_CRITICAL(Lib_SystemGesture, "Updated: {}", event_ptr->is_updated);
+        LOG_CRITICAL(Lib_SystemGesture, "Pressed Position: {}, {}", event_ptr->pressed_position.x,
+                     event_ptr->pressed_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Current Position: {}, {}", event_ptr->current_position.x,
+                     event_ptr->current_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Delta Vector: {}, {}\n", event_ptr->delta_vector.x,
+                     event_ptr->delta_vector.y);
+
+        event_ptr = event_ptr->next;
+    }
+
+    event_ptr = handle->cancelled_primitive_events;
+    if (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Cancelled events:");
+    }
+    while (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Id: {}", event_ptr->primitive_id);
+        LOG_CRITICAL(Lib_SystemGesture, "Updated: {}", event_ptr->is_updated);
+        LOG_CRITICAL(Lib_SystemGesture, "Pressed Position: {}, {}", event_ptr->pressed_position.x,
+                     event_ptr->pressed_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Current Position: {}, {}", event_ptr->current_position.x,
+                     event_ptr->current_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Delta Vector: {}, {}\n", event_ptr->delta_vector.x,
+                     event_ptr->delta_vector.y);
+
+        event_ptr = event_ptr->next;
+    }
+
+    // LOG_CRITICAL(Lib_SystemGesture, "Event count: {}", handle->touch_event_count);
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
+    s32 handle, const OrbisSystemGestureTouchPadData* input_data) {
+    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+
+    s32 result = UpdatePrimitiveTouchRecognizer(handle, input_data);
+    DumpPrimitiveEventsInternal(&global_handles[0]);
     return result;
 
     if (!g_is_initialized) {
