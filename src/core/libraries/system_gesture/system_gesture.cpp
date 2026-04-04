@@ -21,6 +21,8 @@ struct OrbisSystemGestureHandle {
     float has_rect;
     s32 touch_recognizer_count;
     OrbisSystemGestureTouchRecognizer* touch_recognizers[55];
+    OrbisSystemGesturePrimitiveTouchEvent primitive_events[6];
+    u8 primitive_ev_count;
     Pad::OrbisPadData cur_pad_data;
 };
 
@@ -28,17 +30,22 @@ struct OrbisSystemGestureHandle {
 struct OrbisSystemGestureHandleInternal {
     u32 type;
     bool has_controller_info;
-    char unk0[3];
+    char unk0[0x3];
     OrbisSystemGestureRectangle rect;
     float unk1;
     u32 touch_recognizer_count;
     OrbisSystemGestureTouchRecognizer* touch_recognizers[55];
-    char unk2[0x248];
+    void* unk2[0xd];
+    OrbisSystemGesturePrimitiveTouchEvent primitive_events[6];
     Pad::OrbisPadData pad_data;
     char unk3[0x78];
-    OrbisSystemGesturePrimitiveTouchEvent* touch_lists[5];
+    OrbisSystemGesturePrimitiveTouchEvent* inactive_primitive_events;
+    OrbisSystemGesturePrimitiveTouchEvent* beginning_primitive_events;
+    OrbisSystemGesturePrimitiveTouchEvent* active_primitive_events;
+    OrbisSystemGesturePrimitiveTouchEvent* ending_primitive_events;
+    OrbisSystemGesturePrimitiveTouchEvent* cancelled_primitive_events;
     u8 touch_event_count;
-    char unk4[7];
+    char unk4[0x7];
     float rect_width;
     float rect_height;
 };
@@ -82,16 +89,24 @@ s32 PS4_SYSV_ABI (*AppendTouchRecognizer)(s32 handle,
     reinterpret_cast<s32 PS4_SYSV_ABI (*)(s32 handle,
                                           OrbisSystemGestureTouchRecognizer* recognizer)>(
         library_base + lib_append_touch);
-s32 PS4_SYSV_ABI (*UpdatePrimitiveTouchRecognizer)(s32 handle, const OrbisSystemGestureTouchPadData* input_data) = reinterpret_cast<s32 PS4_SYSV_ABI (*)(s32 handle, const OrbisSystemGestureTouchPadData* input_data)>(library_base + lib_update_prim);
-s32 PS4_SYSV_ABI (*UpdateAllTouchRecognizer)(s32 handle) = reinterpret_cast<s32 PS4_SYSV_ABI (*)(s32 handle)>(library_base + lib_update_all);
-s32 PS4_SYSV_ABI (*GetTouchEventsCount)(s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer) = reinterpret_cast<s32 PS4_SYSV_ABI (*)(s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer)>(library_base + lib_get_touch_count);
+s32 PS4_SYSV_ABI (*UpdatePrimitiveTouchRecognizer)(
+    s32 handle, const OrbisSystemGestureTouchPadData* input_data) =
+    reinterpret_cast<s32 PS4_SYSV_ABI (*)(s32 handle,
+                                          const OrbisSystemGestureTouchPadData* input_data)>(
+        library_base + lib_update_prim);
+s32 PS4_SYSV_ABI (*UpdateAllTouchRecognizer)(s32 handle) =
+    reinterpret_cast<s32 PS4_SYSV_ABI (*)(s32 handle)>(library_base + lib_update_all);
+s32 PS4_SYSV_ABI (*GetTouchEventsCount)(s32 handle,
+                                        const OrbisSystemGestureTouchRecognizer* recognizer) =
+    reinterpret_cast<s32 PS4_SYSV_ABI (*)(s32 handle,
+                                          const OrbisSystemGestureTouchRecognizer* recognizer)>(
+        library_base + lib_get_touch_count);
 
 s32 PS4_SYSV_ABI
 sceSystemGestureAppendTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
     LOG_DEBUG(Lib_SystemGesture, "called");
 
-    s32 result = AppendTouchRecognizer(handle, recognizer);
-    return result;
+    return AppendTouchRecognizer(handle, recognizer);
 
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
@@ -139,8 +154,7 @@ s32 PS4_SYSV_ABI sceSystemGestureCreateTouchRecognizer(
     OrbisSystemGestureRectangle* rectangle, OrbisSystemGestureTouchRecognizerParameter* param) {
     LOG_DEBUG(Lib_SystemGesture, "called");
 
-    s32 result = CreateTouchRecognizer(handle, recognizer, type, rectangle, param);
-    return result;
+    return CreateTouchRecognizer(handle, recognizer, type, rectangle, param);
 
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
@@ -252,8 +266,7 @@ s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventsCount(
     s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer) {
     LOG_TRACE(Lib_SystemGesture, "called");
 
-    s32 result = GetTouchEventsCount(handle, recognizer);
-    return result;
+    return GetTouchEventsCount(handle, recognizer);
 
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
@@ -282,23 +295,21 @@ s32 PS4_SYSV_ABI sceSystemGestureGetTouchRecognizerInformation(
 
 s32 PS4_SYSV_ABI sceSystemGestureInitializePrimitiveTouchRecognizer() {
     LOG_INFO(Lib_SystemGesture, "called");
-    s32 result = Initialize();
-    return result;
+    return Initialize();
     if (g_is_initialized) {
         return ORBIS_OK;
     }
-    s32 result2 = Libraries::Kernel::sceKernelGetCompiledSdkVersion(&g_sdk_version);
-    if (result2 == ORBIS_OK) {
+    s32 result = Libraries::Kernel::sceKernelGetCompiledSdkVersion(&g_sdk_version);
+    if (result == ORBIS_OK) {
         g_is_initialized = true;
     }
-    return result2;
+    return result;
 }
 
 s32 PS4_SYSV_ABI sceSystemGestureOpen(s32 input_type, OrbisSystemGestureOpenParameter* param) {
     LOG_DEBUG(Lib_SystemGesture, "called");
 
-    s32 result = Open(input_type, param);
-    return result;
+    return Open(input_type, param);
 
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
@@ -315,6 +326,10 @@ s32 PS4_SYSV_ABI sceSystemGestureOpen(s32 input_type, OrbisSystemGestureOpenPara
     s32 handle = (g_handle_count + 1 * 0x100) + 0x47000000 + g_handle_count;
     g_handle_map[handle] = OrbisSystemGestureHandle{};
     g_handle_count++;
+
+    // Initialize primitive touch events
+    std::memset(g_handle_map[handle].primitive_events, 0,
+                sizeof(g_handle_map[handle].primitive_events));
 
     return handle;
 }
@@ -339,6 +354,7 @@ sceSystemGestureResetTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecogniz
 s32 PS4_SYSV_ABI sceSystemGestureUpdateAllTouchRecognizer(s32 handle) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
     s32 result = UpdateAllTouchRecognizer(handle);
+    LOG_DEBUG(Lib_SystemGesture, "{}", global_handles[0].touch_event_count);
     return result;
     return ORBIS_OK;
 }
@@ -346,8 +362,94 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdateAllTouchRecognizer(s32 handle) {
 s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     s32 handle, const OrbisSystemGestureTouchPadData* input_data) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    
+
     s32 result = UpdatePrimitiveTouchRecognizer(handle, input_data);
+
+    // For debugging, dump all event data from the current global handle.
+    // LOG_CRITICAL(Lib_SystemGesture, "Inactive events:");
+    auto event_ptr = global_handles[0].inactive_primitive_events;
+    while (event_ptr != nullptr) {
+        // LOG_CRITICAL(Lib_SystemGesture, "Id: {}", event_ptr->primitive_id);
+        // LOG_CRITICAL(Lib_SystemGesture, "Updated: {}", event_ptr->is_updated);
+        // LOG_CRITICAL(Lib_SystemGesture, "Pressed Position: {}, {}",
+        // event_ptr->pressed_position.x, event_ptr->pressed_position.y);
+        // LOG_CRITICAL(Lib_SystemGesture, "Current Position: {}, {}",
+        // event_ptr->current_position.x, event_ptr->current_position.y);
+        // LOG_CRITICAL(Lib_SystemGesture, "Delta Vector: {}, {}", event_ptr->delta_vector.x,
+        // event_ptr->delta_vector.y);
+
+        event_ptr = event_ptr->next;
+    }
+
+    event_ptr = global_handles[0].beginning_primitive_events;
+    if (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Beginning events:");
+    }
+    while (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Id: {}", event_ptr->primitive_id);
+        LOG_CRITICAL(Lib_SystemGesture, "Updated: {}", event_ptr->is_updated);
+        LOG_CRITICAL(Lib_SystemGesture, "Pressed Position: {}, {}", event_ptr->pressed_position.x,
+                     event_ptr->pressed_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Current Position: {}, {}", event_ptr->current_position.x,
+                     event_ptr->current_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Delta Vector: {}, {}\n", event_ptr->delta_vector.x,
+                     event_ptr->delta_vector.y);
+
+        event_ptr = event_ptr->next;
+    }
+
+    event_ptr = global_handles[0].active_primitive_events;
+    if (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Active events:");
+    }
+    while (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Id: {}", event_ptr->primitive_id);
+        LOG_CRITICAL(Lib_SystemGesture, "Updated: {}", event_ptr->is_updated);
+        LOG_CRITICAL(Lib_SystemGesture, "Pressed Position: {}, {}", event_ptr->pressed_position.x,
+                     event_ptr->pressed_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Current Position: {}, {}", event_ptr->current_position.x,
+                     event_ptr->current_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Delta Vector: {}, {}\n", event_ptr->delta_vector.x,
+                     event_ptr->delta_vector.y);
+
+        event_ptr = event_ptr->next;
+    }
+
+    event_ptr = global_handles[0].ending_primitive_events;
+    if (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Ending events:");
+    }
+    while (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Id: {}", event_ptr->primitive_id);
+        LOG_CRITICAL(Lib_SystemGesture, "Updated: {}", event_ptr->is_updated);
+        LOG_CRITICAL(Lib_SystemGesture, "Pressed Position: {}, {}", event_ptr->pressed_position.x,
+                     event_ptr->pressed_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Current Position: {}, {}", event_ptr->current_position.x,
+                     event_ptr->current_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Delta Vector: {}, {}\n", event_ptr->delta_vector.x,
+                     event_ptr->delta_vector.y);
+
+        event_ptr = event_ptr->next;
+    }
+
+    event_ptr = global_handles[0].cancelled_primitive_events;
+    if (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Cancelled events:");
+    }
+    while (event_ptr != nullptr) {
+        LOG_CRITICAL(Lib_SystemGesture, "Id: {}", event_ptr->primitive_id);
+        LOG_CRITICAL(Lib_SystemGesture, "Updated: {}", event_ptr->is_updated);
+        LOG_CRITICAL(Lib_SystemGesture, "Pressed Position: {}, {}", event_ptr->pressed_position.x,
+                     event_ptr->pressed_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Current Position: {}, {}", event_ptr->current_position.x,
+                     event_ptr->current_position.y);
+        LOG_CRITICAL(Lib_SystemGesture, "Delta Vector: {}, {}\n", event_ptr->delta_vector.x,
+                     event_ptr->delta_vector.y);
+
+        event_ptr = event_ptr->next;
+    }
+
+    // LOG_CRITICAL(Lib_SystemGesture, "Event count: {}", global_handles[0].touch_event_count);
     return result;
 
     if (!g_is_initialized) {
