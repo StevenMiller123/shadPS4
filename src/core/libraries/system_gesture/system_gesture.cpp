@@ -24,7 +24,14 @@ struct OrbisSystemGestureHandle {
     OrbisSystemGesturePrimitiveTouchEvent primitive_events[6];
     u8 primitive_ev_count;
     Pad::OrbisPadData cur_pad_data;
+    OrbisSystemGesturePrimitiveTouchEvent* inactive_primitive_events;
+    OrbisSystemGesturePrimitiveTouchEvent* beginning_primitive_events;
+    OrbisSystemGesturePrimitiveTouchEvent* active_primitive_events;
+    OrbisSystemGesturePrimitiveTouchEvent* ending_primitive_events;
+    OrbisSystemGesturePrimitiveTouchEvent* cancelled_primitive_events;
 };
+
+static constexpr u64 PRIMITIVE_TOUCH_EVENT_COUNT = 6;
 
 // Actual decompiled struct
 struct OrbisSystemGestureHandleInternal {
@@ -328,8 +335,13 @@ s32 PS4_SYSV_ABI sceSystemGestureOpen(s32 input_type, OrbisSystemGestureOpenPara
     g_handle_count++;
 
     // Initialize primitive touch events
-    std::memset(g_handle_map[handle].primitive_events, 0,
-                sizeof(g_handle_map[handle].primitive_events));
+    auto& lib_handle = g_handle_map[handle];
+    std::memset(&lib_handle.primitive_events, 0,
+                sizeof(OrbisSystemGesturePrimitiveTouchEvent) * PRIMITIVE_TOUCH_EVENT_COUNT);
+    for (s32 i = 0; i < PRIMITIVE_TOUCH_EVENT_COUNT - 1; i++) {
+        lib_handle.primitive_events[i].next = &lib_handle.primitive_events[i + 1];
+    }
+    lib_handle.inactive_primitive_events = &lib_handle.primitive_events[0];
 
     return handle;
 }
