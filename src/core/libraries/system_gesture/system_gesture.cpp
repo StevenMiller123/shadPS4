@@ -24,7 +24,8 @@ struct OrbisSystemGestureHandle {
     OrbisSystemGestureTouchRecognizer* touch_recognizers[55];
     OrbisSystemGesturePrimitiveTouchEvent primitive_events[6];
     u8 primitive_ev_count;
-    Pad::OrbisPadData pad_data[2];
+    Pad::OrbisPadData cur_pad_data;
+    Pad::OrbisPadData prev_pad_data;
     OrbisSystemGesturePrimitiveTouchEvent* inactive_primitive_events;
     OrbisSystemGesturePrimitiveTouchEvent* beginning_primitive_events;
     OrbisSystemGesturePrimitiveTouchEvent* active_primitive_events;
@@ -39,14 +40,14 @@ struct OrbisSystemGestureHandleInternal {
     u32 type;
     bool has_controller_info;
     bool is_updated;
-    char unk0[2];
     OrbisSystemGestureRectangle rect;
-    float unk1;
+    float has_rect;
     u32 touch_recognizer_count;
     OrbisSystemGestureTouchRecognizer* touch_recognizers[55];
-    void* unk2[0xd];
+    char unk2[104];
     OrbisSystemGesturePrimitiveTouchEvent primitive_events[6];
-    Pad::OrbisPadData pad_data[2];
+    Pad::OrbisPadData cur_pad_data;
+    Pad::OrbisPadData prev_pad_data;
     OrbisSystemGesturePrimitiveTouchEvent* inactive_primitive_events;
     OrbisSystemGesturePrimitiveTouchEvent* beginning_primitive_events;
     OrbisSystemGesturePrimitiveTouchEvent* active_primitive_events;
@@ -572,7 +573,7 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     if (g_sdk_version >= Common::ElfInfo::FW_35) {
         // If the timestamp is the same, don't update events.
         bool is_updated =
-            input_data->pad_data_buffer->timestamp != lib_handle.pad_data[0].timestamp;
+            input_data->pad_data_buffer->timestamp != lib_handle.cur_pad_data.timestamp;
         lib_handle.is_updated = is_updated;
         for (auto event = lib_handle.primitive_events; event != nullptr; event = event->next) {
             event->is_updated = is_updated;
@@ -671,14 +672,18 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     // Update creation time on all inactive events
     for (auto event = lib_handle.inactive_primitive_events; event != nullptr; event = event->next) {
         event->creation_time =
-            input_data->pad_data_buffer->timestamp - lib_handle.pad_data[0].timestamp;
+            input_data->pad_data_buffer->timestamp - lib_handle.cur_pad_data.timestamp;
     }
 
     // Copy the new pad data into our handle
-    std::memcpy(&lib_handle.pad_data[1], &lib_handle.pad_data[0], sizeof(Pad::OrbisPadData));
-    std::memcpy(&lib_handle.pad_data[0], input_data->pad_data_buffer, sizeof(Pad::OrbisPadData));
+    std::memcpy(&lib_handle.prev_pad_data, &lib_handle.cur_pad_data, sizeof(Pad::OrbisPadData));
+    std::memcpy(&lib_handle.cur_pad_data, input_data->pad_data_buffer, sizeof(Pad::OrbisPadData));
 
-    
+    // There are actual touches to process
+    if (lib_handle.cur_pad_data.touchData.touchNum > 0 &&
+        lib_handle.cur_pad_data.touchData.touchNum < 3) {
+        
+    }
 
 
     return ORBIS_OK;
