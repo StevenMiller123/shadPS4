@@ -631,6 +631,9 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
             break;
         }
     }
+    if (lib_handle.inactive_primitive_events == nullptr) {
+        lib_handle.inactive_primitive_events = lib_handle.cancelled_primitive_events;
+    }
 
     // Mark all ending events as inactive.
     for (auto event = lib_handle.ending_primitive_events; event != nullptr; event = event->next) {
@@ -643,6 +646,9 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
             event_list->next = lib_handle.ending_primitive_events;
             break;
         }
+    }
+    if (lib_handle.inactive_primitive_events == nullptr) {
+        lib_handle.inactive_primitive_events = lib_handle.ending_primitive_events;
     }
 
     // Mark all beginning events as active.
@@ -657,6 +663,9 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
             event_list->next = lib_handle.beginning_primitive_events;
             break;
         }
+    }
+    if (lib_handle.active_primitive_events == nullptr) {
+        lib_handle.active_primitive_events = lib_handle.beginning_primitive_events;
     }
 
     // Update creation time on all inactive events
