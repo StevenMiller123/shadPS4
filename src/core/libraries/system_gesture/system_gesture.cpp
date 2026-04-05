@@ -16,6 +16,7 @@ namespace Libraries::SystemGesture {
 // Internal structs
 struct OrbisSystemGestureHandle {
     bool has_controller_info;
+    bool is_updated;
     OrbisSystemGestureRectangle rect;
     // TODO: Why is this a float?
     float has_rect;
@@ -569,11 +570,18 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     auto& lib_handle = g_handle_map[handle];
 
     if (g_sdk_version >= Common::ElfInfo::FW_35) {
-        // Some condition here, not entirely sure what it means yet
-        if (input_data->pad_data_buffer->timestamp == lib_handle.cur_pad_data.timestamp) {
+        // If the timestamp is the same, don't update events.
+        bool is_updated =
+            input_data->pad_data_buffer->timestamp != lib_handle.cur_pad_data.timestamp;
+        lib_handle.is_updated = is_updated;
+        for (auto event = lib_handle.primitive_events; event != nullptr; event = event->next) {
+            event->is_updated = is_updated;
+        }
+        if (!is_updated) {
             return ORBIS_OK;
         }
     }
+    lib_handle.is_updated = true;
 
     if (input_data->report_number != 1) {
         // Only one report is allowed
@@ -609,10 +617,58 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
         lib_handle.has_controller_info = true;
     }
 
-    // Get an event from our handle (line 306)
+    // Update old primitive events appropriately.
+    // First, mark all cancelled events as inactive.
+    for (auto event = lib_handle.cancelled_primitive_events; event != nullptr;
+         event = event->next) {
+        event->creation_time = 0;
+        event->event_state = OrbisSystemGestureTouchState::Inactive;
+    }
+    for (auto event_list = lib_handle.inactive_primitive_events; event_list != nullptr;
+         event_list = event_list->next) {
+        if (event_list->next == nullptr) {
+            event_list->next = lib_handle.cancelled_primitive_events;
+            break;
+        }
+    }
 
-    // Copy the pad data into our handle
+    // Mark all ending events as inactive.
+    for (auto event = lib_handle.ending_primitive_events; event != nullptr; event = event->next) {
+        event->creation_time = 0;
+        event->event_state = OrbisSystemGestureTouchState::Inactive;
+    }
+    for (auto event_list = lib_handle.inactive_primitive_events; event_list != nullptr;
+         event_list = event_list->next) {
+        if (event_list->next == nullptr) {
+            event_list->next = lib_handle.ending_primitive_events;
+            break;
+        }
+    }
+
+    // Mark all beginning events as active.
+    for (auto event = lib_handle.beginning_primitive_events; event != nullptr;
+         event = event->next) {
+        event->creation_time = 0;
+        event->event_state = OrbisSystemGestureTouchState::Active;
+    }
+    for (auto event_list = lib_handle.active_primitive_events; event_list != nullptr;
+         event_list = event_list->next) {
+        if (event_list->next == nullptr) {
+            event_list->next = lib_handle.beginning_primitive_events;
+            break;
+        }
+    }
+
+    // Update creation time on all inactive events
+    for (auto event = lib_handle.inactive_primitive_events; event != nullptr; event = event->next) {
+        event->creation_time =
+            input_data->pad_data_buffer->timestamp - lib_handle.cur_pad_data.timestamp;
+    }
+
+    // Copy the new pad data into our handle
     std::memcpy(&lib_handle.cur_pad_data, input_data->pad_data_buffer, sizeof(Pad::OrbisPadData));
+
+
 
     return ORBIS_OK;
 }
