@@ -47,7 +47,9 @@ struct OrbisSystemGesturePrimitiveTouchEvent {
     u64 total_time;
     u8 reserved1[8];
     OrbisSystemGesturePrimitiveTouchEvent* next;
-    u8 reserved2[8];
+    u8 reserved2[4];
+    bool no_delta;
+    u8 reserved3[3];
 };
 
 struct OrbisSystemGestureRectangle {
