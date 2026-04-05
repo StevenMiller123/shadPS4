@@ -231,6 +231,9 @@ s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByIndex(
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
     }
+    if (!touch_event) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
 
     std::scoped_lock lk{g_mtx};
     if (!g_handle_map.contains(handle)) {
@@ -251,22 +254,17 @@ s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByIndex(
             event = list_ev;
         }
     }
-    for (auto list_ev = lib_handle.active_primitive_events; event == nullptr && list_ev != nullptr;
-         list_ev = list_ev->next, cur_index++) {
-        if (cur_index == index) {
-            event = list_ev;
+    auto lists = std::to_array<OrbisSystemGesturePrimitiveTouchEvent*>(
+        {lib_handle.beginning_primitive_events, lib_handle.active_primitive_events,
+         lib_handle.ending_primitive_events, lib_handle.cancelled_primitive_events});
+    for (auto list : lists) {
+        for (auto list_ev = list; list_ev != nullptr && event == nullptr; list_ev = list_ev->next) {
+            if (cur_index == index) {
+                event = list_ev;
+            }
         }
-    }
-    for (auto list_ev = lib_handle.ending_primitive_events; event == nullptr && list_ev != nullptr;
-         list_ev = list_ev->next, cur_index++) {
-        if (cur_index == index) {
-            event = list_ev;
-        }
-    }
-    for (auto list_ev = lib_handle.cancelled_primitive_events;
-         event == nullptr && list_ev != nullptr; list_ev = list_ev->next, cur_index++) {
-        if (cur_index == index) {
-            event = list_ev;
+        if (event != nullptr) {
+            break;
         }
     }
 
@@ -294,6 +292,9 @@ s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByPrimitiveID(
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
     }
+    if (!touch_event) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
 
     std::scoped_lock lk{g_mtx};
     if (!g_handle_map.contains(handle)) {
@@ -302,28 +303,18 @@ s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByPrimitiveID(
 
     auto& lib_handle = g_handle_map[handle];
     OrbisSystemGesturePrimitiveTouchEvent* event = nullptr;
-    for (auto list_ev = lib_handle.beginning_primitive_events;
-         event == nullptr && list_ev != nullptr; list_ev = list_ev->next) {
-        if (event->primitive_id == primitive_id) {
-            event = list_ev;
+    auto lists = std::to_array<OrbisSystemGesturePrimitiveTouchEvent*>(
+        {lib_handle.beginning_primitive_events, lib_handle.active_primitive_events,
+         lib_handle.ending_primitive_events, lib_handle.cancelled_primitive_events});
+    for (auto list : lists) {
+        for (auto list_ev = list; list_ev != nullptr && event == nullptr; list_ev = list_ev->next) {
+            if (list_ev->primitive_id == primitive_id) {
+                event = list_ev;
+                break;
+            }
         }
-    }
-    for (auto list_ev = lib_handle.active_primitive_events; event == nullptr && list_ev != nullptr;
-         list_ev = list_ev->next) {
-        if (event->primitive_id == primitive_id) {
-            event = list_ev;
-        }
-    }
-    for (auto list_ev = lib_handle.ending_primitive_events; event == nullptr && list_ev != nullptr;
-         list_ev = list_ev->next) {
-        if (event->primitive_id == primitive_id) {
-            event = list_ev;
-        }
-    }
-    for (auto list_ev = lib_handle.cancelled_primitive_events;
-         event == nullptr && list_ev != nullptr; list_ev = list_ev->next) {
-        if (event->primitive_id == primitive_id) {
-            event = list_ev;
+        if (event != nullptr) {
+            break;
         }
     }
 
@@ -350,7 +341,48 @@ s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByPrimitiveID(
 s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEvents(
     s32 handle, OrbisSystemGesturePrimitiveTouchEvent* event_buffer, const u32 buffer_size,
     u32* event_count) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    LOG_DEBUG(Lib_SystemGesture, "called, buffer_size = {}", buffer_size);
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!event_buffer || buffer_size == 0 || !event_count) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+
+    auto& lib_handle = g_handle_map[handle];
+    auto lists = std::to_array<OrbisSystemGesturePrimitiveTouchEvent*>(
+        {lib_handle.beginning_primitive_events, lib_handle.active_primitive_events,
+         lib_handle.ending_primitive_events, lib_handle.cancelled_primitive_events});
+    std::memset(event_buffer, 0, buffer_size * 0x50);
+    u32 count = 0;
+    for (auto list : lists) {
+        for (auto event = list; event != nullptr && count < buffer_size;
+             event = event->next, count++) {
+            auto& copy_event = event_buffer[count];
+            copy_event.primitive_id = event->primitive_id;
+            copy_event.event_state = event->event_state;
+            copy_event.pressed_position = event->pressed_position;
+            copy_event.current_position = event->current_position;
+            if (event->no_delta) {
+                copy_event.delta_vector = {0, 0};
+            } else {
+                copy_event.delta_vector = event->delta_vector;
+            }
+            copy_event.is_updated = event->is_updated;
+            copy_event.delta_time = event->elapsed_time;
+            copy_event.elapsed_time = event->total_time;
+        }
+        if (count >= buffer_size) {
+            break;
+        }
+    }
+
+    *event_count = count;
     return ORBIS_OK;
 }
 
