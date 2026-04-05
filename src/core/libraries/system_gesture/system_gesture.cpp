@@ -304,7 +304,9 @@ s32 PS4_SYSV_ABI sceSystemGestureGetTouchRecognizerInformation(
 
 s32 PS4_SYSV_ABI sceSystemGestureInitializePrimitiveTouchRecognizer() {
     LOG_INFO(Lib_SystemGesture, "called");
+
     // return Initialize();
+
     if (g_is_initialized) {
         return ORBIS_OK;
     }
@@ -622,7 +624,7 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     // First, mark all cancelled events as inactive.
     for (auto event = lib_handle.cancelled_primitive_events; event != nullptr;
          event = event->next) {
-        event->creation_time = 0;
+        event->total_time = 0;
         event->event_state = OrbisSystemGestureTouchState::Inactive;
     }
     for (auto event_list = lib_handle.inactive_primitive_events; event_list != nullptr;
@@ -635,10 +637,11 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     if (lib_handle.inactive_primitive_events == nullptr) {
         lib_handle.inactive_primitive_events = lib_handle.cancelled_primitive_events;
     }
+    lib_handle.cancelled_primitive_events = nullptr;
 
     // Mark all ending events as inactive.
     for (auto event = lib_handle.ending_primitive_events; event != nullptr; event = event->next) {
-        event->creation_time = 0;
+        event->total_time = 0;
         event->event_state = OrbisSystemGestureTouchState::Inactive;
     }
     for (auto event_list = lib_handle.inactive_primitive_events; event_list != nullptr;
@@ -651,11 +654,12 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     if (lib_handle.inactive_primitive_events == nullptr) {
         lib_handle.inactive_primitive_events = lib_handle.ending_primitive_events;
     }
+    lib_handle.ending_primitive_events = nullptr;
 
     // Mark all beginning events as active.
     for (auto event = lib_handle.beginning_primitive_events; event != nullptr;
          event = event->next) {
-        event->creation_time = 0;
+        event->total_time = 0;
         event->event_state = OrbisSystemGestureTouchState::Active;
     }
     for (auto event_list = lib_handle.active_primitive_events; event_list != nullptr;
@@ -668,10 +672,11 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     if (lib_handle.active_primitive_events == nullptr) {
         lib_handle.active_primitive_events = lib_handle.beginning_primitive_events;
     }
+    lib_handle.beginning_primitive_events = nullptr;
 
     // Update creation time on all inactive events
     for (auto event = lib_handle.inactive_primitive_events; event != nullptr; event = event->next) {
-        event->creation_time =
+        event->total_time =
             input_data->pad_data_buffer->timestamp - lib_handle.cur_pad_data.timestamp;
     }
 
@@ -679,14 +684,22 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     std::memcpy(&lib_handle.prev_pad_data, &lib_handle.cur_pad_data, sizeof(Pad::OrbisPadData));
     std::memcpy(&lib_handle.cur_pad_data, input_data->pad_data_buffer, sizeof(Pad::OrbisPadData));
 
+    // Form a new "active" list with just the events we update.
+    OrbisSystemGesturePrimitiveTouchEvent* new_active_list = nullptr;
+    u8 primitive_events_count = 0;
+
     // There are actual touches to process
     if (lib_handle.cur_pad_data.touchData.touchNum > 0 &&
         lib_handle.cur_pad_data.touchData.touchNum < 3) {
         for (s32 touch_index = 0; touch_index < lib_handle.cur_pad_data.touchData.touchNum;
              touch_index++) {
+            // Retrieve touch coordinates
             u16 touch_x = lib_handle.cur_pad_data.touchData.touch[touch_index].x;
             u16 touch_y = lib_handle.cur_pad_data.touchData.touch[touch_index].y;
             u8 primitive_id = lib_handle.cur_pad_data.touchData.touch[touch_index].id;
+
+            // Regardless of how this update goes, the event will still be counted
+            primitive_events_count++;
 
             // First, see if there is an active event with this id.
             auto event = lib_handle.active_primitive_events;
@@ -694,7 +707,7 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
                 event = event->next;
             }
             if (event == nullptr) {
-                // No active event case, pull one from the inactive list and start it up.
+                // No active event, pull one from the inactive list and start it up.
                 event = lib_handle.inactive_primitive_events;
                 lib_handle.inactive_primitive_events = event->next;
 
@@ -706,15 +719,84 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
                 event->pressed_position = event->current_position;
                 event->is_updated = true;
 
-
-
-                lib_handle.primitive_events_count++;
+                // Add to the end of the beginning events
+                for (auto event_list = lib_handle.beginning_primitive_events; event_list != nullptr;
+                     event_list = event_list->next) {
+                    if (event_list->next == nullptr) {
+                        event_list->next = event;
+                        break;
+                    }
+                }
+                if (lib_handle.beginning_primitive_events == nullptr) {
+                    lib_handle.beginning_primitive_events = event;
+                }
             } else {
-                // There is an active event, update it appropriately.
+                // Update the event's delta data
+                if (g_sdk_version < Common::ElfInfo::FW_35 || true /*lib_handle.prev_pad_data.touchData.reserve1 != lib_handle.cur_pad_data.touchData.reserve1*/) {
+                    event->delta_time = event->elapsed_time;
+                    event->delta_vector.x = touch_x - event->current_position.x;
+                    event->delta_vector.y = touch_y - event->current_position.y;
+                }
+
+                // Update the current data for the event
+                event->elapsed_time =
+                    lib_handle.cur_pad_data.timestamp - lib_handle.prev_pad_data.timestamp;
+                event->total_time += event->elapsed_time;
+                event->current_position.x = touch_x;
+                event->current_position.y = touch_y;
+
+                // If it has been too long since the last update, this event is cancelled.
+                // Otherwise, put it in the new active list
+                if (200000 >=
+                    lib_handle.cur_pad_data.timestamp - lib_handle.prev_pad_data.timestamp) {
+                    lib_handle.active_primitive_events = event->next;
+                    event->next = nullptr;
+
+                    // Add to the end of the new active events
+                    for (auto event_list = new_active_list; event_list != nullptr;
+                         event_list = event_list->next) {
+                        if (event_list->next == nullptr) {
+                            event_list->next = event;
+                            break;
+                        }
+                    }
+                    if (new_active_list == nullptr) {
+                        new_active_list = event;
+                    }
+                } else {
+                    // Mark the event as cancelled.
+                    event->event_state = OrbisSystemGestureTouchState::Cancelled;
+                    lib_handle.active_primitive_events = event->next;
+                    event->next = nullptr;
+
+                    // Add to the end of the cancelled events
+                    for (auto event_list = lib_handle.cancelled_primitive_events;
+                         event_list != nullptr; event_list = event_list->next) {
+                        if (event_list->next == nullptr) {
+                            event_list->next = event;
+                            break;
+                        }
+                    }
+                    if (lib_handle.cancelled_primitive_events == nullptr) {
+                        lib_handle.cancelled_primitive_events = event;
+                    }
+                }
             }
         }
     }
 
+    // Everything remaining in the library's active list moves to the ending list.
+    for (auto event = lib_handle.active_primitive_events; event != nullptr; event = event->next) {
+        event->event_state = OrbisSystemGestureTouchState::End;
+        primitive_events_count++;
+    }
+    lib_handle.ending_primitive_events = lib_handle.active_primitive_events;
+
+    // Swap the library active list to the new active list
+    lib_handle.active_primitive_events = new_active_list;
+
+    // Update the handle's primitive event count
+    lib_handle.primitive_events_count = primitive_events_count;
 
     return ORBIS_OK;
 }

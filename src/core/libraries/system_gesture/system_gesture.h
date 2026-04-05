@@ -44,7 +44,7 @@ struct OrbisSystemGesturePrimitiveTouchEvent {
     OrbisSystemGestureVector2 delta_vector;
     u64 delta_time;
     u64 elapsed_time;
-    u64 creation_time;
+    u64 total_time;
     u8 reserved1[8];
     OrbisSystemGesturePrimitiveTouchEvent* next;
     u8 reserved2[8];
