@@ -24,7 +24,7 @@ struct OrbisSystemGestureHandle {
     OrbisSystemGestureTouchRecognizer* touch_recognizers[55];
     OrbisSystemGesturePrimitiveTouchEvent primitive_events[6];
     u8 primitive_ev_count;
-    Pad::OrbisPadData cur_pad_data;
+    Pad::OrbisPadData pad_data[2];
     OrbisSystemGesturePrimitiveTouchEvent* inactive_primitive_events;
     OrbisSystemGesturePrimitiveTouchEvent* beginning_primitive_events;
     OrbisSystemGesturePrimitiveTouchEvent* active_primitive_events;
@@ -38,22 +38,22 @@ static constexpr u64 PRIMITIVE_TOUCH_EVENT_COUNT = 6;
 struct OrbisSystemGestureHandleInternal {
     u32 type;
     bool has_controller_info;
-    char unk0[0x3];
+    bool is_updated;
+    char unk0[2];
     OrbisSystemGestureRectangle rect;
     float unk1;
     u32 touch_recognizer_count;
     OrbisSystemGestureTouchRecognizer* touch_recognizers[55];
     void* unk2[0xd];
     OrbisSystemGesturePrimitiveTouchEvent primitive_events[6];
-    Pad::OrbisPadData pad_data;
-    char unk3[0x78];
+    Pad::OrbisPadData pad_data[2];
     OrbisSystemGesturePrimitiveTouchEvent* inactive_primitive_events;
     OrbisSystemGesturePrimitiveTouchEvent* beginning_primitive_events;
     OrbisSystemGesturePrimitiveTouchEvent* active_primitive_events;
     OrbisSystemGesturePrimitiveTouchEvent* ending_primitive_events;
     OrbisSystemGesturePrimitiveTouchEvent* cancelled_primitive_events;
     u8 touch_event_count;
-    char unk4[0x7];
+    char unk3[7];
     float rect_width;
     float rect_height;
 };
@@ -572,7 +572,7 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     if (g_sdk_version >= Common::ElfInfo::FW_35) {
         // If the timestamp is the same, don't update events.
         bool is_updated =
-            input_data->pad_data_buffer->timestamp != lib_handle.cur_pad_data.timestamp;
+            input_data->pad_data_buffer->timestamp != lib_handle.pad_data[0].timestamp;
         lib_handle.is_updated = is_updated;
         for (auto event = lib_handle.primitive_events; event != nullptr; event = event->next) {
             event->is_updated = is_updated;
@@ -671,12 +671,14 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     // Update creation time on all inactive events
     for (auto event = lib_handle.inactive_primitive_events; event != nullptr; event = event->next) {
         event->creation_time =
-            input_data->pad_data_buffer->timestamp - lib_handle.cur_pad_data.timestamp;
+            input_data->pad_data_buffer->timestamp - lib_handle.pad_data[0].timestamp;
     }
 
     // Copy the new pad data into our handle
-    std::memcpy(&lib_handle.cur_pad_data, input_data->pad_data_buffer, sizeof(Pad::OrbisPadData));
+    std::memcpy(&lib_handle.pad_data[1], &lib_handle.pad_data[0], sizeof(Pad::OrbisPadData));
+    std::memcpy(&lib_handle.pad_data[0], input_data->pad_data_buffer, sizeof(Pad::OrbisPadData));
 
+    
 
 
     return ORBIS_OK;
