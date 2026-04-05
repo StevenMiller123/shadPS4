@@ -111,345 +111,8 @@ s32 PS4_SYSV_ABI (*GetTouchEventsCount)(s32 handle,
                                           const OrbisSystemGestureTouchRecognizer* recognizer)>(
         library_base + lib_get_touch_count);
 
-s32 PS4_SYSV_ABI
-sceSystemGestureAppendTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
-    LOG_DEBUG(Lib_SystemGesture, "called");
-
-    // return AppendTouchRecognizer(handle, recognizer);
-
-    if (!g_is_initialized) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
-    }
-    if (!recognizer) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
-    }
-
-    std::scoped_lock lk{g_mtx};
-    if (!g_handle_map.contains(handle)) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
-    }
-    if (recognizer->magic != 0x35547435) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
-    }
-
-    auto& lib_handle = g_handle_map[handle];
-    if (lib_handle.touch_recognizer_count >= 0x37) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_OUT_OF_RECOGNIZER;
-    }
-
-    // Add touch recognizer to appropriate handle
-    lib_handle.touch_recognizers[lib_handle.touch_recognizer_count++] = recognizer;
-    recognizer->touch_recognizer_count = lib_handle.touch_recognizer_count;
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureClose(s32 handle) {
-    LOG_INFO(Lib_SystemGesture, "called");
-    if (!g_is_initialized) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
-    }
-
-    std::scoped_lock lk{g_mtx};
-    if (!g_handle_map.contains(handle)) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
-    }
-    g_handle_map.erase(handle);
-
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureCreateTouchRecognizer(
-    s32 handle, OrbisSystemGestureTouchRecognizer* recognizer, OrbisSystemGestureType type,
-    OrbisSystemGestureRectangle* rectangle, OrbisSystemGestureTouchRecognizerParameter* param) {
-    LOG_DEBUG(Lib_SystemGesture, "called");
-
-    // return CreateTouchRecognizer(handle, recognizer, type, rectangle, param);
-
-    if (!g_is_initialized) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
-    }
-    if (!recognizer) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
-    }
-    if (type < OrbisSystemGestureType::Tap || type > OrbisSystemGestureType::Flick) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_SUPPORTED_GESTURE;
-    }
-
-    std::scoped_lock lk{g_mtx};
-    if (!g_handle_map.contains(handle)) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
-    }
-
-    // Zero-initialize the recognizer
-    std::memset(recognizer, 0, sizeof(OrbisSystemGestureTouchRecognizer));
-    recognizer->type = type;
-    if (rectangle != nullptr) {
-        // Only copies the four float values, doesn't touch the reserved fields.
-        std::memcpy(&recognizer->rect, rectangle, sizeof(float) * 4);
-    } else {
-        recognizer->no_rectangle = true;
-    }
-
-    // Set param_data appropriately
-    switch (type) {
-    case OrbisSystemGestureType::Tap: {
-        if (!param || param->tap.max_tap_count == 0) {
-            recognizer->param_data = 1;
-        } else {
-            recognizer->param_data = param->tap.max_tap_count;
-        }
-    }
-    case OrbisSystemGestureType::TapAndHold: {
-        recognizer->param_data = !param ? 1000 : param->tap_and_hold.time_to_invoke_event;
-    }
-    default: // Do nothing
-    }
-
-    // Set the magic value, this is used to determine if the touch recognizer is initialized.
-    recognizer->magic = 0x35547435;
-
-    // Initialize recognizer touch events.
-    for (OrbisSystemGestureTouchEvent& touch_event : recognizer->touch_events) {
-        touch_event.is_updated = 1;
-        touch_event.gesture_type = type;
-    }
-    return ORBIS_OK;
-}
-
 s32 PS4_SYSV_ABI sceSystemGestureDebugGetVersion() {
     return 0x6a00;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureFinalizePrimitiveTouchRecognizer() {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByIndex(
-    s32 handle, const u32 index, OrbisSystemGesturePrimitiveTouchEvent* touch_event) {
-    LOG_DEBUG(Lib_SystemGesture, "called, index = {}", index);
-    if (!g_is_initialized) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
-    }
-    if (!touch_event) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
-    }
-
-    std::scoped_lock lk{g_mtx};
-    if (!g_handle_map.contains(handle)) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
-    }
-
-    auto& lib_handle = g_handle_map[handle];
-    if (index < lib_handle.primitive_events_count) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INDEX_OUT_OF_ARRAY;
-    }
-
-    // The "index" goes from start of the beginning list to the end of the cancelled list.
-    s32 cur_index = 0;
-    OrbisSystemGesturePrimitiveTouchEvent* event = nullptr;
-    for (auto list_ev = lib_handle.beginning_primitive_events;
-         event == nullptr && list_ev != nullptr; list_ev = list_ev->next, cur_index++) {
-        if (cur_index == index) {
-            event = list_ev;
-        }
-    }
-    auto lists = std::to_array<OrbisSystemGesturePrimitiveTouchEvent*>(
-        {lib_handle.beginning_primitive_events, lib_handle.active_primitive_events,
-         lib_handle.ending_primitive_events, lib_handle.cancelled_primitive_events});
-    for (auto list : lists) {
-        for (auto list_ev = list; list_ev != nullptr && event == nullptr; list_ev = list_ev->next) {
-            if (cur_index == index) {
-                event = list_ev;
-            }
-        }
-        if (event != nullptr) {
-            break;
-        }
-    }
-
-    if (event) {
-        touch_event->primitive_id = event->primitive_id;
-        touch_event->event_state = event->event_state;
-        touch_event->pressed_position = event->pressed_position;
-        touch_event->current_position = event->current_position;
-        if (event->no_delta) {
-            touch_event->delta_vector = {0, 0};
-        } else {
-            touch_event->delta_vector = event->delta_vector;
-        }
-        touch_event->is_updated = event->is_updated;
-        touch_event->delta_time = event->elapsed_time;
-        touch_event->elapsed_time = event->total_time;
-    }
-
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByPrimitiveID(
-    s32 handle, const u16 primitive_id, OrbisSystemGesturePrimitiveTouchEvent* touch_event) {
-    LOG_DEBUG(Lib_SystemGesture, "called, primitive_id = {}", primitive_id);
-    if (!g_is_initialized) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
-    }
-    if (!touch_event) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
-    }
-
-    std::scoped_lock lk{g_mtx};
-    if (!g_handle_map.contains(handle)) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
-    }
-
-    auto& lib_handle = g_handle_map[handle];
-    OrbisSystemGesturePrimitiveTouchEvent* event = nullptr;
-    auto lists = std::to_array<OrbisSystemGesturePrimitiveTouchEvent*>(
-        {lib_handle.beginning_primitive_events, lib_handle.active_primitive_events,
-         lib_handle.ending_primitive_events, lib_handle.cancelled_primitive_events});
-    for (auto list : lists) {
-        for (auto list_ev = list; list_ev != nullptr && event == nullptr; list_ev = list_ev->next) {
-            if (list_ev->primitive_id == primitive_id) {
-                event = list_ev;
-                break;
-            }
-        }
-        if (event != nullptr) {
-            break;
-        }
-    }
-
-    if (!event) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_EVENT_DATA_NOT_FOUND;
-    }
-
-    touch_event->primitive_id = event->primitive_id;
-    touch_event->event_state = event->event_state;
-    touch_event->pressed_position = event->pressed_position;
-    touch_event->current_position = event->current_position;
-    if (event->no_delta) {
-        touch_event->delta_vector = {0, 0};
-    } else {
-        touch_event->delta_vector = event->delta_vector;
-    }
-    touch_event->is_updated = event->is_updated;
-    touch_event->delta_time = event->elapsed_time;
-    touch_event->elapsed_time = event->total_time;
-
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEvents(
-    s32 handle, OrbisSystemGesturePrimitiveTouchEvent* event_buffer, const u32 buffer_size,
-    u32* event_count) {
-    LOG_DEBUG(Lib_SystemGesture, "called, buffer_size = {}", buffer_size);
-    if (!g_is_initialized) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
-    }
-    if (!event_buffer || buffer_size == 0 || !event_count) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
-    }
-
-    std::scoped_lock lk{g_mtx};
-    if (!g_handle_map.contains(handle)) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
-    }
-
-    auto& lib_handle = g_handle_map[handle];
-    auto lists = std::to_array<OrbisSystemGesturePrimitiveTouchEvent*>(
-        {lib_handle.beginning_primitive_events, lib_handle.active_primitive_events,
-         lib_handle.ending_primitive_events, lib_handle.cancelled_primitive_events});
-    std::memset(event_buffer, 0, buffer_size * 0x50);
-    u32 count = 0;
-    for (auto list : lists) {
-        for (auto event = list; event != nullptr && count < buffer_size;
-             event = event->next, count++) {
-            auto& copy_event = event_buffer[count];
-            copy_event.primitive_id = event->primitive_id;
-            copy_event.event_state = event->event_state;
-            copy_event.pressed_position = event->pressed_position;
-            copy_event.current_position = event->current_position;
-            if (event->no_delta) {
-                copy_event.delta_vector = {0, 0};
-            } else {
-                copy_event.delta_vector = event->delta_vector;
-            }
-            copy_event.is_updated = event->is_updated;
-            copy_event.delta_time = event->elapsed_time;
-            copy_event.elapsed_time = event->total_time;
-        }
-        if (count >= buffer_size) {
-            break;
-        }
-    }
-
-    *event_count = count;
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventsCount(s32 handle) {
-    LOG_TRACE(Lib_SystemGesture, "called");
-    if (!g_is_initialized) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
-    }
-
-    std::scoped_lock lk{g_mtx};
-    if (!g_handle_map.contains(handle)) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
-    }
-    return g_handle_map[handle].primitive_events_count;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventByEventID(
-    s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer, const u32 event_id,
-    OrbisSystemGestureTouchEvent* touch_event) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventByIndex(
-    s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer, const u32 index,
-    OrbisSystemGestureTouchEvent* touch_event) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureGetTouchEvents(s32 handle,
-                                                const OrbisSystemGestureTouchRecognizer* recognizer,
-                                                OrbisSystemGestureTouchEvent* event_buffer,
-                                                const u32 buffer_size, u32* event_count) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventsCount(
-    s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer) {
-    LOG_TRACE(Lib_SystemGesture, "called");
-
-    // return GetTouchEventsCount(handle, recognizer);
-
-    if (!g_is_initialized) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
-    }
-    if (!recognizer) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
-    }
-
-    std::scoped_lock lk{g_mtx};
-    if (!g_handle_map.contains(handle)) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
-    }
-    if (recognizer->magic != 0x35547435) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
-    }
-
-    return recognizer->touch_events_count;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureGetTouchRecognizerInformation(
-    s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer,
-    OrbisSystemGestureTouchRecognizerInformation* info) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceSystemGestureInitializePrimitiveTouchRecognizer() {
@@ -498,49 +161,6 @@ s32 PS4_SYSV_ABI sceSystemGestureOpen(s32 input_type, OrbisSystemGestureOpenPara
     lib_handle.inactive_primitive_events = &lib_handle.primitive_events[0];
 
     return handle;
-}
-
-s32 PS4_SYSV_ABI
-sceSystemGestureRemoveTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureResetPrimitiveTouchRecognizer(s32 handle) {
-    LOG_DEBUG(Lib_SystemGesture, "called");
-    if (!g_is_initialized) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
-    }
-
-    std::scoped_lock lk{g_mtx};
-    if (!g_handle_map.contains(handle)) {
-        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
-    }
-
-    // Re-initialize primitive touch events
-    auto& lib_handle = g_handle_map[handle];
-    std::memset(&lib_handle.primitive_events, 0,
-                sizeof(OrbisSystemGesturePrimitiveTouchEvent) * PRIMITIVE_TOUCH_EVENT_COUNT);
-    for (s32 i = 0; i < PRIMITIVE_TOUCH_EVENT_COUNT - 1; i++) {
-        lib_handle.primitive_events[i].next = &lib_handle.primitive_events[i + 1];
-    }
-    lib_handle.inactive_primitive_events = &lib_handle.primitive_events[0];
-
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI
-sceSystemGestureResetTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI sceSystemGestureUpdateAllTouchRecognizer(s32 handle) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    // s32 result = UpdateAllTouchRecognizer(handle);
-    // LOG_DEBUG(Lib_SystemGesture, "{}", global_handles[0].touch_event_count);
-    // return result;
-    return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
@@ -797,9 +417,290 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     return ORBIS_OK;
 }
 
+s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByIndex(
+    s32 handle, const u32 index, OrbisSystemGesturePrimitiveTouchEvent* touch_event) {
+    LOG_DEBUG(Lib_SystemGesture, "called, index = {}", index);
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!touch_event) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+
+    auto& lib_handle = g_handle_map[handle];
+    if (index < lib_handle.primitive_events_count) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INDEX_OUT_OF_ARRAY;
+    }
+
+    // The "index" goes from start of the beginning list to the end of the cancelled list.
+    s32 cur_index = 0;
+    OrbisSystemGesturePrimitiveTouchEvent* event = nullptr;
+    for (auto list_ev = lib_handle.beginning_primitive_events;
+         event == nullptr && list_ev != nullptr; list_ev = list_ev->next, cur_index++) {
+        if (cur_index == index) {
+            event = list_ev;
+        }
+    }
+    auto lists = std::to_array<OrbisSystemGesturePrimitiveTouchEvent*>(
+        {lib_handle.beginning_primitive_events, lib_handle.active_primitive_events,
+         lib_handle.ending_primitive_events, lib_handle.cancelled_primitive_events});
+    for (auto list : lists) {
+        for (auto list_ev = list; list_ev != nullptr && event == nullptr; list_ev = list_ev->next) {
+            if (cur_index == index) {
+                event = list_ev;
+            }
+        }
+        if (event != nullptr) {
+            break;
+        }
+    }
+
+    if (event) {
+        touch_event->primitive_id = event->primitive_id;
+        touch_event->event_state = event->event_state;
+        touch_event->pressed_position = event->pressed_position;
+        touch_event->current_position = event->current_position;
+        if (event->no_delta) {
+            touch_event->delta_vector = {0, 0};
+        } else {
+            touch_event->delta_vector = event->delta_vector;
+        }
+        touch_event->is_updated = event->is_updated;
+        touch_event->delta_time = event->elapsed_time;
+        touch_event->elapsed_time = event->total_time;
+    }
+
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventByPrimitiveID(
+    s32 handle, const u16 primitive_id, OrbisSystemGesturePrimitiveTouchEvent* touch_event) {
+    LOG_DEBUG(Lib_SystemGesture, "called, primitive_id = {}", primitive_id);
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!touch_event) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+
+    auto& lib_handle = g_handle_map[handle];
+    OrbisSystemGesturePrimitiveTouchEvent* event = nullptr;
+    auto lists = std::to_array<OrbisSystemGesturePrimitiveTouchEvent*>(
+        {lib_handle.beginning_primitive_events, lib_handle.active_primitive_events,
+         lib_handle.ending_primitive_events, lib_handle.cancelled_primitive_events});
+    for (auto list : lists) {
+        for (auto list_ev = list; list_ev != nullptr && event == nullptr; list_ev = list_ev->next) {
+            if (list_ev->primitive_id == primitive_id) {
+                event = list_ev;
+                break;
+            }
+        }
+        if (event != nullptr) {
+            break;
+        }
+    }
+
+    if (!event) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_EVENT_DATA_NOT_FOUND;
+    }
+
+    touch_event->primitive_id = event->primitive_id;
+    touch_event->event_state = event->event_state;
+    touch_event->pressed_position = event->pressed_position;
+    touch_event->current_position = event->current_position;
+    if (event->no_delta) {
+        touch_event->delta_vector = {0, 0};
+    } else {
+        touch_event->delta_vector = event->delta_vector;
+    }
+    touch_event->is_updated = event->is_updated;
+    touch_event->delta_time = event->elapsed_time;
+    touch_event->elapsed_time = event->total_time;
+
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEvents(
+    s32 handle, OrbisSystemGesturePrimitiveTouchEvent* event_buffer, const u32 buffer_size,
+    u32* event_count) {
+    LOG_DEBUG(Lib_SystemGesture, "called, buffer_size = {}", buffer_size);
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!event_buffer || buffer_size == 0 || !event_count) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+
+    auto& lib_handle = g_handle_map[handle];
+    auto lists = std::to_array<OrbisSystemGesturePrimitiveTouchEvent*>(
+        {lib_handle.beginning_primitive_events, lib_handle.active_primitive_events,
+         lib_handle.ending_primitive_events, lib_handle.cancelled_primitive_events});
+    std::memset(event_buffer, 0, buffer_size * 0x50);
+    u32 count = 0;
+    for (auto list : lists) {
+        for (auto event = list; event != nullptr && count < buffer_size;
+             event = event->next, count++) {
+            auto& copy_event = event_buffer[count];
+            copy_event.primitive_id = event->primitive_id;
+            copy_event.event_state = event->event_state;
+            copy_event.pressed_position = event->pressed_position;
+            copy_event.current_position = event->current_position;
+            if (event->no_delta) {
+                copy_event.delta_vector = {0, 0};
+            } else {
+                copy_event.delta_vector = event->delta_vector;
+            }
+            copy_event.is_updated = event->is_updated;
+            copy_event.delta_time = event->elapsed_time;
+            copy_event.elapsed_time = event->total_time;
+        }
+        if (count >= buffer_size) {
+            break;
+        }
+    }
+
+    *event_count = count;
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureGetPrimitiveTouchEventsCount(s32 handle) {
+    LOG_TRACE(Lib_SystemGesture, "called");
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+    return g_handle_map[handle].primitive_events_count;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureResetPrimitiveTouchRecognizer(s32 handle) {
+    LOG_DEBUG(Lib_SystemGesture, "called");
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+
+    // Re-initialize primitive touch events
+    auto& lib_handle = g_handle_map[handle];
+    std::memset(&lib_handle.primitive_events, 0,
+                sizeof(OrbisSystemGesturePrimitiveTouchEvent) * PRIMITIVE_TOUCH_EVENT_COUNT);
+    for (s32 i = 0; i < PRIMITIVE_TOUCH_EVENT_COUNT - 1; i++) {
+        lib_handle.primitive_events[i].next = &lib_handle.primitive_events[i + 1];
+    }
+    lib_handle.inactive_primitive_events = &lib_handle.primitive_events[0];
+
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureCreateTouchRecognizer(
+    s32 handle, OrbisSystemGestureTouchRecognizer* recognizer, OrbisSystemGestureType type,
+    OrbisSystemGestureRectangle* rectangle, OrbisSystemGestureTouchRecognizerParameter* param) {
+    LOG_DEBUG(Lib_SystemGesture, "called");
+
+    // return CreateTouchRecognizer(handle, recognizer, type, rectangle, param);
+
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!recognizer) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+    if (type < OrbisSystemGestureType::Tap || type > OrbisSystemGestureType::Flick) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_SUPPORTED_GESTURE;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+
+    // Zero-initialize the recognizer
+    std::memset(recognizer, 0, sizeof(OrbisSystemGestureTouchRecognizer));
+    recognizer->type = type;
+    if (rectangle != nullptr) {
+        // Only copies the four float values, doesn't touch the reserved fields.
+        std::memcpy(&recognizer->rect, rectangle, sizeof(float) * 4);
+    } else {
+        recognizer->no_rectangle = true;
+    }
+
+    // Set param_data appropriately
+    switch (type) {
+    case OrbisSystemGestureType::Tap: {
+        if (!param || param->tap.max_tap_count == 0) {
+            recognizer->param_data = 1;
+        } else {
+            recognizer->param_data = param->tap.max_tap_count;
+        }
+    }
+    case OrbisSystemGestureType::TapAndHold: {
+        recognizer->param_data = !param ? 1000 : param->tap_and_hold.time_to_invoke_event;
+    }
+    default: // Do nothing
+    }
+
+    // Set the magic value, this is used to determine if the touch recognizer is initialized.
+    recognizer->magic = 0x35547435;
+
+    // Initialize recognizer touch events.
+    for (OrbisSystemGestureTouchEvent& touch_event : recognizer->touch_events) {
+        touch_event.is_updated = 1;
+        touch_event.gesture_type = type;
+    }
+    return ORBIS_OK;
+}
+
 s32 PS4_SYSV_ABI
-sceSystemGestureUpdateTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+sceSystemGestureAppendTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
+    LOG_DEBUG(Lib_SystemGesture, "called");
+
+    // return AppendTouchRecognizer(handle, recognizer);
+
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!recognizer) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+    if (recognizer->magic != 0x35547435) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+
+    auto& lib_handle = g_handle_map[handle];
+    if (lib_handle.touch_recognizer_count >= 0x37) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_OUT_OF_RECOGNIZER;
+    }
+
+    // Add touch recognizer to appropriate handle
+    lib_handle.touch_recognizers[lib_handle.touch_recognizer_count++] = recognizer;
+    recognizer->touch_recognizer_count = lib_handle.touch_recognizer_count;
     return ORBIS_OK;
 }
 
@@ -807,6 +708,106 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdateTouchRecognizerRectangle(
     s32 handle, OrbisSystemGestureTouchRecognizer* recognizer,
     const OrbisSystemGestureRectangle* rect) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI
+sceSystemGestureUpdateTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
+    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureUpdateAllTouchRecognizer(s32 handle) {
+    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    // s32 result = UpdateAllTouchRecognizer(handle);
+    // LOG_DEBUG(Lib_SystemGesture, "{}", global_handles[0].touch_event_count);
+    // return result;
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureGetTouchRecognizerInformation(
+    s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer,
+    OrbisSystemGestureTouchRecognizerInformation* info) {
+    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventByEventID(
+    s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer, const u32 event_id,
+    OrbisSystemGestureTouchEvent* touch_event) {
+    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventByIndex(
+    s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer, const u32 index,
+    OrbisSystemGestureTouchEvent* touch_event) {
+    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureGetTouchEvents(s32 handle,
+                                                const OrbisSystemGestureTouchRecognizer* recognizer,
+                                                OrbisSystemGestureTouchEvent* event_buffer,
+                                                const u32 buffer_size, u32* event_count) {
+    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventsCount(
+    s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer) {
+    LOG_TRACE(Lib_SystemGesture, "called");
+
+    // return GetTouchEventsCount(handle, recognizer);
+
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!recognizer) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+    if (recognizer->magic != 0x35547435) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+
+    return recognizer->touch_events_count;
+}
+
+s32 PS4_SYSV_ABI
+sceSystemGestureRemoveTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
+    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI
+sceSystemGestureResetTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
+    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureClose(s32 handle) {
+    LOG_INFO(Lib_SystemGesture, "called");
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+    g_handle_map.erase(handle);
+
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceSystemGestureFinalizePrimitiveTouchRecognizer() {
+    LOG_INFO(Lib_SystemGesture, "called");
+    g_is_initialized = false;
     return ORBIS_OK;
 }
 
