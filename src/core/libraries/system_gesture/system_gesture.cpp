@@ -23,7 +23,7 @@ struct OrbisSystemGestureHandle {
     s32 touch_recognizer_count;
     OrbisSystemGestureTouchRecognizer* touch_recognizers[55];
     OrbisSystemGesturePrimitiveTouchEvent primitive_events[6];
-    u8 primitive_ev_count;
+    u8 primitive_events_count;
     Pad::OrbisPadData cur_pad_data;
     Pad::OrbisPadData prev_pad_data;
     OrbisSystemGesturePrimitiveTouchEvent* inactive_primitive_events;
@@ -682,7 +682,37 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     // There are actual touches to process
     if (lib_handle.cur_pad_data.touchData.touchNum > 0 &&
         lib_handle.cur_pad_data.touchData.touchNum < 3) {
-        
+        for (s32 touch_index = 0; touch_index < lib_handle.cur_pad_data.touchData.touchNum;
+             touch_index++) {
+            u16 touch_x = lib_handle.cur_pad_data.touchData.touch[touch_index].x;
+            u16 touch_y = lib_handle.cur_pad_data.touchData.touch[touch_index].y;
+            u8 primitive_id = lib_handle.cur_pad_data.touchData.touch[touch_index].id;
+
+            // First, see if there is an active event with this id.
+            auto event = lib_handle.active_primitive_events;
+            while (event != nullptr && event->primitive_id != primitive_id) {
+                event = event->next;
+            }
+            if (event == nullptr) {
+                // No active event case, pull one from the inactive list and start it up.
+                event = lib_handle.inactive_primitive_events;
+                lib_handle.inactive_primitive_events = event->next;
+
+                std::memset(event, 0, sizeof(OrbisSystemGesturePrimitiveTouchEvent));
+                event->event_state = OrbisSystemGestureTouchState::Begin;
+                event->primitive_id = primitive_id;
+                event->current_position.x = touch_x;
+                event->current_position.y = touch_y;
+                event->pressed_position = event->current_position;
+                event->is_updated = true;
+
+
+
+                lib_handle.primitive_events_count++;
+            } else {
+                // There is an active event, update it appropriately.
+            }
+        }
     }
 
 
