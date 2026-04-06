@@ -190,7 +190,7 @@ struct OrbisSystemGestureTouchRecognizer {
     u32 touch_recognizer_count;
     u32 touch_events_count;
     OrbisSystemGestureTouchEvent touch_events[16];
-    bool no_rectangle;
+    bool no_rect;
     u8 reserved[3];
     OrbisSystemGestureRectangle rect;
     u8 reserved2[4];

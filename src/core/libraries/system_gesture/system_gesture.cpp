@@ -643,7 +643,7 @@ s32 PS4_SYSV_ABI sceSystemGestureCreateTouchRecognizer(
         // Only copies the four float values, doesn't touch the reserved fields.
         std::memcpy(&recognizer->rect, rectangle, sizeof(float) * 4);
     } else {
-        recognizer->no_rectangle = true;
+        recognizer->no_rect = true;
     }
 
     // Set param_data appropriately
@@ -707,7 +707,24 @@ sceSystemGestureAppendTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecogni
 s32 PS4_SYSV_ABI sceSystemGestureUpdateTouchRecognizerRectangle(
     s32 handle, OrbisSystemGestureTouchRecognizer* recognizer,
     const OrbisSystemGestureRectangle* rect) {
-    LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    LOG_DEBUG(Lib_SystemGesture, "called");
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!recognizer || !rect) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+    if (recognizer->magic != 0x35547435) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+
+    std::memcpy(&recognizer->rect, rect, sizeof(float) * 4);
+    recognizer->no_rect = false;
     return ORBIS_OK;
 }
 
