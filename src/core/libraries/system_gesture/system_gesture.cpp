@@ -728,9 +728,89 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdateTouchRecognizerRectangle(
     return ORBIS_OK;
 }
 
+void updateTapRecognizer(OrbisSystemGestureHandle& handle,
+                         OrbisSystemGestureTouchRecognizer* recognizer) {}
+
+void updateDragRecognizer(OrbisSystemGestureHandle& handle,
+                          OrbisSystemGestureTouchRecognizer* recognizer) {}
+
+void updateTapAndHoldRecognizer(OrbisSystemGestureHandle& handle,
+                                OrbisSystemGestureTouchRecognizer* recognizer) {}
+
+void updatePinchOutInRecognizer(OrbisSystemGestureHandle& handle,
+                                OrbisSystemGestureTouchRecognizer* recognizer) {}
+
+void updateRotationRecognizer(OrbisSystemGestureHandle& handle,
+                              OrbisSystemGestureTouchRecognizer* recognizer) {}
+
+void updateFlickRecognizer(OrbisSystemGestureHandle& handle,
+                           OrbisSystemGestureTouchRecognizer* recognizer) {}
+
 s32 PS4_SYSV_ABI
 sceSystemGestureUpdateTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    if (!recognizer) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+
+    auto& lib_handle = g_handle_map[handle];
+    if (!lib_handle.is_updated) {
+        if (recognizer->magic == 0x35547435) {
+            for (OrbisSystemGestureTouchEvent& event : recognizer->touch_events) {
+                event.is_updated = false;
+            }
+        }
+        return ORBIS_OK;
+    }
+
+    // Recognizer magic is only checked if the handle is updated.
+    if (recognizer->magic != 0x35547435) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+    for (OrbisSystemGestureTouchEvent& event : recognizer->touch_events) {
+        event.is_updated = true;
+    }
+    recognizer->updated_time = lib_handle.cur_pad_data.timestamp;
+    if (recognizer->creation_time == 0) {
+        recognizer->creation_time = recognizer->updated_time;
+    }
+
+    // Update recognizer based on type
+    switch (recognizer->type) {
+    case OrbisSystemGestureType::Tap: {
+        updateTapRecognizer(lib_handle, recognizer);
+        break;
+    }
+    case OrbisSystemGestureType::Drag: {
+        updateDragRecognizer(lib_handle, recognizer);
+        break;
+    }
+    case OrbisSystemGestureType::TapAndHold: {
+        updateTapAndHoldRecognizer(lib_handle, recognizer);
+        break;
+    }
+    case OrbisSystemGestureType::PinchOutIn: {
+        updatePinchOutInRecognizer(lib_handle, recognizer);
+        break;
+    }
+    case OrbisSystemGestureType::Rotation: {
+        updateRotationRecognizer(lib_handle, recognizer);
+        break;
+    }
+    case OrbisSystemGestureType::Flick: {
+        updateFlickRecognizer(lib_handle, recognizer);
+        break;
+    }
+    }
+
     return ORBIS_OK;
 }
 
@@ -739,6 +819,72 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdateAllTouchRecognizer(s32 handle) {
     // s32 result = UpdateAllTouchRecognizer(handle);
     // LOG_DEBUG(Lib_SystemGesture, "{}", global_handles[0].touch_event_count);
     // return result;
+
+    if (!g_is_initialized) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
+    }
+
+    std::scoped_lock lk{g_mtx};
+    if (!g_handle_map.contains(handle)) {
+        return ORBIS_SYSTEM_GESTURE_ERROR_INVALID_HANDLE;
+    }
+
+    auto& lib_handle = g_handle_map[handle];
+    if (!lib_handle.is_updated) {
+        for (OrbisSystemGestureTouchRecognizer* recognizer : lib_handle.touch_recognizers) {
+            if (!recognizer || recognizer->magic != 0x35547435) {
+                continue;
+            }
+            for (OrbisSystemGestureTouchEvent& event : recognizer->touch_events) {
+                event.is_updated = false;
+            }
+        }
+        return ORBIS_OK;
+    }
+
+    for (OrbisSystemGestureTouchRecognizer* recognizer : lib_handle.touch_recognizers) {
+        // Skip uninitialized recognizers
+        if (!recognizer || recognizer->magic != 0x35547435) {
+            continue;
+        }
+        for (OrbisSystemGestureTouchEvent& event : recognizer->touch_events) {
+            event.is_updated = true;
+        }
+
+        recognizer->updated_time = lib_handle.cur_pad_data.timestamp;
+        if (recognizer->creation_time == 0) {
+            recognizer->creation_time = recognizer->updated_time;
+        }
+
+        // Update recognizer based on type
+        switch (recognizer->type) {
+        case OrbisSystemGestureType::Tap: {
+            updateTapRecognizer(lib_handle, recognizer);
+            break;
+        }
+        case OrbisSystemGestureType::Drag: {
+            updateDragRecognizer(lib_handle, recognizer);
+            break;
+        }
+        case OrbisSystemGestureType::TapAndHold: {
+            updateTapAndHoldRecognizer(lib_handle, recognizer);
+            break;
+        }
+        case OrbisSystemGestureType::PinchOutIn: {
+            updatePinchOutInRecognizer(lib_handle, recognizer);
+            break;
+        }
+        case OrbisSystemGestureType::Rotation: {
+            updateRotationRecognizer(lib_handle, recognizer);
+            break;
+        }
+        case OrbisSystemGestureType::Flick: {
+            updateFlickRecognizer(lib_handle, recognizer);
+            break;
+        }
+        }
+    }
+
     return ORBIS_OK;
 }
 
