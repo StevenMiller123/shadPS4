@@ -109,7 +109,8 @@ void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
     } else {
         game_folder = file.parent_path();
         if (const auto game_folder_name = game_folder.filename().string();
-            game_folder_name.ends_with("-UPDATE") || game_folder_name.ends_with("-patch")) {
+            game_folder_name.ends_with("-UPDATE") || game_folder_name.ends_with("-patch") ||
+            game_folder_name.ends_with("-mods")) {
             // If an executable was launched from a separate update directory,
             // use the base game directory as the game folder.
             const std::string base_name = game_folder_name.substr(0, game_folder_name.rfind('-'));
@@ -292,6 +293,13 @@ void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
         }
     }
 
+    std::filesystem::path mods_folder = game_folder;
+    mods_folder += "-mods";
+
+    if (std::filesystem::exists(mods_folder) && !std::filesystem::is_empty(mods_folder)) {
+        LOG_INFO(Loader, "Files found in game mods folder");
+    }
+
     // Create stdin/stdout/stderr
     Common::Singleton<FileSys::HandleTable>::Instance()->CreateStdHandles();
 
@@ -437,13 +445,12 @@ void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
     if (!id.empty()) {
         start_time = std::chrono::steady_clock::now();
 
-        std::thread([this, id]() {
-            while (true) {
-                std::this_thread::sleep_for(std::chrono::seconds(60));
+        play_time_thread = std::jthread([this, id](std::stop_token stop) {
+            while (Common::StoppableTimedWait(stop, std::chrono::seconds(60))) {
                 UpdatePlayTime(id);
                 start_time = std::chrono::steady_clock::now();
             }
-        }).detach();
+        });
     }
 
     args.insert(args.begin(), eboot_name.generic_string());
