@@ -35,30 +35,6 @@ struct OrbisSystemGestureHandle {
 
 static constexpr u64 PRIMITIVE_TOUCH_EVENT_COUNT = 6;
 
-// Actual decompiled struct
-struct OrbisSystemGestureHandleInternal {
-    u32 type;
-    bool has_controller_info;
-    bool is_updated;
-    OrbisSystemGestureRectangle rect;
-    float has_rect;
-    u32 touch_recognizer_count;
-    OrbisSystemGestureTouchRecognizer* touch_recognizers[55];
-    char unk2[104];
-    OrbisSystemGesturePrimitiveTouchEvent primitive_events[6];
-    Pad::OrbisPadData cur_pad_data;
-    Pad::OrbisPadData prev_pad_data;
-    OrbisSystemGesturePrimitiveTouchEvent* inactive_primitive_events;
-    OrbisSystemGesturePrimitiveTouchEvent* beginning_primitive_events;
-    OrbisSystemGesturePrimitiveTouchEvent* active_primitive_events;
-    OrbisSystemGesturePrimitiveTouchEvent* ending_primitive_events;
-    OrbisSystemGesturePrimitiveTouchEvent* cancelled_primitive_events;
-    u8 touch_event_count;
-    char unk3[7];
-    float rect_width;
-    float rect_height;
-};
-
 // Internal data
 bool g_is_initialized{false};
 std::mutex g_mtx{};
@@ -66,59 +42,12 @@ std::map<s32, OrbisSystemGestureHandle> g_handle_map{};
 s32 g_sdk_version{};
 s32 g_handle_count{};
 
-// Actual library offsets
-u64 library_base = 0x80e20c000;
-u64 handle_array = 0xc070;
-u64 lib_init = 0x5580;
-u64 lib_open = 0x5650;
-u64 lib_append_touch = 0x61b0;
-u64 lib_create_touch = 0x6040;
-u64 lib_update_prim = 0x58f0;
-u64 lib_update_all = 0x6630;
-u64 lib_get_touch_count = 0x68a0;
-
-OrbisSystemGestureHandleInternal* global_handles =
-    (OrbisSystemGestureHandleInternal*)(library_base + handle_array);
-
-s32 PS4_SYSV_ABI (*Initialize)() = reinterpret_cast<s32 PS4_SYSV_ABI (*)()>(library_base +
-                                                                            lib_init);
-s32 PS4_SYSV_ABI (*Open)(s32 input_type, OrbisSystemGestureOpenParameter* param) =
-    reinterpret_cast<s32 PS4_SYSV_ABI (*)(s32 input_type, OrbisSystemGestureOpenParameter* param)>(
-        library_base + lib_open);
-s32 PS4_SYSV_ABI (*CreateTouchRecognizer)(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer,
-                                          OrbisSystemGestureType type,
-                                          OrbisSystemGestureRectangle* rectangle,
-                                          OrbisSystemGestureTouchRecognizerParameter* param) =
-    reinterpret_cast<s32 PS4_SYSV_ABI (*)(
-        s32 handle, OrbisSystemGestureTouchRecognizer* recognizer, OrbisSystemGestureType type,
-        OrbisSystemGestureRectangle* rectangle, OrbisSystemGestureTouchRecognizerParameter* param)>(
-        library_base + lib_create_touch);
-s32 PS4_SYSV_ABI (*AppendTouchRecognizer)(s32 handle,
-                                          OrbisSystemGestureTouchRecognizer* recognizer) =
-    reinterpret_cast<s32 PS4_SYSV_ABI (*)(s32 handle,
-                                          OrbisSystemGestureTouchRecognizer* recognizer)>(
-        library_base + lib_append_touch);
-s32 PS4_SYSV_ABI (*UpdatePrimitiveTouchRecognizer)(
-    s32 handle, const OrbisSystemGestureTouchPadData* input_data) =
-    reinterpret_cast<s32 PS4_SYSV_ABI (*)(s32 handle,
-                                          const OrbisSystemGestureTouchPadData* input_data)>(
-        library_base + lib_update_prim);
-s32 PS4_SYSV_ABI (*UpdateAllTouchRecognizer)(s32 handle) =
-    reinterpret_cast<s32 PS4_SYSV_ABI (*)(s32 handle)>(library_base + lib_update_all);
-s32 PS4_SYSV_ABI (*GetTouchEventsCount)(s32 handle,
-                                        const OrbisSystemGestureTouchRecognizer* recognizer) =
-    reinterpret_cast<s32 PS4_SYSV_ABI (*)(s32 handle,
-                                          const OrbisSystemGestureTouchRecognizer* recognizer)>(
-        library_base + lib_get_touch_count);
-
 s32 PS4_SYSV_ABI sceSystemGestureDebugGetVersion() {
     return 0x6a00;
 }
 
 s32 PS4_SYSV_ABI sceSystemGestureInitializePrimitiveTouchRecognizer() {
     LOG_INFO(Lib_SystemGesture, "called");
-
-    // return Initialize();
 
     if (g_is_initialized) {
         return ORBIS_OK;
@@ -132,8 +61,6 @@ s32 PS4_SYSV_ABI sceSystemGestureInitializePrimitiveTouchRecognizer() {
 
 s32 PS4_SYSV_ABI sceSystemGestureOpen(s32 input_type, OrbisSystemGestureOpenParameter* param) {
     LOG_DEBUG(Lib_SystemGesture, "called");
-
-    // return Open(input_type, param);
 
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
@@ -166,12 +93,6 @@ s32 PS4_SYSV_ABI sceSystemGestureOpen(s32 input_type, OrbisSystemGestureOpenPara
 s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
     s32 handle, const OrbisSystemGestureTouchPadData* input_data) {
     LOG_DEBUG(Lib_SystemGesture, "called");
-
-    // static u64 count = 0;
-    // input_data->pad_data_buffer->touchData.reserve1 = count++;
-    // s32 result = UpdatePrimitiveTouchRecognizer(handle, input_data);
-    // LOG_DEBUG(Lib_SystemGesture, "{}", global_handles[0].touch_event_count);
-    // return result;
 
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
@@ -619,8 +540,6 @@ s32 PS4_SYSV_ABI sceSystemGestureCreateTouchRecognizer(
     OrbisSystemGestureRectangle* rectangle, OrbisSystemGestureTouchRecognizerParameter* param) {
     LOG_DEBUG(Lib_SystemGesture, "called");
 
-    // return CreateTouchRecognizer(handle, recognizer, type, rectangle, param);
-
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
     }
@@ -675,8 +594,6 @@ s32 PS4_SYSV_ABI sceSystemGestureCreateTouchRecognizer(
 s32 PS4_SYSV_ABI
 sceSystemGestureAppendTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecognizer* recognizer) {
     LOG_DEBUG(Lib_SystemGesture, "called");
-
-    // return AppendTouchRecognizer(handle, recognizer);
 
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
@@ -816,9 +733,6 @@ sceSystemGestureUpdateTouchRecognizer(s32 handle, OrbisSystemGestureTouchRecogni
 
 s32 PS4_SYSV_ABI sceSystemGestureUpdateAllTouchRecognizer(s32 handle) {
     LOG_ERROR(Lib_SystemGesture, "(STUBBED) called");
-    // s32 result = UpdateAllTouchRecognizer(handle);
-    // LOG_DEBUG(Lib_SystemGesture, "{}", global_handles[0].touch_event_count);
-    // return result;
 
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
@@ -1021,8 +935,6 @@ s32 PS4_SYSV_ABI sceSystemGestureGetTouchEvents(s32 handle,
 s32 PS4_SYSV_ABI sceSystemGestureGetTouchEventsCount(
     s32 handle, const OrbisSystemGestureTouchRecognizer* recognizer) {
     LOG_TRACE(Lib_SystemGesture, "called");
-
-    // return GetTouchEventsCount(handle, recognizer);
 
     if (!g_is_initialized) {
         return ORBIS_SYSTEM_GESTURE_ERROR_NOT_INITIALIZED;
