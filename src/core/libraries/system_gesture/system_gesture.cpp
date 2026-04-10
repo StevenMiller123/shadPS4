@@ -267,7 +267,9 @@ s32 PS4_SYSV_ABI sceSystemGestureUpdatePrimitiveTouchRecognizer(
                 }
             } else {
                 // Update the event's delta data
-                if (g_sdk_version < Common::ElfInfo::FW_35 || true /*lib_handle.prev_pad_data.touchData.reserve1 != lib_handle.cur_pad_data.touchData.reserve1*/) {
+                if (g_sdk_version < Common::ElfInfo::FW_35 ||
+                    lib_handle.prev_pad_data.touchData.time_since_touch_held_down !=
+                        lib_handle.cur_pad_data.touchData.time_since_touch_held_down) {
                     event->delta_time = event->elapsed_time;
                     event->delta_vector.x = touch_x - event->current_position.x;
                     event->delta_vector.y = touch_y - event->current_position.y;
