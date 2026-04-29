@@ -108,7 +108,8 @@ For more information on how to test, debug and report issues with the emulator o
 F10 | FPS Counter
 Ctrl+F10 | Video Debug Info
 F11 | Fullscreen
-F12 | Trigger RenderDoc Capture
+F12 | Trigger RenderDoc Capture (or game-only screenshot if RenderDoc is unavailable)
+Alt+F12 | Capture screenshot including HUD/dialog overlays
 
 > [!NOTE]
 > Xbox and DualShock controllers work out of the box.
@@ -197,6 +198,8 @@ A few noteworthy teams/projects who've helped us along the way are:
 - **yuzu**: Our shader compiler has been designed with yuzu's Hades compiler as a blueprint. This allowed us to focus on the challenges of emulating a modern AMD GPU while having a high-quality optimizing shader compiler implementation as a base.
 
 - [**felix86**](https://github.com/OFFTKP/felix86): A new x86-64 → RISC-V Linux userspace emulator
+
+- [**emudev.org**](https://emudev.org/): A network of people interested in the documentation, emulation, simulation and re-implementation of hardware near extinction . Belongs to my friend skmp and me (shadow) also a member of it
 
 # License
 

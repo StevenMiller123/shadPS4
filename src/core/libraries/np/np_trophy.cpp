@@ -219,7 +219,16 @@ s32 PS4_SYSV_ABI sceNpTrophyCreateContext(OrbisNpTrophyContext* context,
     ctx.context_id = *context;
 
     // Resolve and cache all paths once so callers never recompute them.
-    const std::string np_comm_id = Common::ElfInfo::Instance().GetNpCommIds()[service_label];
+    std::string np_comm_id;
+    const auto& trophyMap = Common::ElfInfo::Instance().GetTrophyIndexMap();
+    auto it = trophyMap.find(service_label);
+    if (it != trophyMap.end()) {
+        np_comm_id = it->second;
+    } else {
+        LOG_ERROR(Lib_NpTrophy, "No npCommId found for trophy index/service_label: {}",
+                  service_label);
+        return ORBIS_NP_TROPHY_ERROR_UNKNOWN;
+    }
     const auto trophy_base =
         Common::FS::GetUserPath(Common::FS::PathType::UserDir) / "trophy" / np_comm_id;
     ctx.xml_save_file =
@@ -831,8 +840,10 @@ int PS4_SYSV_ABI sceNpTrophyRegisterContext(OrbisNpTrophyContext context,
     if (ctx.registered)
         return ORBIS_NP_TROPHY_ERROR_ALREADY_REGISTERED;
 
-    if (!std::filesystem::exists(ctx.trophy_xml_path))
-        return ORBIS_NP_TROPHY_ERROR_TITLE_CONF_NOT_INSTALLED;
+    if (!std::filesystem::exists(ctx.trophy_xml_path)) {
+        LOG_ERROR(Lib_NpTrophy, "Could not find trophy files.");
+        // Stub success here to prevent issues specific to missing a trophy key.
+    }
 
     ctx.registered = true;
     LOG_INFO(Lib_NpTrophy, "Context {} registered", context);
