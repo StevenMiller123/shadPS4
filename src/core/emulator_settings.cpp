@@ -390,34 +390,14 @@ bool EmulatorSettingsImpl::Load(const std::string& serial) {
             } else {
                 if (std::filesystem::exists(Common::FS::GetUserPath(Common::FS::PathType::UserDir) /
                                             "config.toml")) {
-                    SDL_MessageBoxButtonData btns[2]{
-                        {0, 0, "Update"},
-                        {0, 1, "Defaults"},
-                    };
-                    SDL_MessageBoxData msg_box{
-                        0,
-                        nullptr,
-                        "Config Migration",
-                        "The shadPS4 config backend has been updated, and you only have "
-                        "the old version of the config. Do you wish to update it "
-                        "automatically, or continue with the default config?",
-                        2,
-                        btns,
-                        nullptr,
-                    };
-                    int result = 1;
-                    SDL_ShowMessageBox(&msg_box, &result);
-                    if (result == 0) {
-                        if (TransferSettings()) {
-                            m_loaded = true;
-                            Save();
-                            return true;
-                        } else {
-                            SDL_ShowSimpleMessageBox(0, "Config Migration",
-                                                     "Error transferring settings, exiting.",
-                                                     nullptr);
-                            std::quick_exit(1);
-                        }
+                    if (TransferSettings()) {
+                        m_loaded = true;
+                        Save();
+                        return true;
+                    } else {
+                        SDL_ShowSimpleMessageBox(0, "Config Migration",
+                                                 "Error transferring settings, exiting.", nullptr);
+                        std::quick_exit(1);
                     }
                 }
                 LOG_DEBUG(Config, "Global config not found - using defaults");
