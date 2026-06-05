@@ -3,8 +3,8 @@
 
 #include <algorithm>
 #include <mutex>
-#include <queue>
 #include <vector>
+#include <queue>
 
 #include "common/logging/log.h"
 

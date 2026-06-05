@@ -79,7 +79,8 @@ static s32 ValidateTitleIdAgainstCurrentGame(std::string_view title_id) {
     if (expected_title_id.empty()) {
         return ORBIS_NP_ERROR_TITLE_ID_IN_PARAM_SFO_NOT_EXIST;
     }
-    if (title_id.size() != NpTitleDatTitleIdSize || expected_title_id.size() + 3 != NpTitleDatTitleIdSize ||
+    if (title_id.size() != NpTitleDatTitleIdSize ||
+        expected_title_id.size() + 3 != NpTitleDatTitleIdSize ||
         !title_id.starts_with(expected_title_id) || title_id[expected_title_id.size()] != '_') {
         return ORBIS_NP_ERROR_TITLE_ID_IN_PARAM_SFO_NOT_MATCHED_TO_NP_TITLE_ID;
     }
@@ -96,7 +97,8 @@ static s32 ValidateTitleIdAgainstCurrentGame(std::string_view title_id) {
 }
 
 static s32 LoadNpTitleStateFromGame(NpTitleState* state) {
-    const auto nptitle_path = Common::ElfInfo::Instance().GetGameFolder() / "sce_sys" / "nptitle.dat";
+    const auto nptitle_path =
+        Common::ElfInfo::Instance().GetGameFolder() / "sce_sys" / "nptitle.dat";
 
     std::ifstream file(nptitle_path, std::ios::binary);
     if (!file) {

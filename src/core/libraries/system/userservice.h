@@ -57,8 +57,8 @@ struct OrbisUserServiceEvent {
     OrbisUserServiceUserId userId;
 };
 
-using OrbisUserServiceEventCallback =
-    void(PS4_SYSV_ABI*)(const OrbisUserServiceEvent* event, void* userdata);
+using OrbisUserServiceEventCallback = void(PS4_SYSV_ABI*)(const OrbisUserServiceEvent* event,
+                                                          void* userdata);
 
 void AddUserServiceEvent(const OrbisUserServiceEvent e);
 

@@ -113,8 +113,7 @@ static s32 ValidateTrophyConfStructure(const pugi::xml_node& trophy_conf) {
     for (const auto& node : trophy_conf.children()) {
         const auto node_name = std::string_view{node.name()};
         if (node_name == "group") {
-            const int group_id =
-                node.attribute("id").as_int(ORBIS_NP_TROPHY_INVALID_GROUP_ID);
+            const int group_id = node.attribute("id").as_int(ORBIS_NP_TROPHY_INVALID_GROUP_ID);
             if (group_id < 0 || group_id >= 0x20 || group_ids.contains(group_id)) {
                 return ORBIS_NP_TROPHY_ERROR_INVALID_GROUP_ID;
             }
@@ -126,17 +125,15 @@ static s32 ValidateTrophyConfStructure(const pugi::xml_node& trophy_conf) {
             continue;
         }
 
-        const int trophy_id =
-            node.attribute("id").as_int(ORBIS_NP_TROPHY_INVALID_TROPHY_ID);
+        const int trophy_id = node.attribute("id").as_int(ORBIS_NP_TROPHY_INVALID_TROPHY_ID);
         if (trophy_id < 0 || trophy_id >= ORBIS_NP_TROPHY_NUM_MAX ||
             trophy_types.contains(trophy_id)) {
             return ORBIS_NP_TROPHY_ERROR_INVALID_TROPHY_ID;
         }
 
         const auto trophy_type = std::string_view{node.attribute("ttype").value()};
-        if (trophy_type.size() != 1 ||
-            (trophy_type[0] != 'B' && trophy_type[0] != 'S' && trophy_type[0] != 'G' &&
-             trophy_type[0] != 'P')) {
+        if (trophy_type.size() != 1 || (trophy_type[0] != 'B' && trophy_type[0] != 'S' &&
+                                        trophy_type[0] != 'G' && trophy_type[0] != 'P')) {
             return ORBIS_NP_TROPHY_ERROR_INVALID_TROPHY_CONF_FORMAT;
         }
 
@@ -156,8 +153,7 @@ static s32 ValidateTrophyConfStructure(const pugi::xml_node& trophy_conf) {
             continue;
         }
 
-        const int trophy_id =
-            node.attribute("id").as_int(ORBIS_NP_TROPHY_INVALID_TROPHY_ID);
+        const int trophy_id = node.attribute("id").as_int(ORBIS_NP_TROPHY_INVALID_TROPHY_ID);
         const auto trophy_it = trophy_types.find(trophy_id);
         if (trophy_it == trophy_types.end()) {
             return ORBIS_NP_TROPHY_ERROR_INVALID_TROPHY_ID;
@@ -382,8 +378,8 @@ static void MarkTrophyContextsUserLoggedOut(
     }
 }
 
-static void PS4_SYSV_ABI OnTrophyUserServiceEvent(
-    const Libraries::UserService::OrbisUserServiceEvent* event, void*) {
+static void PS4_SYSV_ABI
+OnTrophyUserServiceEvent(const Libraries::UserService::OrbisUserServiceEvent* event, void*) {
     if (event == nullptr) {
         return;
     }
@@ -1422,13 +1418,11 @@ int PS4_SYSV_ABI sceNpTrophyIntCheckNetSyncTitles() {
 }
 
 int PS4_SYSV_ABI sceNpTrophyIntCreateHandle(OrbisNpTrophyHandle* handle) {
-    return CreateHandleWithKind(TrophyHandleKind::Internal, handle,
-                                "sceNpTrophyIntCreateHandle");
+    return CreateHandleWithKind(TrophyHandleKind::Internal, handle, "sceNpTrophyIntCreateHandle");
 }
 
 int PS4_SYSV_ABI sceNpTrophyIntDestroyHandle(OrbisNpTrophyHandle handle) {
-    return DestroyHandleWithKind(TrophyHandleKind::Internal, handle,
-                                 "sceNpTrophyIntDestroyHandle");
+    return DestroyHandleWithKind(TrophyHandleKind::Internal, handle, "sceNpTrophyIntDestroyHandle");
 }
 
 int PS4_SYSV_ABI sceNpTrophyIntGetLocalTrophySummary() {
@@ -1488,8 +1482,7 @@ int PS4_SYSV_ABI sceNpTrophyShowTrophyList(OrbisNpTrophyContext context,
 }
 
 int PS4_SYSV_ABI sceNpTrophySystemAbortHandle(OrbisNpTrophyHandle handle) {
-    return AbortHandleWithKind(TrophyHandleKind::System, handle,
-                               "sceNpTrophySystemAbortHandle");
+    return AbortHandleWithKind(TrophyHandleKind::System, handle, "sceNpTrophySystemAbortHandle");
 }
 
 int PS4_SYSV_ABI sceNpTrophySystemBuildGroupIconUri() {
@@ -1533,8 +1526,7 @@ int PS4_SYSV_ABI sceNpTrophySystemCreateContext() {
 }
 
 int PS4_SYSV_ABI sceNpTrophySystemCreateHandle(OrbisNpTrophyHandle* handle) {
-    return CreateHandleWithKind(TrophyHandleKind::System, handle,
-                                "sceNpTrophySystemCreateHandle");
+    return CreateHandleWithKind(TrophyHandleKind::System, handle, "sceNpTrophySystemCreateHandle");
 }
 
 int PS4_SYSV_ABI sceNpTrophySystemDbgCtl() {
