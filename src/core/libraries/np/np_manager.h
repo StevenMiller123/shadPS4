@@ -113,6 +113,11 @@ s32 PS4_SYSV_ABI sceNpGetNpId(Libraries::UserService::OrbisUserServiceUserId use
                               OrbisNpId* np_id);
 s32 PS4_SYSV_ABI sceNpGetOnlineId(Libraries::UserService::OrbisUserServiceUserId user_id,
                                   OrbisNpOnlineId* online_id);
+s32 PS4_SYSV_ABI sceNpSetNpTitleId(const OrbisNpTitleId* title_id,
+                                   const OrbisNpTitleSecret* title_secret);
+s32 PS4_SYSV_ABI sceNpIntGetNpTitleId(OrbisNpTitleId* title_id);
+s32 PS4_SYSV_ABI sceNpIntGetNpTitleIdSecret(OrbisNpTitleId* title_id,
+                                            OrbisNpTitleSecret* title_secret);
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym);
 } // namespace Libraries::Np::NpManager

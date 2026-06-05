@@ -1,13 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2026 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <algorithm>
 #include <array>
+#include <cctype>
+#include <cstring>
 #include <deque>
+#include <fstream>
 #include <map>
 #include <mutex>
 #include <variant>
 
 #include <core/user_settings.h>
+#include "common/elf_info.h"
 #include "common/logging/log.h"
 #include "core/emulator_settings.h"
 #include "core/libraries/error_codes.h"
@@ -26,6 +31,30 @@ static std::map<std::string, std::function<void()>> g_np_callbacks;
 static std::mutex g_np_callbacks_mutex;
 static std::mutex g_np_state_events_mutex;
 static std::mutex g_np_state_callbacks_mutex;
+static std::mutex g_np_title_mutex;
+
+constexpr std::array<char, 4> NpTitleDatMagic{'N', 'P', 'T', 'D'};
+constexpr std::array<u8, 4> NpTitleDatDataSize{0x00, 0x00, 0x00, 0x80};
+constexpr size_t NpTitleDatSize = 0xA0;
+constexpr size_t NpTitleDatDataSizeOffset = 0x04;
+constexpr size_t NpTitleDatReserved0Offset = 0x08;
+constexpr size_t NpTitleDatReserved0Size = 0x08;
+constexpr size_t NpTitleDatTitleIdOffset = 0x10;
+constexpr size_t NpTitleDatTitleIdSize = 0x0C;
+constexpr size_t NpTitleDatReserved1Offset = 0x1C;
+constexpr size_t NpTitleDatReserved1Size = 0x04;
+constexpr size_t NpTitleDatTitleSecretOffset = 0x20;
+
+struct NpTitleState {
+    OrbisNpTitleId title_id{};
+    OrbisNpTitleSecret title_secret{};
+    bool available = false;
+    bool disk_load_attempted = false;
+    bool explicitly_set = false;
+    s32 result = ORBIS_NP_ERROR_NP_TITLE_DAT_NOT_FOUND;
+};
+
+static NpTitleState g_np_title_state{};
 
 constexpr s32 ORBIS_NP_STATE_CALLBACK_MAX = 8;
 
@@ -44,6 +73,111 @@ struct NpRequest {
 };
 
 static std::vector<NpRequest> g_requests;
+
+static s32 ValidateTitleIdAgainstCurrentGame(std::string_view title_id) {
+    const auto expected_title_id = Common::ElfInfo::Instance().GameSerial();
+    if (expected_title_id.empty()) {
+        return ORBIS_NP_ERROR_TITLE_ID_IN_PARAM_SFO_NOT_EXIST;
+    }
+    if (title_id.size() != NpTitleDatTitleIdSize || expected_title_id.size() + 3 != NpTitleDatTitleIdSize ||
+        !title_id.starts_with(expected_title_id) || title_id[expected_title_id.size()] != '_') {
+        return ORBIS_NP_ERROR_TITLE_ID_IN_PARAM_SFO_NOT_MATCHED_TO_NP_TITLE_ID;
+    }
+
+    const auto suffix = title_id.substr(expected_title_id.size() + 1);
+    for (const char ch : suffix) {
+        if (!std::isdigit(static_cast<unsigned char>(ch)) &&
+            !std::isupper(static_cast<unsigned char>(ch))) {
+            return ORBIS_NP_ERROR_TITLE_ID_IN_PARAM_SFO_NOT_MATCHED_TO_NP_TITLE_ID;
+        }
+    }
+
+    return ORBIS_OK;
+}
+
+static s32 LoadNpTitleStateFromGame(NpTitleState* state) {
+    const auto nptitle_path = Common::ElfInfo::Instance().GetGameFolder() / "sce_sys" / "nptitle.dat";
+
+    std::ifstream file(nptitle_path, std::ios::binary);
+    if (!file) {
+        LOG_WARNING(Lib_NpManager, "nptitle.dat was not found at {}", nptitle_path.string());
+        state->available = false;
+        return ORBIS_NP_ERROR_NP_TITLE_DAT_NOT_FOUND;
+    }
+    file.seekg(0, std::ios::end);
+    const auto file_size = static_cast<std::streamoff>(file.tellg());
+    if (file_size != static_cast<std::streamoff>(NpTitleDatSize)) {
+        LOG_WARNING(Lib_NpManager, "Unexpected nptitle.dat size {} in {}", file_size,
+                    nptitle_path.string());
+        state->available = false;
+        return ORBIS_NP_ERROR_INCONSISTENT_NP_TITLE_ID;
+    }
+    file.seekg(0, std::ios::beg);
+
+    std::array<u8, NpTitleDatSize> data{};
+    if (!file.read(reinterpret_cast<char*>(data.data()), data.size())) {
+        LOG_WARNING(Lib_NpManager, "Failed to read {}", nptitle_path.string());
+        state->available = false;
+        return ORBIS_NP_ERROR_INCONSISTENT_NP_TITLE_ID;
+    }
+
+    if (!std::equal(NpTitleDatMagic.begin(), NpTitleDatMagic.end(),
+                    reinterpret_cast<const char*>(data.data()))) {
+        LOG_WARNING(Lib_NpManager, "Unexpected nptitle.dat magic in {}", nptitle_path.string());
+        state->available = false;
+        return ORBIS_NP_ERROR_INCONSISTENT_NP_TITLE_ID;
+    }
+    if (!std::equal(NpTitleDatDataSize.begin(), NpTitleDatDataSize.end(),
+                    data.begin() + NpTitleDatDataSizeOffset)) {
+        LOG_WARNING(Lib_NpManager, "Unexpected nptitle.dat data size field in {}",
+                    nptitle_path.string());
+        state->available = false;
+        return ORBIS_NP_ERROR_INCONSISTENT_NP_TITLE_ID;
+    }
+    if (!std::all_of(data.begin() + NpTitleDatReserved0Offset,
+                     data.begin() + NpTitleDatReserved0Offset + NpTitleDatReserved0Size,
+                     [](u8 byte) { return byte == 0; }) ||
+        !std::all_of(data.begin() + NpTitleDatReserved1Offset,
+                     data.begin() + NpTitleDatReserved1Offset + NpTitleDatReserved1Size,
+                     [](u8 byte) { return byte == 0; })) {
+        LOG_WARNING(Lib_NpManager, "Unexpected nptitle.dat reserved bytes in {}",
+                    nptitle_path.string());
+        state->available = false;
+        return ORBIS_NP_ERROR_INCONSISTENT_NP_TITLE_ID;
+    }
+
+    state->title_id = {};
+    state->title_secret = {};
+    std::memcpy(state->title_id.id, data.data() + NpTitleDatTitleIdOffset,
+                std::min(sizeof(state->title_id.id), NpTitleDatTitleIdSize));
+    std::memcpy(state->title_secret.data, data.data() + NpTitleDatTitleSecretOffset,
+                sizeof(state->title_secret.data));
+    if (state->title_id.id[0] == '\0' ||
+        state->title_id.id[std::size(state->title_id.id) - 1] != '\0') {
+        LOG_WARNING(Lib_NpManager, "Malformed NpTitleId in {}", nptitle_path.string());
+        state->available = false;
+        return ORBIS_NP_ERROR_INCONSISTENT_NP_TITLE_ID;
+    }
+    const auto title_id_validation = ValidateTitleIdAgainstCurrentGame(state->title_id.id);
+    if (title_id_validation < 0) {
+        LOG_WARNING(Lib_NpManager, "NpTitleId {} does not match the current game title id",
+                    state->title_id.id);
+        state->available = false;
+        return title_id_validation;
+    }
+    state->available = true;
+    LOG_INFO(Lib_NpManager, "Loaded NP title state from {}", nptitle_path.string());
+    return ORBIS_OK;
+}
+
+static void EnsureNpTitleStateLoaded() {
+    if (g_np_title_state.explicitly_set || g_np_title_state.disk_load_attempted) {
+        return;
+    }
+
+    g_np_title_state.disk_load_attempted = true;
+    g_np_title_state.result = LoadNpTitleStateFromGame(&g_np_title_state);
+}
 
 s32 CreateNpRequest(bool async) {
     if (g_active_requests == ORBIS_NP_MANAGER_REQUEST_LIMIT) {
@@ -744,7 +878,53 @@ s32 PS4_SYSV_ABI sceNpSetNpTitleId(const OrbisNpTitleId* title_id,
         LOG_ERROR(Lib_NpManager, "called with invalid arguments");
         return ORBIS_NP_ERROR_INVALID_ARGUMENT;
     }
-    LOG_ERROR(Lib_NpManager, "(STUBBED) called, title_id = {}", title_id->id);
+    if (title_id->id[0] == '\0' || title_id->id[std::size(title_id->id) - 1] != '\0') {
+        return ORBIS_NP_ERROR_INVALID_ID;
+    }
+    const auto title_id_validation = ValidateTitleIdAgainstCurrentGame(title_id->id);
+    if (title_id_validation < 0) {
+        return title_id_validation;
+    }
+
+    std::scoped_lock lk{g_np_title_mutex};
+    g_np_title_state.title_id = *title_id;
+    g_np_title_state.title_secret = *title_secret;
+    g_np_title_state.available = true;
+    g_np_title_state.disk_load_attempted = true;
+    g_np_title_state.explicitly_set = true;
+    g_np_title_state.result = ORBIS_OK;
+
+    LOG_INFO(Lib_NpManager, "Stored NP title state, title_id = {}", title_id->id);
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceNpIntGetNpTitleId(OrbisNpTitleId* title_id) {
+    if (title_id == nullptr) {
+        return ORBIS_NP_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{g_np_title_mutex};
+    EnsureNpTitleStateLoaded();
+    if (!g_np_title_state.available) {
+        return g_np_title_state.result;
+    }
+    *title_id = g_np_title_state.title_id;
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceNpIntGetNpTitleIdSecret(OrbisNpTitleId* title_id,
+                                            OrbisNpTitleSecret* title_secret) {
+    if (title_id == nullptr || title_secret == nullptr) {
+        return ORBIS_NP_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{g_np_title_mutex};
+    EnsureNpTitleStateLoaded();
+    if (!g_np_title_state.available) {
+        return g_np_title_state.result;
+    }
+    *title_id = g_np_title_state.title_id;
+    *title_secret = g_np_title_state.title_secret;
     return ORBIS_OK;
 }
 
@@ -1049,6 +1229,9 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("a8R9-75u4iM", "libSceNpManager", 1, "libSceNpManager", sceNpGetAccountId);
     LIB_FUNCTION("rbknaUjpqWo", "libSceNpManager", 1, "libSceNpManager", sceNpGetAccountIdA);
     LIB_FUNCTION("p-o74CnoNzY", "libSceNpManager", 1, "libSceNpManager", sceNpGetNpId);
+    LIB_FUNCTION("H0n1QHWdVwQ", "libSceNpManager", 1, "libSceNpManager", sceNpIntGetNpTitleId);
+    LIB_FUNCTION("LtYqw9M23hw", "libSceNpManager", 1, "libSceNpManager",
+                 sceNpIntGetNpTitleIdSecret);
     LIB_FUNCTION("XDncXQIJUSk", "libSceNpManager", 1, "libSceNpManager", sceNpGetOnlineId);
     LIB_FUNCTION("eQH7nWPcAgc", "libSceNpManager", 1, "libSceNpManager", sceNpGetState);
     LIB_FUNCTION("VgYczPGB5ss", "libSceNpManager", 1, "libSceNpManager", sceNpGetUserIdByAccountId);

@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2026 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <algorithm>
+#include <mutex>
 #include <queue>
+#include <vector>
 
 #include "common/logging/log.h"
 
@@ -115,8 +118,31 @@ int PS4_SYSV_ABI sceUserServiceGetDiscPlayerFlag() {
 
 std::queue<OrbisUserServiceEvent> user_service_event_queue = {};
 
+struct UserServiceEventCallbackEntry {
+    OrbisUserServiceEventCallback callback{};
+    void* userdata{};
+};
+
+std::mutex user_service_event_callbacks_mutex{};
+std::vector<UserServiceEventCallbackEntry> user_service_event_callbacks{};
+
+static void DispatchUserServiceEventCallbacks(const OrbisUserServiceEvent& event) {
+    std::vector<UserServiceEventCallbackEntry> callbacks{};
+    {
+        std::scoped_lock lk{user_service_event_callbacks_mutex};
+        callbacks = user_service_event_callbacks;
+    }
+
+    for (const auto& entry : callbacks) {
+        if (entry.callback != nullptr) {
+            entry.callback(&event, entry.userdata);
+        }
+    }
+}
+
 void AddUserServiceEvent(const OrbisUserServiceEvent e) {
     LOG_DEBUG(Lib_UserService, "Event added to queue: {} {}", (u8)e.event, e.userId);
+    DispatchUserServiceEventCallbacks(e);
     user_service_event_queue.push(e);
 }
 
@@ -1212,8 +1238,20 @@ int PS4_SYSV_ABI sceUserServiceLogout() {
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceUserServiceRegisterEventCallback() {
-    LOG_ERROR(Lib_UserService, "(STUBBED) called");
+int PS4_SYSV_ABI sceUserServiceRegisterEventCallback(OrbisUserServiceEventCallback callback,
+                                                     void* userdata) {
+    if (callback == nullptr) {
+        return ORBIS_USER_SERVICE_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{user_service_event_callbacks_mutex};
+    const auto it = std::ranges::find_if(
+        user_service_event_callbacks, [&](const UserServiceEventCallbackEntry& entry) {
+            return entry.callback == callback && entry.userdata == userdata;
+        });
+    if (it == user_service_event_callbacks.end()) {
+        user_service_event_callbacks.push_back({callback, userdata});
+    }
     return ORBIS_OK;
 }
 
@@ -2177,8 +2215,16 @@ int PS4_SYSV_ABI sceUserServiceTerminate() {
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceUserServiceUnregisterEventCallback() {
-    LOG_ERROR(Lib_UserService, "(STUBBED) called");
+int PS4_SYSV_ABI sceUserServiceUnregisterEventCallback(OrbisUserServiceEventCallback callback,
+                                                       void* userdata) {
+    if (callback == nullptr) {
+        return ORBIS_USER_SERVICE_ERROR_INVALID_ARGUMENT;
+    }
+
+    std::scoped_lock lk{user_service_event_callbacks_mutex};
+    std::erase_if(user_service_event_callbacks, [&](const UserServiceEventCallbackEntry& entry) {
+        return entry.callback == callback && entry.userdata == userdata;
+    });
     return ORBIS_OK;
 }
 

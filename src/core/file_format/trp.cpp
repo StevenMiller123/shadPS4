@@ -42,6 +42,10 @@ static void hexToBytes(const char* hex, unsigned char* dst) {
     }
 }
 
+static bool EnsureDirectory(const std::filesystem::path& path) {
+    return std::filesystem::exists(path) || std::filesystem::create_directories(path);
+}
+
 bool TRP::Extract(const std::filesystem::path& trophyPath, std::string npCommId,
                   const std::filesystem::path& outputPath) {
     // Retrieve trophy key
@@ -80,9 +84,8 @@ bool TRP::Extract(const std::filesystem::path& trophyPath, std::string npCommId,
         }
 
         s64 seekPos = sizeof(TrpHeader);
-        // Create output directories
-        if (!std::filesystem::create_directories(outputPath / "Icons") ||
-            !std::filesystem::create_directories(outputPath / "Xml")) {
+        // Re-extraction into an existing trophy cache is expected after the user imports a key.
+        if (!EnsureDirectory(outputPath / "Icons") || !EnsureDirectory(outputPath / "Xml")) {
             LOG_ERROR(Common_Filesystem, "Failed to create output directories for {}", npCommId);
             return false;
         }
