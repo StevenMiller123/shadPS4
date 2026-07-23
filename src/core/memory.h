@@ -8,6 +8,7 @@
 #include <string>
 #include <string_view>
 #include "common/enum.h"
+#include "common/io_file.h"
 #include "common/shared_first_mutex.h"
 #include "common/singleton.h"
 #include "common/types.h"
@@ -241,6 +242,8 @@ public:
     void CopySparseMemory(VAddr source, u8* dest, u64 size);
 
     bool TryWriteBacking(void* address, const void* data, u64 size);
+
+    s64 ReadFileIntoBacking(Common::FS::IOFile& file, void* address, u64 size);
 
     void SetupMemoryRegions(u64 flexible_size, bool use_extended_mem1, bool use_extended_mem2);
 

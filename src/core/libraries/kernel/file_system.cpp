@@ -355,15 +355,12 @@ s64 PS4_SYSV_ABI sceKernelWrite(s32 fd, const void* buf, u64 nbytes) {
 static std::vector<u8> file_buf{};
 
 s64 ReadFile(Common::FS::IOFile& file, void* buf, u64 nbytes) {
-    const auto* memory = Core::Memory::Instance();
+    auto* memory = Core::Memory::Instance();
     // Invalidate up to the actual number of bytes that could be read.
     const auto remaining = file.GetSize() - file.Tell();
-    memory->InvalidateMemory(reinterpret_cast<VAddr>(buf), std::min<u64>(nbytes, remaining));
-    if (file_buf.capacity() < nbytes) {
-        file_buf.reserve(nbytes);
-    }
-    u64 bytes = file.ReadRaw<u8>(file_buf.data(), nbytes);
-    std::memcpy(buf, file_buf.data(), bytes);
+    // memory->InvalidateMemory(reinterpret_cast<VAddr>(buf), std::min<u64>(nbytes, remaining));
+    u64 bytes = memory->ReadFileIntoBacking(file, buf, std::min<u64>(nbytes, remaining));
+    // u64 bytes = file.ReadRaw<u8>(buf, nbytes);
     return bytes;
 }
 
