@@ -350,13 +350,19 @@ s64 PS4_SYSV_ABI sceKernelWrite(s32 fd, const void* buf, u64 nbytes) {
     return result;
 }
 
+static thread_local std::vector<u8> file_buf{};
+
 s64 ReadFile(Common::FS::IOFile& file, void* buf, u64 nbytes) {
     const auto* memory = Core::Memory::Instance();
     // Invalidate up to the actual number of bytes that could be read.
     const auto remaining = file.GetSize() - file.Tell();
     memory->InvalidateMemory(reinterpret_cast<VAddr>(buf), std::min<u64>(nbytes, remaining));
-
-    return file.ReadRaw<u8>(buf, nbytes);
+    if (file_buf.capacity() < nbytes) {
+        file_buf.reserve(nbytes);
+    }
+    u64 bytes = file.ReadRaw<u8>(file_buf.data(), nbytes);
+    std::memcpy(buf, file_buf.data(), bytes);
+    return bytes;
 }
 
 s64 PS4_SYSV_ABI readv(s32 fd, const OrbisKernelIovec* iov, s32 iovcnt) {
@@ -1322,6 +1328,7 @@ s32 PS4_SYSV_ABI posix_select(s32 nfds, fd_set_posix* readfds, fd_set_posix* wri
         }
 
         if (native_fd == -1) {
+            LOG_WARNING(Kernel_Fs, "Unsupported fd {}", i);
             continue;
         }
 
@@ -1453,6 +1460,7 @@ s32 PS4_SYSV_ABI posix_select(s32 nfds, fd_set* readfds, fd_set* writefds, fd_se
                 }
             }();
             if (native_fd == -1) {
+                LOG_WARNING(Kernel_Fs, "Unsupported fd {}", i);
                 continue;
             }
             host_to_guest.emplace(native_fd, i);
