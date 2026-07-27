@@ -109,7 +109,8 @@ ModuleBudgetInfo ClassifyModule(std::filesystem::path path, BudgetPtype process_
     return info;
 }
 
-Module::Module(Core::MemoryManager* memory_, const std::filesystem::path& file_, u32& max_tls_index, bool is_dynamic)
+Module::Module(Core::MemoryManager* memory_, const std::filesystem::path& file_, u32& max_tls_index,
+               bool is_dynamic)
     : memory{memory_}, file{file_}, name{file.filename().string()} {
     elf.Open(file);
     if (elf.IsElfFile()) {
