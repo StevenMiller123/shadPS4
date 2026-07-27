@@ -343,7 +343,7 @@ s32 PS4_SYSV_ABI posix_mprotect(VAddr addr, u64 size, s32 prot) {
 }
 
 s32 PS4_SYSV_ABI sceKernelMtypeprotect(VAddr addr, u64 size, s32 mtype, s32 prot) {
-    LOG_INFO(Kernel_Vmm, "called addr = {}, size = {:#x}, prot = {:#x}", addr, size, prot);
+    LOG_INFO(Kernel_Vmm, "called addr = {:#x}, size = {:#x}, prot = {:#x}", addr, size, prot);
     const auto mem_prot = static_cast<Core::MemoryProt>(prot);
     const auto mem_type = static_cast<Core::DmemMemoryType>(mtype);
     return g_memory->ProtectType(addr, size, mem_type, mem_prot);

@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
-#pragma GCC push_options
-#pragma GCC optimize("O0")
+
 #include <string_view>
 #include "common/enum.h"
 #include "common/types.h"

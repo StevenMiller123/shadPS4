@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: Copyright 2024-2026 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
-#pragma GCC push_options
-#pragma GCC optimize("O0")
+
 #include <boost/container/small_vector.hpp>
 #include "common/alignment.h"
 #include "common/scope_exit.h"

@@ -885,8 +885,7 @@ static bool TryPatchJit(void* code_address) {
 
     return TryPatch(code, module).first;
 }
-#pragma GCC push_options
-#pragma GCC optimize("O0")
+
 static void TryPatchAot(void* code_address, u64 code_size) {
     auto* code = static_cast<u8*>(code_address);
     auto* module = GetModule(code);

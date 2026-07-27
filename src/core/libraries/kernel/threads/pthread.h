@@ -197,7 +197,7 @@ struct PthreadAttr {
 };
 using PthreadAttrT = PthreadAttr*;
 
-static constexpr u32 ThrStackDefault = 512_KB;
+static constexpr u32 ThrStackDefault = 1_MB;
 static constexpr u32 ThrStackInitial = 2_MB;
 static constexpr u32 ThrPageSize = 16_KB;
 static constexpr u32 ThrGuardDefault = ThrPageSize;
