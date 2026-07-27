@@ -843,7 +843,7 @@ void* AddressSpace::Map(VAddr virtual_addr, u64 size, PAddr phys_addr, bool is_e
     return impl->Map(virtual_addr, phys_addr, size, prot);
 #else
     const int flag = phys_addr != -1 ? MAP_SHARED : (MAP_ANONYMOUS | MAP_PRIVATE);
-    return impl->Map(virtual_addr, phys_addr, size, flag, prot);
+    return impl->Map(virtual_addr, phys_addr, size, prot, flag);
 #endif
 }
 
