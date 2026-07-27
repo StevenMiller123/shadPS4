@@ -923,7 +923,6 @@ set(CORE src/core/aerolib/stubs.cpp
          src/core/memory/dmem_map.h
          src/core/memory/kernel.cpp
          src/core/memory/kernel.h
-         src/core/memory/flexible_pool.cpp
          src/core/memory/flexible_pool.h
          src/core/memory/rmap_splay_tree.h
          src/core/memory/splay_tree.h
@@ -931,7 +930,6 @@ set(CORE src/core/aerolib/stubs.cpp
          src/core/memory/sx_lock.h
          src/core/memory/vm_map.cpp
          src/core/memory/vm_map.h
-         src/core/memory/vm_object.cpp
          src/core/memory/vm_object.h
          src/core/debug_state.cpp
          src/core/debug_state.h
