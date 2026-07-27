@@ -46,10 +46,8 @@ s32 DmemDevice::ioctl(u32 cmd, void* args) {
     }
     case MemoryQuery: {
         auto* data = reinterpret_cast<MemoryQueryArgs*>(args);
-        auto* info =
-            reinterpret_cast<::Libraries::Kernel::OrbisQueryInfo*>(data->query_info);
-        return dmem.Query(data->addr, data->flags & 1, &info->start, &info->end,
-                          &info->memoryType);
+        auto* info = reinterpret_cast<::Libraries::Kernel::OrbisQueryInfo*>(data->query_info);
+        return dmem.Query(data->addr, data->flags & 1, &info->start, &info->end, &info->memoryType);
     }
     default:
         LOG_WARNING(Kernel_Fs, "Unknown ioctl");

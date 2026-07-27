@@ -493,7 +493,8 @@ int PS4_SYSV_ABI posix_sched_get_priority_min(SchedPolicy policy) {
 }
 
 int PS4_SYSV_ABI posix_pthread_rename_np(PthreadT thread, const char* name) {
-    LOG_INFO(Kernel_Pthread, "thread = {}, name = {}", thread ? thread->name : "null", name ? name : "(null)");
+    LOG_INFO(Kernel_Pthread, "thread = {}, name = {}", thread ? thread->name : "null",
+             name ? name : "(null)");
     auto* thread_state = ThrState::Instance();
     auto* memory = Core::Memory::Instance();
 
