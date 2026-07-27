@@ -25,7 +25,7 @@ namespace {
 constexpr s32 InferredNpAppType = 0;
 
 bool g_signaling_heap_initialized = false;
-void* g_signaling_heap_base = nullptr;
+VAddr g_signaling_heap_base = 0;
 s64 g_signaling_heap_size = 0;
 SignalingRuntimeHooks g_runtime_hooks{};
 bool g_runtime_hooks_registered = false;
@@ -80,7 +80,7 @@ s32 InitSignalingHeap(s64 pool_size) {
 
     const u64 aligned_size = Common::AlignUp(static_cast<u64>(pool_size), 0x4000);
 
-    void* heap_base = nullptr;
+    VAddr heap_base = 0;
     const s32 rc = Libraries::Kernel::sceKernelMapNamedFlexibleMemory(&heap_base, aligned_size, 3,
                                                                       0, "SceNpSignaling");
     if (rc < 0) {
@@ -100,10 +100,10 @@ void ShutdownSignalingHeap() {
 
     g_signaling_heap_initialized = false;
 
-    if (g_signaling_heap_base != nullptr) {
+    if (g_signaling_heap_base != 0) {
         Libraries::Kernel::sceKernelMunmap(g_signaling_heap_base,
                                            static_cast<u64>(g_signaling_heap_size));
-        g_signaling_heap_base = nullptr;
+        g_signaling_heap_base = 0;
         g_signaling_heap_size = 0;
     }
 }

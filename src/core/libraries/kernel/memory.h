@@ -27,12 +27,6 @@ enum MemoryTypes : u32 {
     ORBIS_KERNEL_WB_GARLIC = 10 // write - back mode (Garlic bus)
 };
 
-enum MemoryFlags : u32 {
-    ORBIS_KERNEL_MAP_FIXED = 0x0010, // Fixed
-    ORBIS_KERNEL_MAP_NO_OVERWRITE = 0x0080,
-    ORBIS_KERNEL_MAP_NO_COALESCE = 0x400000
-};
-
 enum MemoryProtection : u32 {
     ORBIS_KERNEL_PROT_CPU_READ = 0x01,  // Permit reads from the CPU
     ORBIS_KERNEL_PROT_CPU_RW = 0x02,    // Permit reads/writes from the CPU
@@ -138,18 +132,18 @@ s32 PS4_SYSV_ABI sceKernelAllocateDirectMemory(PAddr search_start, PAddr search_
                                                u64 alignment, s32 memory_type, PAddr* out_addr);
 s32 PS4_SYSV_ABI sceKernelReleaseDirectMemory(u64 start, u64 len);
 s32 PS4_SYSV_ABI sceKernelCheckedReleaseDirectMemory(u64 start, u64 len);
-s32 PS4_SYSV_ABI sceKernelAvailableDirectMemorySize(u64 searchStart, u64 searchEnd, u64 alignment,
-                                                    u64* physAddrOut, u64* sizeOut);
+s32 PS4_SYSV_ABI sceKernelAvailableDirectMemorySize(u64 search_start, u64 search_end, u64 alignment,
+                                                    PAddr* out_addr, u64* out_size);
 s32 PS4_SYSV_ABI sceKernelVirtualQuery(const void* addr, s32 flags, OrbisVirtualQueryInfo* info,
                                        u64 infoSize);
 s32 PS4_SYSV_ABI sceKernelMapNamedDirectMemory(VAddr* addr, u64 len, s32 prot, s32 flags,
                                                s64 phys_addr, u64 alignment, const char* name);
-s32 PS4_SYSV_ABI sceKernelMapNamedFlexibleMemory(VAddr* addr_in_out, u64 len, s32 prot, s32 flags,
+s32 PS4_SYSV_ABI sceKernelMapNamedFlexibleMemory(VAddr* addr, u64 len, s32 prot, s32 flags,
                                                  const char* name);
-s32 PS4_SYSV_ABI sceKernelMapFlexibleMemory(VAddr* addr_in_out, u64 len, s32 prot, s32 flags);
+s32 PS4_SYSV_ABI sceKernelMapFlexibleMemory(VAddr* addr, u64 len, s32 prot, s32 flags);
 
-s32 PS4_SYSV_ABI sceKernelDirectMemoryQuery(u64 offset, s32 flags, OrbisQueryInfo* query_info,
-                                            u64 infoSize);
+s32 PS4_SYSV_ABI sceKernelDirectMemoryQuery(PAddr addr, s32 flags, OrbisQueryInfo* query_info,
+                                            u64 info_size);
 s32 PS4_SYSV_ABI sceKernelAvailableFlexibleMemorySize(u64* sizeOut);
 void PS4_SYSV_ABI _sceKernelRtldSetApplicationHeapAPI(void* func[]);
 

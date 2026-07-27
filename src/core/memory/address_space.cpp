@@ -752,7 +752,7 @@ struct AddressSpace::Impl {
         }
     }
 
-    void* Map(VAddr virtual_addr, PAddr phys_addr, u64 size, PosixPageProtection prot, int flag,
+    void* Map(VAddr virtual_addr, PAddr phys_addr, u64 size, PosixPageProtection prot,
               int fd = -1) {
         m_free_regions.subtract({virtual_addr, virtual_addr + size});
 #ifdef __APPLE__
@@ -762,6 +762,7 @@ struct AddressSpace::Impl {
         }
 #endif
         const int handle = fd != -1 ? fd : (phys_addr != -1 ? backing_fd : -1);
+        const int flag = phys_addr != -1 ? MAP_SHARED : (MAP_ANONYMOUS | MAP_PRIVATE);
         const off_t host_offset = phys_addr != -1 ? phys_addr : 0;
         void* ret = mmap(reinterpret_cast<void*>(virtual_addr), size, prot, MAP_FIXED | flag,
                          handle, host_offset);
@@ -839,8 +840,7 @@ void* AddressSpace::Map(VAddr virtual_addr, u64 size, PAddr phys_addr, bool is_e
     // canonical copy of the memory and rely on the JIT to map translated code as executable.
     constexpr auto prot = PAGE_READWRITE;
 #endif
-    const int flag = phys_addr != -1 ? MAP_SHARED : (MAP_ANONYMOUS | MAP_PRIVATE);
-    return impl->Map(virtual_addr, phys_addr, size, prot, flag);
+    return impl->Map(virtual_addr, phys_addr, size, prot);
 }
 
 void* AddressSpace::MapFile(VAddr virtual_addr, u64 size, u64 offset, MemoryMapFlags flags,

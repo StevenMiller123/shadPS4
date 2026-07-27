@@ -95,7 +95,7 @@ ModuleBudgetInfo ClassifyModule(std::filesystem::path path, BudgetPtype process_
 
     const auto filename = path.filename().string();
     const bool is_libc_or_fios = (filename == "libc.sprx" || filename == "libSceFios2.sprx");
-    const bool is_system = path.string().contains("/sys_modules/");
+    const bool is_system = path.string().contains("sys_modules");
     if (is_system && !is_libc_or_fios) {
         // System library.
         info.budget_ptype = BudgetPtype::System;

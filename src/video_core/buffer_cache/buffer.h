@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 #include "common/types.h"
-#include "core/memory.h"
+#include "core/memory/kernel.h"
 #include "video_core/amdgpu/resource.h"
 #include "video_core/renderer_vulkan/vk_common.h"
 
@@ -185,7 +185,7 @@ public:
         const auto [data, offset] = Map(size, alignment);
         auto* memory = Core::Memory::Instance();
         const VAddr src_vaddr = reinterpret_cast<const VAddr>(src);
-        if (memory->IsValidMapping(src_vaddr)) {
+        if (memory->IsGuestMapping(src_vaddr)) {
             memory->CopySparseMemory(src_vaddr, data, size);
         } else {
             std::memcpy(data, reinterpret_cast<const void*>(src), size);
