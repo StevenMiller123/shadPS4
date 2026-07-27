@@ -121,10 +121,10 @@ void BufferCache::DownloadBufferMemory(Buffer& buffer, VAddr device_addr, u64 si
         for (const auto& copy : copies) {
             const VAddr copy_device_addr = buffer.CpuAddr() + copy.srcOffset;
             const u64 dst_offset = copy.dstOffset - offset;
-            /*memory->ForEachBackingRegion(
+            memory->ForEachBackingInRange(
                 copy_device_addr, copy.size, [&](u64 offset, u64 size, u8* backing) {
                     std::memcpy(backing, download + dst_offset + offset, size);
-                });*/
+                });
         }
         memory_tracker->UnmarkRegionAsGpuModified(device_addr, size);
         if (is_write) {

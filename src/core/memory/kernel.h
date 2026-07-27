@@ -122,10 +122,34 @@ public:
 
     void InvalidateMemory(VAddr addr, u64 size) const;
 
-private:
-    void UnmapEntry(VmMapEntry* entry);
+    template <typename Func>
+    bool ForEachBackingInRange(VAddr addr, u64 size, Func&& func) {
+        std::shared_lock lk{vm_map.lock};
+        auto [entry, found] = vm_map.LookupEntryReadOnly(addr);
+        if (!found) {
+            return false;
+        }
 
-public:
+        u64 cursor = 0;
+        while (entry != vm_map.GetTree().end() && size) {
+            const u64 clip_start = entry->start < addr ? addr - entry->start : 0;
+            const u64 clip_offset = clip_start + entry->offset;
+            const u64 clip_size = std::min(entry->end - addr, size);
+            if (entry->object) {
+                u8* backing_base = impl.BackingBase();
+                entry->object->ForEachBacking(
+                    clip_offset, clip_size, [&](u64 phys_addr, u64 backing_size) {
+                        func(cursor, backing_size, backing_base + phys_addr);
+                        cursor += backing_size;
+                    });
+            }
+            size -= clip_size;
+            entry++;
+        }
+        return true;
+    }
+
+private:
     AddressSpace impl;
     BudgetState budget;
     Blockpool blockpool;

@@ -113,6 +113,8 @@ void MemoryManager::SetPrtArea(u32 id, VAddr address, u64 size) {
 void MemoryManager::CopySparseMemory(VAddr virtual_addr, u8* dest, u64 size) {
     std::shared_lock lk{vm_map.lock};
     auto [entry, found] = vm_map.LookupEntryReadOnly(virtual_addr);
+    ASSERT_MSG(found, "Failed to find entry for virtual_addr {:#x}", virtual_addr);
+
     while (entry != vm_map.GetTree().end() && size) {
         const u64 copy_size = std::min<u64>(entry->end - virtual_addr, size);
         if (entry->object) {
