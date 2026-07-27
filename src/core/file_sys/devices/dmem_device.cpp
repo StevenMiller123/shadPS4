@@ -13,7 +13,7 @@ std::shared_ptr<BaseDevice> DmemDevice::Create(u32 handle, const char*, s32, u16
 }
 
 s32 DmemDevice::ioctl(u32 cmd, void* args) {
-    LOG_ERROR(Kernel_Fs, "called, cmd = {:#x}", cmd);
+    LOG_INFO(Kernel_Vmm, "called, cmd = {:#x}", cmd);
     auto* memory = Core::Memory::Instance();
     auto& dmem = memory->GetDmemManager();
 
