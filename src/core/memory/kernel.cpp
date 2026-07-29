@@ -255,8 +255,10 @@ s32 MemoryManager::MapMemory(VAddr* out_addr, u64 size, MemoryProt prot, MemoryM
         }
         case Core::FileSys::FileType::Regular: {
             max_prot = MemoryProt::CpuReadWrite;
-            if (False(file->f.GetAccessMode() & Common::FS::FileAccessMode::Write) &&
-                False(file->f.GetAccessMode() & Common::FS::FileAccessMode::Append)) {
+            auto* host_file = file->GetHostFile();
+            if (!host_file ||
+                (False(host_file->GetAccessMode() & Common::FS::FileAccessMode::Write) &&
+                 False(host_file->GetAccessMode() & Common::FS::FileAccessMode::Append))) {
                 // If the file does not have write access, ensure prot does not contain write
                 // permissions. On real hardware, these mappings succeed, but the memory cannot be
                 // written to.
@@ -272,7 +274,7 @@ s32 MemoryManager::MapMemory(VAddr* out_addr, u64 size, MemoryProt prot, MemoryM
             object->type = VmObjectType::Vnode;
             object->size = size;
             object->budget_ptype = is_app_file ? BudgetPtype::BigApp : BudgetPtype::Invalid;
-            object->vnode.host_fd = file->f.GetFileMapping();
+            object->vnode.file = file;
             break;
         }
         case Core::FileSys::FileType::Blockpool: {

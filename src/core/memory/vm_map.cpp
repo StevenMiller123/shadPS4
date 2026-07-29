@@ -205,8 +205,7 @@ s32 VmMap::MapMemory(VAddr* out_addr, u64 size, MemoryProt prot, MemoryProt max_
                 impl.Map(addr, size, offset, True(prot & MemoryProt::CpuExec));
                 break;
             case VmObjectType::Vnode:
-                impl.MapFile(addr, size, offset, flags, static_cast<u32>(prot & max_prot),
-                             object->vnode.host_fd);
+                object->vnode.file->handle->Map(addr, size, offset, flags, prot);
                 break;
             case VmObjectType::Default: {
                 u64 map_offset = 0;

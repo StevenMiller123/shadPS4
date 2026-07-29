@@ -10,6 +10,7 @@
 #include "core/memory/blockpool.h"
 #include "core/memory/budget.h"
 #include "core/memory/flexible_pool.h"
+#include "core/file_sys/fs.h"
 
 namespace Core {
 
@@ -44,7 +45,7 @@ struct VmObject {
         std::vector<PhysRange> backing;
     } anon;
     struct {
-        uintptr_t host_fd;
+        FileSys::File* file;
     } vnode;
     struct {
         std::vector<DmemBlock> blocks;

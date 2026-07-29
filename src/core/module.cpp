@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2024 shadPS4 Emulator Project
+// SPDX-FileCopyrightText: Copyright 2024-2026 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "common/alignment.h"
@@ -109,10 +109,10 @@ ModuleBudgetInfo ClassifyModule(std::filesystem::path path, BudgetPtype process_
     return info;
 }
 
-Module::Module(Core::MemoryManager* memory_, const std::filesystem::path& file_, u32& max_tls_index,
-               bool is_dynamic)
-    : memory{memory_}, file{file_}, name{file.filename().string()} {
-    elf.Open(file);
+Module::Module(Core::MemoryManager* memory, const std::filesystem::path& file,
+               std::unique_ptr<Core::FileSys::IFile> handle, u32& max_tls_index, bool is_dynamic)
+    : memory{memory}, file{file}, name{file.filename().string()} {
+    elf.Open(std::move(handle));
     if (elf.IsElfFile()) {
         LoadModuleToMemory(max_tls_index, is_dynamic);
         LoadDynamicInfo();
