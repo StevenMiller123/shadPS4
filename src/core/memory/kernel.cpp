@@ -363,7 +363,11 @@ s32 MemoryManager::QueryProtection(VAddr addr, VAddr* out_start, VAddr* out_end,
 s32 MemoryManager::Protect(VAddr start, u64 size, MemoryProt new_prot) {
     size = Common::AlignUpPow2((start & 0x3fff) + size, PAGE_SIZE);
     start = Common::AlignDownPow2(start, PAGE_SIZE);
-    return vm_map.Protect(dmem, start, start + size, new_prot, 0);
+    s32 result = vm_map.Protect(dmem, start, start + size, new_prot, 0);
+    if (result == ORBIS_OK) {
+        InvalidateMemory(start, size);
+    }
+    return result;
 }
 
 s32 MemoryManager::ProtectType(VAddr start, u64 size, DmemMemoryType new_mtype,
@@ -376,7 +380,11 @@ s32 MemoryManager::ProtectType(VAddr start, u64 size, DmemMemoryType new_mtype,
     }
     const VAddr end = Common::AlignUpPow2(start + size, PAGE_SIZE);
     start = Common::AlignDownPow2(start, PAGE_SIZE);
-    return vm_map.ProtectType(dmem, start, end, new_mtype, new_prot);
+    s32 result = vm_map.ProtectType(dmem, start, end, new_mtype, new_prot);
+    if (result == ORBIS_OK) {
+        InvalidateMemory(start, size);
+    }
+    return result;
 }
 
 s32 MemoryManager::VirtualQuery(VAddr addr, s32 flags,
