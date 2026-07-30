@@ -68,6 +68,20 @@ static bool CanMerge(VmMap::Tree::iterator a, VmMap::Tree::iterator b) {
     return true;
 }
 
+static MemoryPermission ToHostPerm(MemoryProt guest_prot) {
+    MemoryPermission perms{};
+    if (True(guest_prot & (MemoryProt::CpuRead | MemoryProt::GpuRead))) {
+        perms |= MemoryPermission::Read;
+    }
+    if (True(guest_prot & (MemoryProt::CpuWrite | MemoryProt::GpuWrite))) {
+        perms |= MemoryPermission::Write;
+    }
+    if (True(guest_prot & MemoryProt::CpuExec)) {
+        perms |= MemoryPermission::Execute;
+    }
+    return perms;
+}
+
 void VmMap::Init(VAddr min_offset, VAddr max_offset, u32 sdk_version) {
     m_min_offset = min_offset;
     m_max_offset = max_offset;
@@ -456,17 +470,7 @@ s32 VmMap::Protect(DmemManager& dmem, VAddr start, VAddr end, MemoryProt new_pro
         }
 
         if (auto prot = entry->protection; prot != old) {
-            Core::MemoryPermission perms{};
-            if (True(prot & (MemoryProt::CpuRead | MemoryProt::GpuRead))) {
-                perms |= Core::MemoryPermission::Read;
-            }
-            if (True(prot & MemoryProt::CpuWrite | MemoryProt::GpuWrite)) {
-                perms |= Core::MemoryPermission::Write;
-            }
-            if (True(prot & MemoryProt::CpuExec)) {
-                perms |= Core::MemoryPermission::Execute;
-            }
-            impl.Protect(entry->start, entry->Size(), perms);
+            impl.Protect(entry->start, entry->Size(), ToHostPerm(prot));
         }
 
         SimplifyEntry(entry);
@@ -557,7 +561,7 @@ s32 VmMap::ProtectType(DmemManager& dmem, VAddr start, VAddr end, DmemMemoryType
         }
 
         if (old_prot != new_prot) {
-            // impl.Protect(cur->start, cur->Size(), ToHostPerm(new_prot));
+            impl.Protect(cur->start, cur->Size(), ToHostPerm(new_prot));
         }
         dmem.UpdateMtype(cur->offset, cur->offset + cur->Size(), new_mtype);
 
