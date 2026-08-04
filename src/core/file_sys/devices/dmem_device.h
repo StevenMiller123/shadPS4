@@ -47,8 +47,8 @@ public:
     };
 
     struct AvailableMemoryArgs {
-        u64 search_start;
-        u64 search_end;
+        PAddr search_start;
+        PAddr search_end;
         u64 alignment;
         u64 out_size;
     };
