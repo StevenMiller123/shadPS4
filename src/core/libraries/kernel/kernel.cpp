@@ -331,6 +331,13 @@ s32 PS4_SYSV_ABI __sys_regmgr_call(u32 op, u32 key, void* result, void* value, u
     return ORBIS_OK;
 }
 
+s32 PS4_SYSV_ABI __sys_ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_size, u64 unk3) {
+    if (result) {
+        *result = 0;
+    }
+    return ORBIS_OK;
+}
+
 // Nominally: long sysconf(int name);
 u64 PS4_SYSV_ABI posix_sysconf(s32 name) {
     switch (name) {
@@ -488,6 +495,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("k+AXqu2-eBc", "libkernel", 1, "libkernel", posix_getpagesize);
     LIB_FUNCTION("k+AXqu2-eBc", "libScePosix", 1, "libkernel", posix_getpagesize);
     LIB_FUNCTION("7NwggrWJ5cA", "libkernel", 1, "libkernel", __sys_regmgr_call);
+    LIB_FUNCTION("Hk7iHmGxB18", "libkernel", 1, "libkernel", __sys_ipmimgr_call);
 
     LIB_FUNCTION("mkawd0NA9ts", "libkernel", 1, "libkernel", posix_sysconf);
     LIB_FUNCTION("mkawd0NA9ts", "libScePosix", 1, "libkernel", posix_sysconf);

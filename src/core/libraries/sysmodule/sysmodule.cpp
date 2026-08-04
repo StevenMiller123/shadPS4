@@ -98,9 +98,19 @@ s32 PS4_SYSV_ABI sceSysmoduleLoadModule(OrbisSysModule id) {
     return result;
 }
 
-s32 PS4_SYSV_ABI sceSysmoduleLoadModuleByNameInternal() {
-    LOG_ERROR(Lib_SysModule, "(STUBBED) called");
-    return ORBIS_OK;
+s32 PS4_SYSV_ABI sceSysmoduleLoadModuleByNameInternal(const char* name, u64 argc, const void* argv,
+                                                      u32 flags, s32* result) {
+    LOG_INFO(Lib_SysModule, "called, module {}", name);
+    auto* linker = Common::Singleton<Core::Linker>::Instance();
+    const auto& sys_module_path = EmulatorSettings.GetSysModulesDir();
+
+    std::string mod_name = std::string(name).append(".sprx");
+    const auto& module_path = sys_module_path / mod_name;
+    if (!std::filesystem::exists(module_path)) {
+        LOG_ERROR(Lib_SysModule, "Module {} is not present", name);
+        return 100;
+    }
+    return linker->LoadAndStartModule(module_path, argc, argv, result);
 }
 
 s32 PS4_SYSV_ABI sceSysmoduleLoadModuleInternal(OrbisSysModuleInternal id) {
