@@ -134,7 +134,7 @@ public:
         while (entry != vm_map.GetTree().end() && size) {
             const u64 clip_start = entry->start < addr ? addr - entry->start : 0;
             const u64 clip_offset = clip_start + entry->offset;
-            const u64 clip_size = std::min(entry->end - addr, size);
+            const u64 clip_size = std::min<u64>(entry->end - addr, size);
             if (entry->object) {
                 u8* backing_base = impl.BackingBase();
                 entry->object->ForEachBacking(
