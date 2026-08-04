@@ -356,6 +356,12 @@ s64 ReadFile(Core::FileSys::File* file, void* buf, u64 nbytes) {
     return bytes;
 }
 
+s64 PS4_SYSV_ABI readlink(const char* path, void* buf, u64 nbytes) {
+    LOG_ERROR(Kernel_Fs, "(STUBBED) path = {}", path);
+    *__Error() = POSIX_EINVAL;
+    return -1;
+}
+
 s64 PS4_SYSV_ABI readv(s32 fd, const OrbisKernelIovec* iov, s32 iovcnt) {
     auto* h = Common::Singleton<Core::FileSys::HandleTable>::Instance();
     auto* file = h->GetFile(fd);
@@ -1582,6 +1588,7 @@ void RegisterFileSystem(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("Oy6IpwgtYOk", "libScePosix", 1, "libkernel", posix_lseek);
     LIB_FUNCTION("Oy6IpwgtYOk", "libkernel", 1, "libkernel", posix_lseek);
     LIB_FUNCTION("oib76F-12fk", "libkernel", 1, "libkernel", sceKernelLseek);
+    LIB_FUNCTION("pd02UI9TbOA", "libkernel", 1, "libkernel", readlink);
     LIB_FUNCTION("DRuBt2pvICk", "libkernel", 1, "libkernel", read);
     LIB_FUNCTION("AqBioC2vF3I", "libScePosix", 1, "libkernel", posix_read);
     LIB_FUNCTION("AqBioC2vF3I", "libkernel", 1, "libkernel", posix_read);

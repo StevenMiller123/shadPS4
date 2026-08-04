@@ -611,7 +611,11 @@ void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
     }
 
     // Fonts are mounted into the sandboxed system directory, construct the appropriate path.
-    const char* sandbox_root = Libraries::Kernel::sceKernelGetFsSandboxRandomWord();
+    std::string sandbox_root =
+        std::string("/").append(Libraries::Kernel::sceKernelGetFsSandboxRandomWord());
+    const auto& sys_dir = Common::FS::GetUserPath(Common::FS::PathType::UserDir) / "vsh" / "system";
+    mnt->Mount(sys_dir, sandbox_root);
+
     std::string guest_font_dir = "/";
     guest_font_dir.append(sandbox_root).append("/common/font");
     const auto& host_font_dir = fonts_dir / "font";
