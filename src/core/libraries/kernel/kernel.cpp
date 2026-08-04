@@ -331,13 +331,6 @@ s32 PS4_SYSV_ABI __sys_regmgr_call(u32 op, u32 key, void* result, void* value, u
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI __sys_ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_size, u64 unk3) {
-    if (result) {
-        *result = 0;
-    }
-    return ORBIS_OK;
-}
-
 // Nominally: long sysconf(int name);
 u64 PS4_SYSV_ABI posix_sysconf(s32 name) {
     switch (name) {
@@ -458,9 +451,61 @@ u64 PS4_SYSV_ABI posix_sysconf(s32 name) {
     }
 }
 
+s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_size, u64 unk3) {
+    LOG_ERROR(Lib_Kernel, "(STUBBED) called, op: {:#x}", op);
+    if (op == 2) {
+        std::string name = *(char**)(args + 8);
+        LOG_ERROR(Lib_Kernel, "Create client {}", name);
+        // if (name == "SceNorpheusUpdService" || name == "SceCompAppProxyUtil" || name ==
+        // "SceCompAppProxy" || name == "SceShellAppProxy" || name == "SceStickerCoreServer") {
+        //     *result = 0;
+        // } else {
+        //     *result = -1;
+        // }
+    }
+    if (op == 0x201) {
+        while (true) {
+        }
+    }
+    if (result) {
+        *result = 0;
+    }
+    return ORBIS_OK;
+}
+
 s32 PS4_SYSV_ABI sceKernelGetPsmIntdevModeForRcmgr() {
     LOG_ERROR(Lib_Kernel, "(STUBBED)");
     return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceMbusInit() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceMbusEventCreate_() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceMbusGetDeviceInfoByCondition_() {
+    // LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceMbusEventReceive() {
+    // LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceIpmi_fjPNqzuUop8() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+char* PS4_SYSV_ABI dlerror() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return nullptr;
 }
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
@@ -482,7 +527,16 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_OBJ("f7uOxY9mM1U", "libkernel", 1, "libkernel", &g_stack_chk_guard);
     LIB_OBJ("+2thxYZ4syk", "libkernel", 1, "libkernel", g_environ.data());
     LIB_OBJ("djxxOmW6-aw", "libkernel", 1, "libkernel", &g_progname);
+
+    LIB_FUNCTION("Hk7iHmGxB18", "libkernel", 1, "libkernel", ipmimgr_call);
     LIB_FUNCTION("C2ltEJILIGE", "libkernel", 1, "libkernel", sceKernelGetPsmIntdevModeForRcmgr);
+    LIB_FUNCTION("wRPXMGtkOq0", "libSceMbus", 1, "libSceMbus", sceMbusInit);
+    LIB_FUNCTION("c08SEHicDNU", "libSceMbus", 1, "libSceMbus", sceMbusEventCreate_);
+    LIB_FUNCTION("KRL-S9qBqXw", "libSceMbus", 1, "libSceMbus", sceMbusGetDeviceInfoByCondition_);
+    LIB_FUNCTION("puHrnP8V-dY", "libSceMbus", 1, "libSceMbus", sceMbusEventReceive);
+    LIB_FUNCTION("fjPNqzuUop8", "libSceIpmi", 1, "libSceIpmi", sceIpmi_fjPNqzuUop8);
+    LIB_FUNCTION("ucFJiTO1EUw", "libkernel", 1, "libkernel", dlerror);
+
     LIB_FUNCTION("D4yla3vx4tY", "libkernel", 1, "libkernel", sceKernelError);
     LIB_FUNCTION("YeU23Szo3BM", "libkernel", 1, "libkernel", sceKernelGetAllowedSdkVersionOnSystem);
     LIB_FUNCTION("Mv1zUObHvXI", "libkernel", 1, "libkernel", sceKernelGetSystemSwVersion);
@@ -493,7 +547,8 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("PfccT7qURYE", "libkernel", 1, "libkernel", kernel_ioctl);
     LIB_FUNCTION("wW+k21cmbwQ", "libkernel", 1, "libkernel", kernel_ioctl);
     LIB_FUNCTION("JGfTMBOdUJo", "libkernel", 1, "libkernel", sceKernelGetFsSandboxRandomWord);
-    LIB_FUNCTION("JGfTMBOdUJo", "libkernel_psmkit", 1, "libkernel", sceKernelGetFsSandboxRandomWord);
+    LIB_FUNCTION("JGfTMBOdUJo", "libkernel_psmkit", 1, "libkernel",
+                 sceKernelGetFsSandboxRandomWord);
     LIB_FUNCTION("6xVpy0Fdq+I", "libkernel", 1, "libkernel", _sigprocmask);
     LIB_FUNCTION("Xjoosiw+XPI", "libkernel", 1, "libkernel", sceKernelUuidCreate);
     LIB_FUNCTION("Ou3iL1abvng", "libkernel", 1, "libkernel", stack_chk_fail);
@@ -501,7 +556,6 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("k+AXqu2-eBc", "libkernel", 1, "libkernel", posix_getpagesize);
     LIB_FUNCTION("k+AXqu2-eBc", "libScePosix", 1, "libkernel", posix_getpagesize);
     LIB_FUNCTION("7NwggrWJ5cA", "libkernel", 1, "libkernel", __sys_regmgr_call);
-    LIB_FUNCTION("Hk7iHmGxB18", "libkernel", 1, "libkernel", __sys_ipmimgr_call);
 
     LIB_FUNCTION("mkawd0NA9ts", "libkernel", 1, "libkernel", posix_sysconf);
     LIB_FUNCTION("mkawd0NA9ts", "libScePosix", 1, "libkernel", posix_sysconf);
