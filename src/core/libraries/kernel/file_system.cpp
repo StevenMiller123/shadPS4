@@ -873,8 +873,8 @@ s32 PS4_SYSV_ABI posix_ftruncate(s32 fd, s64 length) {
     auto* file = h->GetFile(fd);
 
     if (file == nullptr) {
-        *__Error() = POSIX_EBADF;
-        return -1;
+        LOG_ERROR(Kernel_Fs, "Unhandled truncate? fd = {}", fd);
+        return ORBIS_OK;
     }
 
     if (file->type == Core::FileSys::FileType::Device) {
@@ -1599,6 +1599,7 @@ void RegisterFileSystem(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("c7ZnT7V1B98", "libScePosix", 1, "libkernel", posix_rmdir);
     LIB_FUNCTION("c7ZnT7V1B98", "libkernel", 1, "libkernel", posix_rmdir);
     LIB_FUNCTION("naInUjYt3so", "libkernel", 1, "libkernel", sceKernelRmdir);
+    LIB_FUNCTION("8vE6Z6VEYyk", "libkernel", 1, "libkernel", posix_access);
     LIB_FUNCTION("8vE6Z6VEYyk", "libkernel_psmkit", 1, "libkernel", posix_access);
     LIB_FUNCTION("E6ao34wPw+U", "libScePosix", 1, "libkernel", posix_stat);
     LIB_FUNCTION("E6ao34wPw+U", "libkernel", 1, "libkernel", posix_stat);

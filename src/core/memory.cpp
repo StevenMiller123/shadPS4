@@ -684,13 +684,12 @@ s32 MemoryManager::MapMemory(void** out_addr, VAddr virtual_addr, u64 size, Memo
 s32 MemoryManager::MapFile(void** out_addr, VAddr virtual_addr, u64 size, MemoryProt prot,
                            MemoryMapFlags flags, s32 fd, s64 phys_addr) {
     uintptr_t handle = 0;
-    std::scoped_lock lk{unmap_mutex};
     // Get the file to map
     auto* h = Common::Singleton<Core::FileSys::HandleTable>::Instance();
     auto file = h->GetFile(fd);
     if (file == nullptr) {
-        LOG_WARNING(Kernel_Vmm, "Invalid file for mmap, fd {}", fd);
-        return ORBIS_KERNEL_ERROR_EBADF;
+        LOG_WARNING(Kernel_Vmm, "Invalid file for mmap, fd {}. Falling back to anon mapping", fd);
+        return MapMemory(out_addr, virtual_addr, size, prot, flags, Core::VMAType::Flexible);
     }
 
     if (file->type != Core::FileSys::FileType::Regular) {
@@ -702,6 +701,8 @@ s32 MemoryManager::MapFile(void** out_addr, VAddr virtual_addr, u64 size, Memory
         // On PS4, read is appended to write mappings.
         prot |= MemoryProt::CpuRead;
     }
+
+    std::scoped_lock lk{unmap_mutex};
 
     // Detect a non-host backend (ZArchive, ...).
     Common::FS::IOFile* host_file = file->handle ? file->handle->GetHostFile() : nullptr;

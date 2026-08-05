@@ -59,6 +59,16 @@ int VideoOutDriver::Open(const ServiceThreadParams* params) {
     return 1;
 }
 
+
+int VideoOutDriver::SysOpen(const ServiceThreadParams* params) {
+    if (main_port.is_open) {
+        return ORBIS_VIDEO_OUT_ERROR_RESOURCE_BUSY;
+    }
+    main_port.is_open = true;
+    liverpool->SetVoPort(&main_port);
+    return 2;
+}
+
 void VideoOutDriver::Close(s32 handle) {
     std::scoped_lock lock{mutex};
 
@@ -99,9 +109,6 @@ void VideoOutDriver::Close(s32 handle) {
 }
 
 VideoOutPort* VideoOutDriver::GetPort(int handle) {
-    if (handle != 1) [[unlikely]] {
-        return nullptr;
-    }
     return &main_port;
 }
 
