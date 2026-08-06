@@ -456,22 +456,34 @@ u64 PS4_SYSV_ABI posix_sysconf(s32 name) {
 
 s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_size, u64 unk3) {
     LOG_ERROR(Lib_Kernel, "(STUBBED) called, op: {:#x}", op);
-    if (op == 2) {
+    switch (op) {
+    case 2: {
         std::string name = *(char**)(args + 8);
         LOG_ERROR(Lib_Kernel, "Create client {}", name);
-        // if (name == "SceNorpheusUpdService" || name == "SceCompAppProxyUtil" || name ==
-        // "SceCompAppProxy" || name == "SceShellAppProxy" || name == "SceStickerCoreServer") {
-        //     *result = 0;
-        // } else {
-        //     *result = -1;
-        // }
+        if (name == "SceNorpheusUpdService" || name == "SceCompAppProxyUtil" ||
+            name == "SceCompAppProxy" || name == "SceShellAppProxy" ||
+            name == "SceStickerCoreServer" || name == "SceNpPartyIpc" ||
+            name == "ScePartyIpcService") {
+            *result = 0;
+        } else {
+            *result = POSIX_ENOENT;
+        }
+
+        if (name == "ScePartyIpcService") {
+            while (true) {
+            }
+        }
     }
-    if (op == 0x201) {
+    case 0x201: {
         while (true) {
         }
     }
-    if (result) {
+    case 0x251: {
+        *result = POSIX_EAGAIN;
+    }
+    default: {
         *result = 0;
+    }
     }
     return ORBIS_OK;
 }
@@ -620,7 +632,8 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("tPWsbOUGO8k", "libkernel", 1, "libkernel", shm_unlink);
     LIB_FUNCTION("nTxZBp8YNGc", "libkernel", 1, "libkernel", pthread_mutex_setname_np);
     LIB_FUNCTION("EZ8h70dtFLg", "libkernel", 1, "libkernel", pthread_cond_setname_np);
-    LIB_FUNCTION("X8FN-5Nk-yE", "libSceVideoOut", 1, "libSceVideoOut", sceVideoOutSysAddSetModeEvent);
+    LIB_FUNCTION("X8FN-5Nk-yE", "libSceVideoOut", 1, "libSceVideoOut",
+                 sceVideoOutSysAddSetModeEvent);
 
     LIB_FUNCTION("D4yla3vx4tY", "libkernel", 1, "libkernel", sceKernelError);
     LIB_FUNCTION("YeU23Szo3BM", "libkernel", 1, "libkernel", sceKernelGetAllowedSdkVersionOnSystem);
