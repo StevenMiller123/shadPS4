@@ -531,8 +531,8 @@ s32 PS4_SYSV_ABI sceApplicationInitialize() {
 s32 PS4_SYSV_ABI getrlimit(s32 rid, u64* limits) {
     LOG_ERROR(Lib_Kernel, "(STUBBED)");
     if (limits) {
-        limits[0] = 0;
-        limits[1] = 0;
+        limits[0] = 256;
+        limits[1] = 256;
     }
     return ORBIS_OK;
 }
