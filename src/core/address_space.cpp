@@ -247,20 +247,23 @@ struct AddressSpace::Impl {
                                     MEM_RESERVE | MEM_COMMIT | MEM_REPLACE_PLACEHOLDER,
                                     PAGE_READWRITE, nullptr, 0);
 
-                // Use ReadFile to read file contents into the memory area.
-                // Create an OVERLAPPED with the file offset, then supply that to ReadFile
-                OVERLAPPED param{};
+                // Retrieve the current file pointer
+                LARGE_INTEGER size_to_move;
+                LARGE_INTEGER zero;
+                zero.QuadPart = 0;
+                bool ret = SetFilePointerEx(backing, zero, &size_to_move, FILE_CURRENT);
+                ASSERT_MSG(ret, "SetFilePointerEx failed. {}", Common::GetLastErrorMsg());
+
                 // Offset is the least-significant 32 bits, OffsetHigh is the most-significant.
+                OVERLAPPED param{};
                 param.Offset = phys_addr & 0xffffffffull;
                 param.OffsetHigh = (phys_addr & 0xffffffff00000000ull) >> 32;
-                bool ret = ReadFile(backing, ptr, size, &resultvar, &param);
+                ret = ReadFile(backing, ptr, size, &resultvar, &param);
                 ASSERT_MSG(ret, "ReadFile failed. {}", Common::GetLastErrorMsg());
 
-                // ReadFile moves the file pointer, restore it with SetFilePointer
-                s64 size_to_move = -size;
-                LONG size_low = size_to_move & 0xffffffffull;
-                LONG size_high = (size_to_move & 0xffffffff00000000ull) >> 32;
-                ret = SetFilePointer(backing, size_low, &size_high, FILE_CURRENT);
+                // Restore the file pointer retrieved earlier
+                ret = SetFilePointerEx(backing, size_to_move, nullptr, FILE_BEGIN);
+                ASSERT_MSG(ret, "SetFilePointerEx failed. {}", Common::GetLastErrorMsg());
 
                 // Protect the memory area appropriately
                 ret = VirtualProtect(ptr, size, prot, &resultvar);
