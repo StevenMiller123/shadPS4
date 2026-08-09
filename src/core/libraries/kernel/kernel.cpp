@@ -330,7 +330,14 @@ s32 PS4_SYSV_ABI sceKernelGetProcessType(s32 pid) {
 }
 
 s32 PS4_SYSV_ABI __sys_regmgr_call(u32 op, u32 key, void* result, void* value, u64 len) {
-    LOG_ERROR(Lib_Kernel, "(STUBBED) called, op: {:#x}, key: {}, len: {}", op, key, len);
+    LOG_ERROR(Lib_Kernel, "(STUBBED) called, op: {:#x}, key: {:#x}, len: {}", op, key, len);
+    if (value) {
+        *(u32*)value = 0;
+    }
+    if (result) {
+        *(u32*)result = 0;
+    }
+
     return ORBIS_OK;
 }
 

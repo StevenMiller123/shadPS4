@@ -617,6 +617,8 @@ void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
         std::string("/").append(Libraries::Kernel::sceKernelGetFsSandboxRandomWord());
     const auto& sys_dir = Common::FS::GetUserPath(Common::FS::PathType::UserDir) / "vsh" / "system";
     mnt->Mount(sys_dir, sandbox_root);
+    const auto& sysex_dir = Common::FS::GetUserPath(Common::FS::PathType::UserDir) / "vsh" / "system_ex";
+    mnt->Mount(sysex_dir, "/system_ex");
 
     std::string guest_font_dir = "/";
     guest_font_dir.append(sandbox_root).append("/common/font");

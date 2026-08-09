@@ -225,6 +225,7 @@ public:
     }
 
     std::string m_name;
+    u64 m_bits = 0;
 
 private:
     std::mutex m_mutex;
@@ -235,8 +236,6 @@ private:
     ThreadMode m_thread_mode;
     QueueMode m_queue_mode;
     bool m_deleted = false;
-
-    u64 m_bits = 0;
 };
 
 using OrbisKernelUseconds = u32;
@@ -254,7 +253,7 @@ int PS4_SYSV_ABI sceKernelCreateEventFlag(OrbisKernelEventFlag* ef, const char* 
     if (ef == nullptr || pName == nullptr) {
         return ORBIS_KERNEL_ERROR_EINVAL;
     }
-    if (pOptParam || attr > (ORBIS_KERNEL_EVF_ATTR_MULTI | ORBIS_KERNEL_EVF_ATTR_TH_PRIO)) {
+    if (pOptParam) {
         return ORBIS_KERNEL_ERROR_EINVAL;
     }
 
@@ -351,6 +350,33 @@ int PS4_SYSV_ABI sceKernelPollEventFlag(OrbisKernelEventFlag ef, u64 bitPattern,
         return ORBIS_KERNEL_ERROR_ESRCH;
     }
 
+    if (ef->m_name == "SceShellUIBootManager") {
+        ef->m_bits |= 0x00000000800000; // BackgroundInitFinishedBeforeBGLayer
+        ef->m_bits |= 0x00000001000000; // BackgroundInitFinishedBeforeBasePlugin
+        ef->m_bits |= 0x00001000000000; // MainOnStandbyFinished
+        ef->m_bits |= 0x04000000000000; // RegMgrInitOKCompleted
+        // ef->m_bits |= 0x01000000000000;    // SelectResolutionCompleted
+        // ef->m_bits |= 0x00000000000100;    // InitialSetupCompleted
+        // ef->m_bits |= 0x00000000020000;    // CrashReportPluginCompleted
+        // ef->m_bits |= 0x00000000001000;    // PowerOffWarningFinished
+        // ef->m_bits |= 0x00008000000000;    // CreateKratosUserCompleted
+        // ef->m_bits |= 0x10000000000000;    // NotifyDBInitializedStarted
+        // ef->m_bits |= 0x00020000000000;    // AutoStandbyAnnouncementFinished
+        // ef->m_bits |= 0x00000200000000;    // SystemUpdateCompleted
+        // ef->m_bits |= 0x00100000000000;    // SystemPasscodeInputCompleted
+        // ef->m_bits |= 0x00000040000000;    // HealthWarningStarted
+        // ef->m_bits |= 0x20000000000000;    // NotifyDBInitializedFinished
+        // ef->m_bits |= 0x80000000000000;    // PlatformPrivacyCompleted
+        // ef->m_bits |= 0x00000002000000;    // BackgroundInitFinishedBeforeFarsightUI
+        // ef->m_bits |= 0x00002000000000;    // BackgroundAutoLoginFinished
+        // ef->m_bits |= 0x00000000000400;    // BasePluginLoadFinished
+    }
+
+    if (ef->m_name == "SceCompositorEventflag" || ef->m_name == "SceCompositorResetStatusEVF" ||
+        ef->m_name == "SceCompositorSysSusEq") {
+        return ORBIS_OK;
+    }
+
     if (bitPattern == 0) {
         return ORBIS_KERNEL_ERROR_EINVAL;
     }
@@ -397,7 +423,8 @@ int PS4_SYSV_ABI sceKernelWaitEventFlag(OrbisKernelEventFlag ef, u64 bitPattern,
         return ORBIS_KERNEL_ERROR_ESRCH;
     }
 
-    if (ef->m_name == "SceBootStatusFlags") {
+    if (ef->m_name == "SceBootStatusFlags" || ef->m_name == "SceCompositorEventflag" ||
+        ef->m_name == "SceCompositorResetStatusEVF" || ef->m_name == "SceCompositorSysSusEq") {
         return ORBIS_OK;
     }
 
