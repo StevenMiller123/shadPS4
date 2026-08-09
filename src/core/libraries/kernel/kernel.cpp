@@ -538,8 +538,13 @@ s32 PS4_SYSV_ABI sceApplicationInitialize() {
 s32 PS4_SYSV_ABI getrlimit(s32 rid, u64* limits) {
     LOG_ERROR(Lib_Kernel, "(STUBBED)");
     if (limits) {
-        limits[0] = 256;
-        limits[1] = 256;
+        if (rid == 8) {
+            limits[0] = 256;
+            limits[1] = 256;
+        } else {
+            limits[0] = 0xffffffffffffffff;
+            limits[1] = 0xffffffffffffffff;
+        }
     }
     return ORBIS_OK;
 }
@@ -599,6 +604,11 @@ s32 PS4_SYSV_ABI sceVideoOutSysAddSetModeEvent() {
     return ORBIS_OK;
 }
 
+s32 PS4_SYSV_ABI posix_fcntl() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
     g_environ.emplace_back(nullptr);
@@ -641,6 +651,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("EZ8h70dtFLg", "libkernel", 1, "libkernel", pthread_cond_setname_np);
     LIB_FUNCTION("X8FN-5Nk-yE", "libSceVideoOut", 1, "libSceVideoOut",
                  sceVideoOutSysAddSetModeEvent);
+    LIB_FUNCTION("8nY19bKoiZk", "libkernel", 1, "libkernel", posix_fcntl);
 
     LIB_FUNCTION("D4yla3vx4tY", "libkernel", 1, "libkernel", sceKernelError);
     LIB_FUNCTION("YeU23Szo3BM", "libkernel", 1, "libkernel", sceKernelGetAllowedSdkVersionOnSystem);

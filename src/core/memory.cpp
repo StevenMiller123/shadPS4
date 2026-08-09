@@ -610,6 +610,10 @@ s32 MemoryManager::MapMemory(void** out_addr, VAddr virtual_addr, u64 size, Memo
 
             // Perform an address space mapping for each physical area
             void* out_addr = impl.Map(current_addr, size_to_map, new_fmem_area.base, is_exec);
+
+            // Clear memory contents
+            std::memset(out_addr, 0, size_to_map);
+
             // Tracy memory tracking breaks from merging memory areas. Disabled for now.
             // TRACK_ALLOC(out_addr, size_to_map, "VMEM");
 
@@ -946,10 +950,6 @@ u64 MemoryManager::UnmapBytesFromEntry(VAddr virtual_addr, VirtualMemoryArea vma
 
                 // Coalesce with nearby flexible memory areas.
                 MergeAdjacent(fmem_map, new_fmem_handle);
-
-                // Zero out the old memory data
-                const auto unmap_hardware_address = impl.BackingBase() + phys_addr;
-                std::memset(unmap_hardware_address, 0, size_in_dma);
 
                 // Update flexible usage
                 flexible_usage -= size_in_dma;
