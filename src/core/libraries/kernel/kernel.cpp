@@ -357,6 +357,7 @@ s32 PS4_SYSV_ABI __sys_regmgr_call(OrbisRegMgrOp op, OrbisRegMgrEntryKey key, vo
             break;
         }
         }
+        break;
     }
     default: {
         LOG_ERROR(Lib_Kernel, "Unhandled regmgr op {}", static_cast<u32>(op));
@@ -637,7 +638,7 @@ s32 PS4_SYSV_ABI pthread_mutex_setname_np(void* mutex, const char* name) {
 }
 
 s32 PS4_SYSV_ABI pthread_cond_setname_np(void* mutex, const char* name) {
-    // LOG_ERROR(Lib_Kernel, "(STUBBED), name = {}", name);
+    LOG_ERROR(Lib_Kernel, "(STUBBED), name = {}", name);
     return ORBIS_OK;
 }
 
