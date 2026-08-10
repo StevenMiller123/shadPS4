@@ -609,6 +609,12 @@ s32 PS4_SYSV_ABI posix_fcntl() {
     return ORBIS_OK;
 }
 
+s32 PS4_SYSV_ABI sceKernelGetProcessName(s32 pid, char* name) {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    std::strncpy(name, "eboot.bin", 10);
+    return ORBIS_OK;
+}
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
     g_environ.emplace_back(nullptr);
@@ -652,6 +658,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("X8FN-5Nk-yE", "libSceVideoOut", 1, "libSceVideoOut",
                  sceVideoOutSysAddSetModeEvent);
     LIB_FUNCTION("8nY19bKoiZk", "libkernel", 1, "libkernel", posix_fcntl);
+    LIB_FUNCTION("fUJRLEbJOuQ", "libkernel", 1, "libkernel", sceKernelGetProcessName);
 
     LIB_FUNCTION("D4yla3vx4tY", "libkernel", 1, "libkernel", sceKernelError);
     LIB_FUNCTION("YeU23Szo3BM", "libkernel", 1, "libkernel", sceKernelGetAllowedSdkVersionOnSystem);
