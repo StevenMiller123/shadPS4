@@ -496,11 +496,40 @@ u64 PS4_SYSV_ABI posix_sysconf(s32 name) {
     }
 }
 
-s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_size, u64 unk3) {
-    LOG_ERROR(Lib_Kernel, "(STUBBED) called, op: {:#x}", op);
+enum IpmiMgrOp : u32 {
+    CreateServer = 0,
+    DestroyServer = 1,
+    CreateClient = 2,
+    DestroyClient = 3,
+    CreateSession = 4,
+    DestroySession  = 5,
+    Trace = 0x10,
+    ServerReceivePacket = 0x201,
+    SendConnectResult = 0x212,
+    SessionRespondSync = 0x232,
+    ClientInvokeAsyncMethod = 0x241,
+    SessionRespondAsync = 0x242,
+    ClientTryGetResult = 0x243,
+    ClientGetMessage = 0x251,
+    ClientTryGetMessage = 0x252,
+    SessionTrySendMessage = 0x254,
+    SessionGetClientPid = 0x302,
+    ClientDisconnect = 0x310,
+    ClientInvokeSyncMethod = 0x320,
+    ClientConnect = 0x400,
+    SessionGetClientAppId = 0x463,
+    SessionGetUserData = 0x468,
+    ServerGetName = 0x46a,
+    ClientGetName = 0x46b,
+    ClientWaitEventFlag = 0x490,
+    ClientPollEventFlag = 0x491,
+    SessionSetEventFlag = 0x493,
+};
+
+s32 PS4_SYSV_ABI ipmimgr_call(IpmiMgrOp op, u32 kid, u32* result, void* args, u64 args_size) {
     switch (op) {
-    case 2: {
-        std::string name = *(char**)(args + 8);
+    case IpmiMgrOp::CreateClient: {
+        std::string name = *(char**)((u8*)args + 8);
         LOG_ERROR(Lib_Kernel, "Create client {}", name);
         if (name == "SceMorpheusUpdService" || name == "SceCompAppProxyUtil" ||
             name == "SceCompAppProxy" || name == "SceShellAppProxy" ||
@@ -518,18 +547,26 @@ s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_
         }
         break;
     }
-    case 0x201: {
+    case IpmiMgrOp::ServerReceivePacket: {
         while (true) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
         *result = 0;
         break;
     }
-    case 0x252: {
+    case IpmiMgrOp::ClientGetMessage: {
+        while (true) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+        *result = 0;
+        break;
+    }
+    case IpmiMgrOp::ClientTryGetMessage: {
         *result = ORBIS_KERNEL_ERROR_EAGAIN;
         break;
     }
     default: {
+        LOG_ERROR(Lib_Kernel, "(STUBBED) called, op: {:#x}", static_cast<u32>(op));
         *result = 0;
         break;
     }
@@ -700,7 +737,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     internal_environ[0] = "MONO_GC_PARAMS=nursery-size=128m,max-heap-size=512m";
     internal_environ[1] = "MONO_LOG_LEVEL=debug";
     internal_environ[2] = "MONO_LOG_MASK=all";
-    internal_environ[3] = "MONO_DISABLE_SHM=1";
+    // internal_environ[3] = "MONO_DISABLE_SHM=1";
     g_environ = internal_environ;
 
     Libraries::Kernel::RegisterFileSystem(sym);
