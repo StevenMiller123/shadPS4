@@ -43,7 +43,8 @@
 namespace Libraries::Kernel {
 
 static u64 g_stack_chk_guard = 0xDEADBEEF54321ABC; // dummy return
-static std::vector<char*> g_environ{};
+static const char* internal_environ[32];
+static const char** g_environ;
 static const char* g_progname = "eboot.bin";
 
 boost::asio::io_context io_context;
@@ -640,7 +641,12 @@ void PS4_SYSV_ABI sceLibcMspaceCreateForMonoMutex(u64 param1, u32 param2, u32 pa
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
-    g_environ.emplace_back(nullptr);
+    std::memset(internal_environ, 0, sizeof(internal_environ));
+    internal_environ[0] = "MONO_GC_PARAMS=nursery-size=128m,max-heap-size=512m";
+    internal_environ[1] = "MONO_LOG_LEVEL=debug";
+    internal_environ[2] = "MONO_LOG_MASK=all";
+    internal_environ[3] = "MONO_DISABLE_SHM=1";
+    g_environ = internal_environ;
 
     Libraries::Kernel::RegisterFileSystem(sym);
     Libraries::Kernel::RegisterTime(sym);
@@ -655,7 +661,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     Libraries::Kernel::RegisterCoredump(sym);
 
     LIB_OBJ("f7uOxY9mM1U", "libkernel", 1, "libkernel", &g_stack_chk_guard);
-    LIB_OBJ("+2thxYZ4syk", "libkernel", 1, "libkernel", g_environ.data());
+    LIB_OBJ("+2thxYZ4syk", "libkernel", 1, "libkernel", &g_environ);
     LIB_OBJ("djxxOmW6-aw", "libkernel", 1, "libkernel", &g_progname);
 
     LIB_FUNCTION("Hk7iHmGxB18", "libkernel", 1, "libkernel", ipmimgr_call);
