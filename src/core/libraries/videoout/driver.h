@@ -80,7 +80,6 @@ public:
     ~VideoOutDriver();
 
     int Open(const ServiceThreadParams* params);
-    int SysOpen(const ServiceThreadParams* params);
     void Close(s32 handle);
 
     VideoOutPort* GetPort(s32 handle);

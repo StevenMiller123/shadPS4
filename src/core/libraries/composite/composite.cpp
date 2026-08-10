@@ -33,6 +33,38 @@ s32 PS4_SYSV_ABI sceCompositorInitWithProcessOrder() {
         &sce_compositor_video_address, 1_GB, 0, std::to_underlying(Core::MemoryMapFlags::System),
         "sceComposite HLE buffer 2");
     sce_compositor_video_size = 1_GB;
+    constexpr u32 sce_composite_color_width = 1280;
+    constexpr u32 sce_composite_color_height = 720;
+    constexpr u32 color_target_size = sce_composite_color_width * sce_composite_color_height * 4;
+
+    using namespace VideoOut;
+    using namespace Kernel;
+
+    // SceVideoOut::bufs[0].base will be patched by libSceComposite, but we need to allocate a
+    // buffer for the first frame flip
+    sce_composite_color_target_addr = nullptr;
+    void* dmem_addr;
+    // TODO: User proper flags when I emulate them
+    sceKernelAllocateMainDirectMemory(color_target_size, 16_KB, 0, (s64*)&dmem_addr);
+    sceKernelMapDirectMemory(&sce_composite_color_target_addr, color_target_size, 0, 0,
+                             (s64)dmem_addr, 0x1000);
+
+    ASSERT(sce_composite_color_target_addr != nullptr);
+
+    BufferAttribute attrib = {};
+    attrib.pixel_format = PixelFormat::A8R8G8B8Srgb;
+    attrib.tiling_mode = TilingMode::Linear;
+    attrib.aspect_ratio = 0;
+    attrib.width = sce_composite_color_width;
+    attrib.height = sce_composite_color_height;
+    attrib.pitch_in_pixel = sce_composite_color_width;
+    attrib.option = 0;
+    attrib.reserved0 = 0;
+    attrib.reserved1 = 0;
+
+    void* addrs[1] = {sce_composite_color_target_addr};
+    sceVideoOutOpen(0, 0, 0, nullptr);
+    sceVideoOutRegisterBuffers(2, 0, addrs, 1, &attrib);
     return ORBIS_OK;
 }
 
@@ -99,17 +131,25 @@ s32 PS4_SYSV_ABI sceCompsoitorGetGpuClock(u64* gpu_clock) {
 }
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
-    LIB_FUNCTION("IUlpGnuoR1c", "libSceComposite", 1, "libSceComposite", sceCompositorInitWithProcessOrder);
-    LIB_FUNCTION("twGXom56jw0", "libSceComposite", 1, "libSceComposite", sceCompositorGetRenderTargetResolution);
-    LIB_FUNCTION("T6CVkdCDO7o", "libSceComposite", 1, "libSceComposite", sceCompositorGetSystemAddress);
-    LIB_FUNCTION("N6ID0KNnzY8", "libSceComposite", 1, "libSceComposite", sceCompositorGetSystemSize);
-    LIB_FUNCTION("bxt+muwit0w", "libSceComposite", 1, "libSceComposite", sceCompositorGetVideoAddress);
+    LIB_FUNCTION("IUlpGnuoR1c", "libSceComposite", 1, "libSceComposite",
+                 sceCompositorInitWithProcessOrder);
+    LIB_FUNCTION("twGXom56jw0", "libSceComposite", 1, "libSceComposite",
+                 sceCompositorGetRenderTargetResolution);
+    LIB_FUNCTION("T6CVkdCDO7o", "libSceComposite", 1, "libSceComposite",
+                 sceCompositorGetSystemAddress);
+    LIB_FUNCTION("N6ID0KNnzY8", "libSceComposite", 1, "libSceComposite",
+                 sceCompositorGetSystemSize);
+    LIB_FUNCTION("bxt+muwit0w", "libSceComposite", 1, "libSceComposite",
+                 sceCompositorGetVideoAddress);
     LIB_FUNCTION("FTQCTDU0b4g", "libSceComposite", 1, "libSceComposite", sceCompositorGetVideoSize);
-    LIB_FUNCTION("G4Q8KNkb5XE", "libSceComposite", 1, "libSceComposite", sceCompositorAllocateIndex);
-    LIB_FUNCTION("1oTrw-ivVpA", "libSceComposite", 1, "libSceComposite", sceCompositorSetFlipCommand);
-    LIB_FUNCTION("DhtKelVAIaA", "libSceComposite", 1, "libSceComposite", sceCompositorSetGnmContextCommand);
-    LIB_FUNCTION("deKovf3qViA", "libSceComposite", 1, "libSceComposite", sceCompositorWaitPostEvent);
+    LIB_FUNCTION("G4Q8KNkb5XE", "libSceComposite", 1, "libSceComposite",
+                 sceCompositorAllocateIndex);
+    LIB_FUNCTION("1oTrw-ivVpA", "libSceComposite", 1, "libSceComposite",
+                 sceCompositorSetFlipCommand);
+    LIB_FUNCTION("DhtKelVAIaA", "libSceComposite", 1, "libSceComposite",
+                 sceCompositorSetGnmContextCommand);
+    LIB_FUNCTION("deKovf3qViA", "libSceComposite", 1, "libSceComposite",
+                 sceCompositorWaitPostEvent);
     LIB_FUNCTION("4yWqjTZtvs4", "libSceComposite", 1, "libSceComposite", sceCompsoitorGetGpuClock);
-
 }
 } // namespace Libraries::Composite
