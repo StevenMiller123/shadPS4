@@ -313,13 +313,63 @@ s32 PS4_SYSV_ABI sceKernelGetProcessType(s32 pid) {
     return 0;
 }
 
-s32 PS4_SYSV_ABI __sys_regmgr_call(u32 op, u32 key, void* result, void* value, u64 len) {
-    LOG_ERROR(Lib_Kernel, "(STUBBED) called, op: {:#x}, key: {:#x}, len: {}", op, key, len);
-    if (value) {
-        *(u32*)value = 0;
+enum OrbisRegMgrOp : u32 {
+    SetInt = 2,
+};
+
+enum OrbisRegMgrEntryKey : u32 {
+    SystemLanguage = 0x2020000,
+    SystemInitialize = 0x2040000,
+    SystemButtonAssign = 0x20b0000,
+    VideoOutResetResolutionFlag = 0xa130000,
+};
+
+s32 PS4_SYSV_ABI __sys_regmgr_call(OrbisRegMgrOp op, OrbisRegMgrEntryKey key, void* result,
+                                   void* value, u64 len) {
+    LOG_ERROR(Lib_Kernel, "(STUBBED) called, op: {:#x}, key: {:#x}, len: {}", static_cast<u32>(op),
+              static_cast<u32>(key), len);
+
+    switch (op) {
+    case OrbisRegMgrOp::SetInt: {
+        u32* val_int = reinterpret_cast<u32*>(value);
+        u32* result_int = reinterpret_cast<u32*>(result);
+        switch (key) {
+        case OrbisRegMgrEntryKey::SystemLanguage:
+        case OrbisRegMgrEntryKey::SystemInitialize:
+        case OrbisRegMgrEntryKey::SystemButtonAssign:
+        case OrbisRegMgrEntryKey::VideoOutResetResolutionFlag: {
+            if (val_int) {
+                *val_int = 1;
+            }
+            if (result_int) {
+                *result_int = 0;
+            }
+            break;
+        }
+        default: {
+            LOG_ERROR(Lib_Kernel, "Unhandled regmgr key {:#x}", static_cast<u32>(key));
+            if (val_int) {
+                *val_int = 0;
+            }
+            if (result_int) {
+                *result_int = 0;
+            }
+            break;
+        }
+        }
     }
-    if (result) {
-        *(u32*)result = 0;
+    default: {
+        LOG_ERROR(Lib_Kernel, "Unhandled regmgr op {}", static_cast<u32>(op));
+        u32* val_int = reinterpret_cast<u32*>(value);
+        u32* result_int = reinterpret_cast<u32*>(result);
+        if (val_int) {
+            *val_int = 0;
+        }
+        if (result_int) {
+            *result_int = 0;
+        }
+        break;
+    }
     }
 
     return ORBIS_OK;
