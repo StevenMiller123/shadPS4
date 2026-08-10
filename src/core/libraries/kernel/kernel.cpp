@@ -505,7 +505,7 @@ s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_
         if (name == "SceMorpheusUpdService" || name == "SceCompAppProxyUtil" ||
             name == "SceCompAppProxy" || name == "SceShellAppProxy" ||
             name == "SceStickerCoreServer" || name == "SceNpPartyIpc" ||
-            name == "ScePartyIpcService") {
+            name == "ScePartyIpcService" || name == "SceAppDbIpc") {
             *result = 0;
         } else {
             *result = -1;
