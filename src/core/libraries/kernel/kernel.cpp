@@ -690,6 +690,10 @@ void PS4_SYSV_ABI sceLibcMspaceCreateForMonoMutex(u64 param1, u32 param2, u32 pa
     }
 }
 
+s32 PS4_SYSV_ABI sceKernelIsCEX() {
+    return 1;
+}
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
     std::memset(internal_environ, 0, sizeof(internal_environ));
@@ -739,6 +743,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
                  sceVideoOutSysAddSetModeEvent);
     LIB_FUNCTION("8nY19bKoiZk", "libkernel", 1, "libkernel", posix_fcntl);
     LIB_FUNCTION("fUJRLEbJOuQ", "libkernel", 1, "libkernel", sceKernelGetProcessName);
+    LIB_FUNCTION("8aCOCGoRkUI", "libkernel", 1, "libkernel", sceKernelIsCEX);
 
     LIB_FUNCTION("D4yla3vx4tY", "libkernel", 1, "libkernel", sceKernelError);
     LIB_FUNCTION("YeU23Szo3BM", "libkernel", 1, "libkernel", sceKernelGetAllowedSdkVersionOnSystem);
