@@ -88,9 +88,18 @@ public:
         return nullptr;
     }
 
-    u32 FindByName(const std::filesystem::path& name) const {
+    u32 FindByPath(const std::filesystem::path& path) const {
         for (u32 i = 0; i < m_modules.size(); i++) {
-            if (name == m_modules[i]->file) {
+            if (path == m_modules[i]->file) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    u32 FindByName(const std::string_view& name) const {
+        for (u32 i = 0; i < m_modules.size(); i++) {
+            if (name == m_modules[i]->name) {
                 return i;
             }
         }

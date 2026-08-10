@@ -630,4 +630,14 @@ void* Module::FindByName(std::string_view name) {
     return nullptr;
 }
 
+void* Module::FindByNid(std::string_view nid) {
+    const auto symbols = export_sym.GetSymbols();
+    const auto it = std::ranges::find_if(
+        symbols, [&](const Loader::SymbolRecord& record) { return record.name.contains(nid); });
+    if (it != symbols.end()) {
+        return reinterpret_cast<void*>(it->virtual_address);
+    }
+    return nullptr;
+}
+
 } // namespace Core

@@ -598,6 +598,38 @@ s32 PS4_SYSV_ABI sceKernelGetProcessName(s32 pid, char* name) {
     return ORBIS_OK;
 }
 
+void PS4_SYSV_ABI sceLibcMspaceCreateForMonoMutex(u64 param1, u32 param2, u32 param3, u64 param4) {
+    static bool is_called = false;
+    ASSERT_MSG(!is_called, "cannot be called twice");
+    ASSERT_MSG(!param1 && !param2 && !param3 && !param4, "parameters should all be 0");
+
+    static constexpr std::string_view mspace_name = "SceLibcMutexPoolForMonoVM";
+    void* addr_in = nullptr;
+    s32 ret = sceKernelMapNamedSystemFlexibleMemory(&addr_in, 0x100000, 3, 0, mspace_name.data());
+    ASSERT_MSG(!ret, "sceKernelMapNamedSystemFlexibleMemory must succeed");
+
+    auto linker = Common::Singleton<Core::Linker>::Instance();
+    auto* libcinternal_module = linker->GetModule(linker->FindByName("libSceLibcInternal.sprx"));
+
+    static PS4_SYSV_ABI void* (*sceLibcMspaceCreate)(const char*, void*, u64, s32) = nullptr;
+    static PS4_SYSV_ABI void (*nid_wUqJ0psUjDo)(void*) = nullptr;
+    if (libcinternal_module) {
+        sceLibcMspaceCreate =
+            reinterpret_cast<PS4_SYSV_ABI void* (*)(const char*, void*, u64, s32)>(
+                libcinternal_module->FindByName("sceLibcMspaceCreate"));
+        nid_wUqJ0psUjDo = reinterpret_cast<PS4_SYSV_ABI void (*)(void*)>(
+            libcinternal_module->FindByNid("wUqJ0psUjDo"));
+    }
+
+    if (!libcinternal_module) {
+        LOG_ERROR(Lib_Kernel, "(STUBBED) called");
+    } else {
+        is_called = true;
+        void* internal_mspace = sceLibcMspaceCreate(mspace_name.data(), addr_in, 0x100000, 12);
+        nid_wUqJ0psUjDo(internal_mspace);
+    }
+}
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
     g_environ.emplace_back(nullptr);
@@ -662,6 +694,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("k+AXqu2-eBc", "libkernel", 1, "libkernel", posix_getpagesize);
     LIB_FUNCTION("k+AXqu2-eBc", "libScePosix", 1, "libkernel", posix_getpagesize);
     LIB_FUNCTION("7NwggrWJ5cA", "libkernel", 1, "libkernel", __sys_regmgr_call);
+    LIB_FUNCTION("pi90NsG3zPA", "libkernel", 1, "libkernel", sceLibcMspaceCreateForMonoMutex);
 
     LIB_FUNCTION("mkawd0NA9ts", "libkernel", 1, "libkernel", posix_sysconf);
     LIB_FUNCTION("mkawd0NA9ts", "libScePosix", 1, "libkernel", posix_sysconf);
