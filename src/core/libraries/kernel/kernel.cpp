@@ -456,23 +456,30 @@ s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_
             name == "ScePartyIpcService") {
             *result = 0;
         } else {
-            *result = POSIX_ENOENT;
+            *result = -1;
         }
 
-        if (name == "ScePartyIpcService") {
+        if (name == "ScePartyIpcService" || name == "SceVnaIpcServer") {
             while (true) {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
             }
         }
+        break;
     }
     case 0x201: {
         while (true) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
+        *result = 0;
+        break;
     }
-    case 0x251: {
-        *result = POSIX_EAGAIN;
+    case 0x252: {
+        *result = ORBIS_KERNEL_ERROR_EAGAIN;
+        break;
     }
     default: {
         *result = 0;
+        break;
     }
     }
     return ORBIS_OK;

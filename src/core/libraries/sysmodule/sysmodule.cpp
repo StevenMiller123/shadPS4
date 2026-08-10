@@ -106,8 +106,15 @@ s32 PS4_SYSV_ABI sceSysmoduleLoadModuleByNameInternal(const char* name, u64 argc
 
     std::string mod_name = std::string(name).append(".sprx");
     const auto& module_path = sys_module_path / mod_name;
-    if (!std::filesystem::exists(module_path) || mod_name == "libSceComposite.sprx") {
+    if (!std::filesystem::exists(module_path)) {
         LOG_ERROR(Lib_SysModule, "Module {} is not present", name);
+        return 100;
+    }
+    if (mod_name != "libScePsmUtil.sprx" && mod_name != "libmono-btls-shared.sprx" &&
+        mod_name != "libmonosgen-2.0.sprx" && mod_name != "libSceMetadataReaderWriter.sprx" &&
+        mod_name != "libSceAbstractStorage.sprx" && mod_name != "libSceAbstractLocal.sprx" &&
+        mod_name != "libSceAsyncStorageInternal.sprx" && mod_name != "libReactNative.Modules.Vsh.sprx") {
+        LOG_ERROR(Lib_SysModule, "Module {} is not allowed", name);
         return 100;
     }
     return linker->LoadAndStartModule(module_path, argc, argv, result);
