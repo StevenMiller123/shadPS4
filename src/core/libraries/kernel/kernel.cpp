@@ -569,9 +569,10 @@ s32 PS4_SYSV_ABI sysctl() {
     return ORBIS_OK;
 }
 
+static s32 shm_index = 0x10000;
 s32 PS4_SYSV_ABI shm_open(const char* path) {
     LOG_ERROR(Lib_Kernel, "(STUBBED), path = {}", path);
-    return 0x10000;
+    return shm_index++;
 }
 
 s32 PS4_SYSV_ABI shm_unlink(const char* path) {
