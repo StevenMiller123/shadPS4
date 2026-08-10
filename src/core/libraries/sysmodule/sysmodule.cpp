@@ -106,7 +106,7 @@ s32 PS4_SYSV_ABI sceSysmoduleLoadModuleByNameInternal(const char* name, u64 argc
 
     std::string mod_name = std::string(name).append(".sprx");
     const auto& module_path = sys_module_path / mod_name;
-    if (!std::filesystem::exists(module_path)) {
+    if (!std::filesystem::exists(module_path) || mod_name == "libSceComposite.sprx") {
         LOG_ERROR(Lib_SysModule, "Module {} is not present", name);
         return 100;
     }
