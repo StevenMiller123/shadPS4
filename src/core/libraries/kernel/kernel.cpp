@@ -450,7 +450,7 @@ s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_
     case 2: {
         std::string name = *(char**)(args + 8);
         LOG_ERROR(Lib_Kernel, "Create client {}", name);
-        if (name == "SceNorpheusUpdService" || name == "SceCompAppProxyUtil" ||
+        if (name == "SceMorpheusUpdService" || name == "SceCompAppProxyUtil" ||
             name == "SceCompAppProxy" || name == "SceShellAppProxy" ||
             name == "SceStickerCoreServer" || name == "SceNpPartyIpc" ||
             name == "ScePartyIpcService") {

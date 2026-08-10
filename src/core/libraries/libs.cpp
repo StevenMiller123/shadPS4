@@ -14,6 +14,7 @@
 #include "core/libraries/camera/camera.h"
 #include "core/libraries/companion/companion_httpd.h"
 #include "core/libraries/companion/companion_util.h"
+#include "core/libraries/composite/composite.h"
 #include "core/libraries/content_export/content_export.h"
 #include "core/libraries/disc_map/disc_map.h"
 #include "core/libraries/fiber/fiber.h"
@@ -172,6 +173,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
             {"libSceContentExport.sprx", Libraries::ContentExport::RegisterLib},
             {"libSceVideoRecording.sprx", Libraries::VideoRecording::RegisterLib},
             {"libSceInvitationDialog.sprx", Libraries::InvitationDialog::RegisterLib},
+            {"libSceComposite.sprx", Libraries::Composite::RegisterLib},
 #ifdef ARCH_X86_64
             {"libSceFiber.sprx", Libraries::Fiber::RegisterLib},
 #endif
