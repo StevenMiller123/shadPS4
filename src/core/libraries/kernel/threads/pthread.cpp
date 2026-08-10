@@ -952,6 +952,9 @@ void RegisterThread(Core::Loader::SymbolsResolver* sym) {
     InstallPthreadCancelSignalHandler();
 #endif
 
+    LIB_FUNCTION("YkGOXpJEtO8", "libkernel", 1, "libkernel", posix_pthread_get_user_context_np);
+    LIB_FUNCTION("cfjAjVTFG6A", "libkernel", 1, "libkernel", posix_pthread_suspend_user_context_np);
+    LIB_FUNCTION("QRdE7dBfNks", "libkernel", 1, "libkernel", posix_pthread_resume_user_context_np);
     LIB_FUNCTION("YkGOXpJEtO8", "libkernel_psmkit", 1, "libkernel", posix_pthread_get_user_context_np);
     LIB_FUNCTION("cfjAjVTFG6A", "libkernel_psmkit", 1, "libkernel", posix_pthread_suspend_user_context_np);
     LIB_FUNCTION("QRdE7dBfNks", "libkernel_psmkit", 1, "libkernel", posix_pthread_resume_user_context_np);
