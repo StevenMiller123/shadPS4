@@ -55,8 +55,7 @@ private:
             const auto pred = [](IR::Inst* inst) -> std::optional<IR::Inst*> {
                 if (inst->GetOpcode() == IR::Opcode::GetUserData ||
                     inst->GetOpcode() == IR::Opcode::CompositeConstructU32x2 ||
-                    inst->GetOpcode() == IR::Opcode::ReadConst ||
-                    inst->GetOpcode() == IR::Opcode::ReadConstBuffer) {
+                    inst->GetOpcode() == IR::Opcode::ReadConst) {
                     return inst;
                 }
                 return std::nullopt;
@@ -68,8 +67,7 @@ private:
         }
         case IR::Opcode::GetUserData:
         case IR::Opcode::CompositeConstructU32x2:
-        case IR::Opcode::ReadConst:
-        case IR::Opcode::ReadConstBuffer: {
+        case IR::Opcode::ReadConst: {
             InstVector iv = MakeInstVector(inst);
             if (auto it = iv_to_vn.find(iv); it != iv_to_vn.end()) {
                 vn = it->second;
