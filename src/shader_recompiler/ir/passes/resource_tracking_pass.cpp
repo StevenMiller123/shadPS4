@@ -367,7 +367,8 @@ using SharpSources = boost::container::small_vector<const IR::Inst*, 4>;
 
 bool IsSharpSource(const IR::Inst* inst) {
     return inst->GetOpcode() == IR::Opcode::GetUserData ||
-           inst->GetOpcode() == IR::Opcode::ReadConst;
+           inst->GetOpcode() == IR::Opcode::ReadConst ||
+           inst->GetOpcode() == IR::Opcode::ReadConstBuffer;
 }
 
 SharpSources FindSharpSources(const IR::Inst* handle, u32 pc) {
@@ -486,7 +487,7 @@ SharpLocation TrackSharp(const IR::Inst* inst, const IR::Block& current_parent, 
         }
     }
 
-    ASSERT_MSG(sources.size() == 1, "Unable to deduce sharp source");
+    ASSERT_MSG(sources.size() > 0, "Unable to deduce sharp source");
     return SharpLocationFromSource(sources[0]);
 }
 
