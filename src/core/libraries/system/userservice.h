@@ -145,7 +145,7 @@ int PS4_SYSV_ABI sceUserServiceGetGlsTtsVolume();
 int PS4_SYSV_ABI sceUserServiceGetHmuBrightness();
 int PS4_SYSV_ABI sceUserServiceGetHmuZoom();
 int PS4_SYSV_ABI sceUserServiceGetHoldAudioOutDevice();
-int PS4_SYSV_ABI sceUserServiceGetHomeDirectory();
+int PS4_SYSV_ABI sceUserServiceGetHomeDirectory(u32 user_id, char* out_dir);
 int PS4_SYSV_ABI sceUserServiceGetImeAutoCapitalEnabled();
 int PS4_SYSV_ABI sceUserServiceGetImeInitFlag();
 int PS4_SYSV_ABI sceUserServiceGetImeInputType();

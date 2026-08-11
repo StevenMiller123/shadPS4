@@ -468,6 +468,11 @@ int PS4_SYSV_ABI sceKernelWaitEqueue(OrbisKernelEqueue eq, OrbisKernelEvent* ev,
 
     auto& equeue = kqueues[eq];
 
+    if (equeue->GetName() == "ScePsmSetModeEvent") {
+        *out = 1;
+        return ORBIS_OK;
+    }
+
     TRACE_HINT(equeue->GetName());
     LOG_TRACE(Kernel_Event, "equeue = {} num = {}", equeue->GetName(), num);
 

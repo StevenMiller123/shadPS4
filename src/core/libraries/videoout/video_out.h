@@ -116,6 +116,8 @@ struct OrbisVideoOutEventData {
     u64 flip_arg : 48;
 };
 
+inline void* sce_composite_color_target_addr = nullptr;
+
 void PS4_SYSV_ABI sceVideoOutSetBufferAttribute(BufferAttribute* attribute, PixelFormat pixelFormat,
                                                 u32 tilingMode, u32 aspectRatio, u32 width,
                                                 u32 height, u32 pitchInPixel);
@@ -140,6 +142,7 @@ s32 PS4_SYSV_ABI sceVideoOutAdjustColor(s32 handle, const SceVideoOutColorSettin
 
 // Internal system functions
 s32 sceVideoOutSubmitEopFlip(s32 handle, u32 buf_id, u32 mode, s64 flip_arg, void** unk);
+VideoOutBuffer& PS4_SYSV_ABI sceVideoOutGetBuffer(s32 index);
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym);
 

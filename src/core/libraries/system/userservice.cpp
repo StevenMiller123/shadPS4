@@ -470,8 +470,9 @@ int PS4_SYSV_ABI sceUserServiceGetHoldAudioOutDevice() {
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceUserServiceGetHomeDirectory() {
+int PS4_SYSV_ABI sceUserServiceGetHomeDirectory(u32 user_id, char* out_dir) {
     LOG_ERROR(Lib_UserService, "(STUBBED) called");
+    std::strncpy(out_dir, "/user/home/1000", 16);
     return ORBIS_OK;
 }
 

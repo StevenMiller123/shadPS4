@@ -98,8 +98,12 @@ void VideoOutDriver::Close(s32 handle) {
     main_port.vblank_events.clear();
 }
 
-VideoOutPort* VideoOutDriver::GetPort(int handle) {
+VideoOutPort* VideoOutDriver::GetPort(s32 handle) {
     return &main_port;
+}
+
+VideoOutBuffer& VideoOutDriver::GetBuffer(s32 index) {
+    return main_port.buffer_slots[index];
 }
 
 int VideoOutDriver::RegisterBuffers(VideoOutPort* port, s32 startIndex, void* const* addresses,

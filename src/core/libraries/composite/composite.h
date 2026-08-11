@@ -10,6 +10,5 @@ class SymbolsResolver;
 }
 
 namespace Libraries::Composite {
-inline void* sce_composite_color_target_addr = nullptr;
 void RegisterLib(Core::Loader::SymbolsResolver* sym);
 } // namespace Libraries::Composite

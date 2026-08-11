@@ -1040,7 +1040,7 @@ int PS4_SYSV_ABI sceShellCoreUtilGetTitleWorkaroundFileString() {
 
 int PS4_SYSV_ABI sceShellCoreUtilGetUIStatus() {
     LOG_ERROR(Lib_SystemService, "(STUBBED) called");
-    return ORBIS_OK;
+    return -1;
 }
 
 int PS4_SYSV_ABI sceShellCoreUtilGetUserFocus() {

@@ -83,7 +83,7 @@ public:
     void Close(s32 handle);
 
     VideoOutPort* GetPort(s32 handle);
-
+    VideoOutBuffer& GetBuffer(s32 index);
     int RegisterBuffers(VideoOutPort* port, s32 startIndex, void* const* addresses, s32 bufferNum,
                         const BufferAttribute* attribute);
     int UnregisterBuffers(VideoOutPort* port, s32 attributeIndex);

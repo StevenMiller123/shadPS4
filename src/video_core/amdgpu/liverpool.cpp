@@ -22,6 +22,9 @@ namespace AmdGpu {
 
 static const char* dcb_task_name{"DCB_TASK"};
 static const char* ccb_task_name{"CCB_TASK"};
+static bool composite_requested_patch_color_target = false;
+static bool composite_requested_patch_depth_target = false;
+static bool composite_has_xf_render = false;
 
 #define MAX_NAMES 56
 static_assert(Liverpool::NumComputeRings <= MAX_NAMES);
@@ -275,6 +278,18 @@ Liverpool::Task Liverpool::ProcessGraphics(std::span<const u32> dcb, std::span<c
                             reinterpret_cast<const char*>(&nop->data_block[1]), marker_sz};
                         rasterizer->ScopeMarkerBegin(label, true);
                     }
+                    const auto marker_sz = nop->header.count.Value() * 2;
+                    const std::string_view label{reinterpret_cast<const char*>(&nop->data_block[1]),
+                                                 marker_sz};
+                    if (!std::strncmp(label.data(), "PatchRenderTarget", 17) &&
+                        composite_has_xf_render) {
+                        composite_requested_patch_color_target = true;
+                        composite_has_xf_render = false;
+                    } else if (!std::strncmp(label.data(), "PatchDepthRenderTarget", 22)) {
+                        composite_requested_patch_depth_target = true;
+                    } else if (!std::strncmp(label.data(), "Xf::Render", 10)) {
+                        composite_has_xf_render = true;
+                    }
                     break;
                 }
                 case PM4CmdNop::PayloadType::DebugColorMarkerPush: {
@@ -339,6 +354,15 @@ Liverpool::Task Liverpool::ProcessGraphics(std::span<const u32> dcb, std::span<c
                     const auto col_buf_id = (reg_addr - ContextRegs::CbColor0Base) /
                                             (ContextRegs::CbColor1Base - ContextRegs::CbColor0Base);
                     ASSERT(col_buf_id < NUM_COLOR_BUFFERS);
+
+                    if (composite_requested_patch_color_target &&
+                        Libraries::VideoOut::sceVideoOutGetBuffer(0).address_left ==
+                            reinterpret_cast<uintptr_t>(
+                                Libraries::VideoOut::sce_composite_color_target_addr)) {
+                        composite_requested_patch_color_target = false;
+                        Libraries::VideoOut::sceVideoOutGetBuffer(0).address_left =
+                            static_cast<uintptr_t>(regs.reg_array[reg_addr] << 8);
+                    }
 
                     const auto nop_offset = header->type3.count;
                     if (nop_offset == 0x0e || nop_offset == 0x0d || nop_offset == 0x0b) {

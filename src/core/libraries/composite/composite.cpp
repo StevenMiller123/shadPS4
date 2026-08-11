@@ -25,13 +25,11 @@ s32 PS4_SYSV_ABI sceCompositorInitWithProcessOrder() {
     LOG_ERROR(Lib_Composite, "called");
     sce_compositor_system_address = nullptr;
     sce_compositor_video_address = nullptr;
-    Libraries::Kernel::sceKernelMapNamedSystemFlexibleMemory(
-        &sce_compositor_system_address, 512_MB, 0, std::to_underlying(Core::MemoryMapFlags::System),
-        "sceComposite HLE buffer 1");
+    Libraries::Kernel::sceKernelMapNamedSystemFlexibleMemory(&sce_compositor_system_address, 512_MB,
+                                                             0, 0, "sceComposite HLE buffer 1");
     sce_compositor_system_size = 512_MB;
-    Libraries::Kernel::sceKernelMapNamedSystemFlexibleMemory(
-        &sce_compositor_video_address, 1_GB, 0, std::to_underlying(Core::MemoryMapFlags::System),
-        "sceComposite HLE buffer 2");
+    Libraries::Kernel::sceKernelMapNamedSystemFlexibleMemory(&sce_compositor_video_address, 1_GB, 0,
+                                                             0, "sceComposite HLE buffer 2");
     sce_compositor_video_size = 1_GB;
     constexpr u32 sce_composite_color_width = 1280;
     constexpr u32 sce_composite_color_height = 720;
@@ -43,17 +41,17 @@ s32 PS4_SYSV_ABI sceCompositorInitWithProcessOrder() {
     // SceVideoOut::bufs[0].base will be patched by libSceComposite, but we need to allocate a
     // buffer for the first frame flip
     sce_composite_color_target_addr = nullptr;
-    void* dmem_addr;
+    s64 dmem_addr = 0;
     // TODO: User proper flags when I emulate them
-    sceKernelAllocateMainDirectMemory(color_target_size, 16_KB, 0, (s64*)&dmem_addr);
-    sceKernelMapDirectMemory(&sce_composite_color_target_addr, color_target_size, 0, 0,
-                             (s64)dmem_addr, 0x1000);
+    sceKernelAllocateMainDirectMemory(color_target_size, 16_KB, 0, &dmem_addr);
+    sceKernelMapDirectMemory(&sce_composite_color_target_addr, color_target_size, 0, 0, dmem_addr,
+                             0x1000);
 
     ASSERT(sce_composite_color_target_addr != nullptr);
 
     BufferAttribute attrib = {};
     attrib.pixel_format = PixelFormat::A8R8G8B8Srgb;
-    attrib.tiling_mode = TilingMode::Linear;
+    attrib.tiling_mode = TilingMode::Tile;
     attrib.aspect_ratio = 0;
     attrib.width = sce_composite_color_width;
     attrib.height = sce_composite_color_height;
@@ -102,7 +100,7 @@ s32 PS4_SYSV_ABI sceCompositorAllocateIndex() {
 
 s32 PS4_SYSV_ABI sceCompositorSetFlipCommand() {
     LOG_ERROR(Lib_Composite, "called");
-    Libraries::VideoOut::sceVideoOutSubmitFlip(2, 0, 0, 0);
+    Libraries::VideoOut::sceVideoOutSubmitFlip(2, 0, 1, 0);
     return ORBIS_OK;
 }
 

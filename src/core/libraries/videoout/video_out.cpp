@@ -459,6 +459,11 @@ s32 PS4_SYSV_ABI sceVideoOutSubmitChangeBufferAttribute(s32 handle, s32 attribut
     return driver->ChangeBufferAttribute(port, attributeIndex, attribute);
 }
 
+// Fake function, used to hackily retrieve buffers for other hacks
+VideoOutBuffer& PS4_SYSV_ABI sceVideoOutGetBuffer(s32 index) {
+    return driver->GetBuffer(index);
+}
+
 s32 PS4_SYSV_ABI sceVideoOutSetWindowModeMargins(s32 handle, s32 top, s32 bottom) {
     LOG_ERROR(Lib_VideoOut, "(STUBBED) called top = {}, bottom = {}", top, bottom);
     return ORBIS_OK;
