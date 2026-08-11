@@ -502,7 +502,7 @@ enum IpmiMgrOp : u32 {
     CreateClient = 2,
     DestroyClient = 3,
     CreateSession = 4,
-    DestroySession  = 5,
+    DestroySession = 5,
     Trace = 0x10,
     ServerReceivePacket = 0x201,
     SendConnectResult = 0x212,
@@ -743,8 +743,8 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
     std::memset(internal_environ, 0, sizeof(internal_environ));
     internal_environ[0] = "MONO_GC_PARAMS=nursery-size=64m,max-heap-size=256m";
-    internal_environ[1] = "MONO_LOG_LEVEL=debug";
-    internal_environ[2] = "MONO_LOG_MASK=all";
+    // internal_environ[1] = "MONO_LOG_LEVEL=debug";
+    // internal_environ[2] = "MONO_LOG_MASK=all";
     // internal_environ[3] = "MONO_DISABLE_SHM=1";
     g_environ = internal_environ;
 
@@ -789,7 +789,8 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("8nY19bKoiZk", "libkernel", 1, "libkernel", posix_fcntl);
     LIB_FUNCTION("fUJRLEbJOuQ", "libkernel", 1, "libkernel", sceKernelGetProcessName);
     LIB_FUNCTION("8aCOCGoRkUI", "libkernel", 1, "libkernel", sceKernelIsCEX);
-    LIB_FUNCTION("vJhYrkgTYWY", "libSceBgft", 1, "libSceBgft", sceBgftServiceIntGetNotificationEvent);
+    LIB_FUNCTION("vJhYrkgTYWY", "libSceBgft", 1, "libSceBgft",
+                 sceBgftServiceIntGetNotificationEvent);
 
     LIB_FUNCTION("D4yla3vx4tY", "libkernel", 1, "libkernel", sceKernelError);
     LIB_FUNCTION("YeU23Szo3BM", "libkernel", 1, "libkernel", sceKernelGetAllowedSdkVersionOnSystem);
