@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "common/logging/log.h"
+#include "common/singleton.h"
 #include "core/libraries/network/http.h"
 #include "core/libraries/network/http2.h"
 #include "core/libraries/np/np_common.h"
 #include "core/libraries/np/np_error.h"
 #include "core/libraries/np/np_handler.h"
 #include "core/libraries/np/np_web_api2/np_web_api2_context.h"
+#include "core/linker.h"
 
 namespace Libraries::Np::NpWebApi2 {
 
@@ -17,6 +19,24 @@ u32 g_current_push_event_callback_id{};
 u32 g_current_push_context_callback_id{};
 u32 g_current_user_context_id{};
 u64 g_current_request_id{};
+
+static bool has_lle_calls = false;
+
+static PS4_SYSV_ABI s32 (*sceHttpParseResponseHeader)(const char*, u64, const char*, const char**,
+                                                      u64*);
+
+static PS4_SYSV_ABI s32 (*sceHttp2AbortRequest)(s32);
+static PS4_SYSV_ABI s32 (*sceHttp2AddRequestHeader)(s32, const char*, const char*, u32);
+static PS4_SYSV_ABI s32 (*sceHttp2CreateRequestWithURL)(s32, const char*, const char*, u64);
+static PS4_SYSV_ABI s32 (*sceHttp2CreateTemplate)(s32);
+static PS4_SYSV_ABI s32 (*sceHttp2DeleteRequest)(s32);
+static PS4_SYSV_ABI s32 (*sceHttp2DeleteTemplate)(s32);
+static PS4_SYSV_ABI s32 (*sceHttp2GetAllResponseHeaders)(s32, char**, u64*);
+static PS4_SYSV_ABI s32 (*sceHttp2SendRequest)(s32, const void*, u64);
+static PS4_SYSV_ABI s32 (*sceHttp2SetPreSendCallback)(s32,
+                                                      Libraries::Http2::OrbisHttp2PreSendCallback,
+                                                      void*);
+static PS4_SYSV_ABI s32 (*sceHttp2SetRequestContentLength)(s32, u64);
 
 void LibraryContext::CheckTimeout() {
     u64 time = Libraries::Kernel::sceKernelGetProcessTime();
@@ -34,6 +54,48 @@ s32 LibraryContext::CreateUserContext(Libraries::UserService::OrbisUserServiceUs
     if (this->user_contexts.size() >= 0x10000) {
         LOG_ERROR(Lib_NpWebApi2, "Too many user contexts");
         return ORBIS_NP_WEBAPI2_ERROR_USER_CONTEXT_MAX;
+    }
+
+    if (!has_lle_calls) {
+        auto* linker = Common::Singleton<Core::Linker>::Instance();
+        Core::Module* mod = nullptr;
+        s32 i = 0;
+        do {
+            mod = linker->GetModule(i++);
+            if (mod->name.contains("libSceHttp.sprx")) {
+                sceHttpParseResponseHeader = reinterpret_cast<PS4_SYSV_ABI s32 (*)(
+                    const char*, u64, const char*, const char**, u64*)>(
+                    mod->FindByName("sceHttpParseResponseHeader"));
+            } else if (mod->name.contains("libSceHttp2.sprx")) {
+                sceHttp2AbortRequest = reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32)>(
+                    mod->FindByName("sceHttp2AbortRequest"));
+                sceHttp2AddRequestHeader =
+                    reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32, const char*, const char*, u32)>(
+                        mod->FindByName("sceHttp2AddRequestHeader"));
+                sceHttp2CreateRequestWithURL =
+                    reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32, const char*, const char*, u64)>(
+                        mod->FindByName("sceHttp2CreateRequestWithURL"));
+                sceHttp2CreateTemplate = reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32)>(
+                    mod->FindByName("sceHttp2CreateTemplate"));
+                sceHttp2DeleteRequest = reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32)>(
+                    mod->FindByName("sceHttp2DeleteRequest"));
+                sceHttp2DeleteTemplate = reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32)>(
+                    mod->FindByName("sceHttp2DeleteTemplate"));
+                sceHttp2GetAllResponseHeaders =
+                    reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32, char**, u64*)>(
+                        mod->FindByName("sceHttp2GetAllResponseHeaders"));
+                sceHttp2SendRequest = reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32, const void*, u64)>(
+                    mod->FindByName("sceHttp2SendRequest"));
+                sceHttp2SetPreSendCallback = reinterpret_cast<PS4_SYSV_ABI s32 (*)(
+                    s32, Libraries::Http2::OrbisHttp2PreSendCallback, void*)>(
+                    mod->FindByName("sceHttp2SetPreSendCallback"));
+                sceHttp2SetRequestContentLength = reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32, u64)>(
+                    mod->FindByName("sceHttp2SetRequestContentLength"));
+            } else {
+                continue;
+            }
+        } while (mod);
+        has_lle_calls = true;
     }
 
     s32 actual_user_ctx_id = 0;

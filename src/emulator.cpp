@@ -613,6 +613,10 @@ void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
     mnt->Mount(mount_temp_dir, "/temp0");
     mnt->Mount(mount_temp_dir, "/temp");
 
+    // Mounting certs
+    const auto& certs_dir = Common::FS::GetUserPath(Common::FS::PathType::UserDir) / "certs";
+    mnt->Mount(certs_dir, "/system/common/cert");
+
     const auto& mount_download_dir =
         Common::FS::GetUserPath(Common::FS::PathType::DownloadDir) / id;
     if (!std::filesystem::exists(mount_download_dir)) {

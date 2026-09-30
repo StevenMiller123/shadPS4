@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "common/logging/log.h"
+#include "common/singleton.h"
 #include "core/emulator_settings.h"
 #include "core/libraries/kernel/time.h"
 #include "core/libraries/network/http2.h"
@@ -10,6 +11,7 @@
 #include "core/libraries/np/np_web_api2/np_web_api2_context.h"
 #include "core/libraries/np/np_web_api2/np_web_api2_internal.h"
 #include "core/libraries/system/userservice.h"
+#include "core/linker.h"
 
 #include <map>
 #include <mutex>
@@ -21,12 +23,37 @@ s32 g_current_lib_context_id{};
 std::map<s32, LibraryContext*> g_lib_contexts{};
 u64 g_last_timeout_check{};
 
+static bool has_lle_calls = false;
+
+static PS4_SYSV_ABI s32 (*sceHttp2DeleteRequest)(s32);
+static PS4_SYSV_ABI s32 (*sceHttp2ReadData)(s32, void*, u64);
+static PS4_SYSV_ABI s32 (*sceHttp2GetStatusCode)(s32, s32*);
+
 s32 createLibraryContext(s32 http_ctx_id, s32 type, u64 pool_size, const char* name) {
     std::scoped_lock lk{g_mutex};
 
     if (g_lib_contexts.size() >= 0x8000) {
         LOG_ERROR(Lib_NpWebApi2, "Too many library contexts");
         return ORBIS_NP_WEBAPI2_ERROR_LIB_CONTEXT_MAX;
+    }
+
+    if (!has_lle_calls) {
+        auto* linker = Common::Singleton<Core::Linker>::Instance();
+        Core::Module* mod = nullptr;
+        s32 i = 0;
+        do {
+            mod = linker->GetModule(i++);
+            if (mod->name.contains("libSceHttp2.sprx")) {
+                sceHttp2DeleteRequest = reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32)>(
+                    mod->FindByName("sceHttp2DeleteRequest"));
+                sceHttp2ReadData = reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32, void*, u64)>(
+                    mod->FindByName("sceHttp2ReadData"));
+                sceHttp2GetStatusCode = reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32, s32*)>(
+                    mod->FindByName("sceHttp2GetStatusCode"));
+                break;
+            }
+        } while (mod);
+        has_lle_calls = true;
     }
 
     do {
@@ -708,7 +735,7 @@ s32 sendRequest(s64 request_id, s32 part_index, void* data, u64 data_size,
         if (result >= 0) {
             s32 http_request_id = request->GetHttpRequestId();
             s32 http_status{};
-            result = Libraries::Http2::sceHttp2GetStatusCode(http_request_id, &http_status);
+            result = sceHttp2GetStatusCode(http_request_id, &http_status);
             if (result >= 0) {
                 if (resp_info_option) {
                     resp_info_option->http_status = http_status;
@@ -806,7 +833,7 @@ s32 readData(s64 request_id, void* data, u64 size) {
     }
 
     s32 http_req_id = request->GetHttpRequestId();
-    s32 result2 = Libraries::Http2::sceHttp2ReadData(http_req_id, data, size);
+    s32 result2 = sceHttp2ReadData(http_req_id, data, size);
 
     request->Lock();
     request->SetState(0);
@@ -910,7 +937,7 @@ s32 deleteRequest(s64 request_id) {
     lib_ctx->Unlock();
     lib_ctx->RemoveUser();
     if (http_request_id != 0) {
-        Libraries::Http2::sceHttp2DeleteRequest(http_request_id);
+        sceHttp2DeleteRequest(http_request_id);
     }
     return ORBIS_OK;
 }
