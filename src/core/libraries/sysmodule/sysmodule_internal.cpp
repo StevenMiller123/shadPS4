@@ -17,6 +17,9 @@
 #include "core/libraries/libpng/pngdec.h"
 #include "core/libraries/libpng/pngenc.h"
 #include "core/libraries/libs.h"
+#include "core/libraries/network/http.h"
+#include "core/libraries/network/http2.h"
+#include "core/libraries/network/ssl2.h"
 #include "core/libraries/ngs2/ngs2.h"
 #include "core/libraries/rtc/rtc.h"
 #include "core/libraries/rudp/rudp.h"
@@ -244,9 +247,9 @@ s32 loadModuleInternal(s32 index, s32 argc, const void* argv, s32* res_out) {
              {"libSceWkFontConfig.sprx", nullptr},
              {"libScePsmKitSystem.sprx", nullptr},
              {"libSceDepth.sprx", nullptr},
-             {"libSceSsl2.sprx", nullptr},
-             {"libSceHttp.sprx", nullptr},
-             {"libSceHttp2.sprx", nullptr},
+             {"libSceSsl2.sprx", &Libraries::Ssl2::RegisterLib},
+             {"libSceHttp.sprx", &Libraries::Http::RegisterLib},
+             {"libSceHttp2.sprx", &Libraries::Http2::RegisterLib},
              {"libScePadTracker.sprx", nullptr},
              {"libSceMoveTracker.sprx", nullptr},
              {"libSceSystemGesture.sprx", &Libraries::SystemGesture::RegisterLib},

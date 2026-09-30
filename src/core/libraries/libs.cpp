@@ -35,8 +35,6 @@
 #include "core/libraries/network/http2.h"
 #include "core/libraries/network/net.h"
 #include "core/libraries/network/netctl.h"
-#include "core/libraries/network/ssl.h"
-#include "core/libraries/network/ssl2.h"
 #include "core/libraries/np/np_auth.h"
 #include "core/libraries/np/np_commerce/np_commerce.h"
 #include "core/libraries/np/np_common.h"
@@ -128,13 +126,10 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
             {"libSceAudioOut.sprx", Libraries::AudioOut::RegisterLib},
             {"libSceAudioIn.sprx", Libraries::AudioIn::RegisterLib},
             {"libSceAudio3d.sprx", RegisterAudio3d},
-            {"libSceHttp.sprx", Libraries::Http::RegisterLib},
-            {"libSceHttp2.sprx", Libraries::Http2::RegisterLib},
             {"libSceNet.sprx", Libraries::Net::RegisterLib},
             {"libSceNetCtl.sprx", Libraries::NetCtl::RegisterLib},
             {"libSceSaveData.sprx", Libraries::SaveData::RegisterLib},
             {"libSceSaveDataDialog.sprx", Libraries::SaveData::Dialog::RegisterLib},
-            {"libSceSsl2.sprx", Libraries::Ssl2::RegisterLib},
             {"libSceSysmodule.sprx", Libraries::SysModule::RegisterLib},
             {"libSceNpCommerce.sprx", Libraries::Np::NpCommerce::RegisterLib},
             {"libSceNpCommon.sprx", Libraries::Np::NpCommon::RegisterLib},
