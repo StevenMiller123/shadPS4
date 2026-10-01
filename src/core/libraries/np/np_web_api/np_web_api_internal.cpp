@@ -59,7 +59,9 @@ s32 initializeLibrary() {
     s32 i = 0;
     do {
         mod = linker->GetModule(i++);
-        if (mod->name.contains("libSceHttp.sprx")) {
+        if (!mod) {
+            break;
+        } else if (mod->name.contains("libSceHttp.sprx")) {
             sceHttpCreateTemplate =
                 reinterpret_cast<PS4_SYSV_ABI s32 (*)(s32, const char*, s32, s32)>(
                     mod->FindByName("sceHttpCreateTemplate"));

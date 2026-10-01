@@ -62,7 +62,9 @@ s32 LibraryContext::CreateUserContext(Libraries::UserService::OrbisUserServiceUs
         s32 i = 0;
         do {
             mod = linker->GetModule(i++);
-            if (mod->name.contains("libSceHttp.sprx")) {
+            if (!mod) {
+                break;
+            } else if (mod->name.contains("libSceHttp.sprx")) {
                 sceHttpParseResponseHeader = reinterpret_cast<PS4_SYSV_ABI s32 (*)(
                     const char*, u64, const char*, const char**, u64*)>(
                     mod->FindByName("sceHttpParseResponseHeader"));
