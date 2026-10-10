@@ -21,7 +21,6 @@
 
 namespace Libraries::Np::NpWebApi {
 
-
 static std::recursive_mutex g_global_mutex;
 static std::map<s32, OrbisNpWebApiContext*> g_contexts;
 static s32 g_library_context_count = 0;
